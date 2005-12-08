@@ -1,0 +1,26 @@
+XTerm*background: black
+XTerm*foreground: lightgrey
+XTerm*color4: #5050ff
+!XTerm*colorBDMode: true
+XTerm*cursorColor: yellow
+!#if X_RESOLUTION > 4000
+!XTerm*font: -b&h-lucidatypewriter-medium-*-*-*-12-*-*-*-*-*-iso10646-*
+!#else
+!XTerm*font: -b&h-lucidatypewriter-bold-*-*-*-14-140-*-*-*-*-iso10646-*
+XTerm*faceName: Bitstream Sans Mono Regular
+XTerm*faceSize: 12
+!#endif
+XTerm*utf8: 1
+!#if HEIGHT > 768
+;XTerm.vt100.geometry: 90x40
+!#else
+XTerm.vt100.geometry: 100x35
+!#endif
+XTerm*saveLines: 2000
+XTerm*scrollBar: false
+XTerm*termName: xterm
+XTerm*colorMode: true
+XTerm*boldColor: false
+XTerm*loginShell: true
+XTerm*eightBitInput: false
+XTerm*metaSendsEscape: true

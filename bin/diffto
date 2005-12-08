@@ -1,0 +1,133 @@
+#!/bin/sh
+
+#[ -f "$HOME/.difftorc" ] && source "$HOME/.difftorc"
+
+repo2path() {
+	printf '/space/src/%s' "`echo "$@" | tr [[:upper:]] [[:lower:]]`"
+}
+
+args=`getopt 'fOop:r' $@`
+[ $? -ne 0 ] && exit $?
+set -- $args
+
+for arg
+do
+	case "$arg" in
+	-f)
+		getfile=1
+		shift
+		;;
+	-O)
+		origlast=1
+		shift
+		;;
+	-o)
+		difforig=1
+		shift
+		;;
+	-p)
+		searchpath=$2
+		shift 2
+		;;
+	-r)
+		recurse=1
+		shift
+		;;
+	--)
+		shift;
+		break
+		;;
+	esac
+done
+
+if [ $# -eq 0 ]
+then
+	echo "need repo!" >&2
+	exit 1
+fi
+
+repo=$1
+shift
+repopath=`repo2path "$repo"`
+
+diffto() {
+	local parent=$1
+	shift
+
+	[ $# -eq 0 ] && set -- "$parent"*
+
+	for file
+	do
+		case "$file" in
+		\*)	# no files here
+			break
+			;;
+		*~|CVS|*/CVS)
+			continue
+			;;
+		esac
+
+		if [ -d "$file" ]
+		then
+			[ -n "$recurse" ] && diffto "$parent$file/"
+			continue
+		fi
+
+		ident=`ident -q "$file" | sed -nEe '/.*\\$'"${repo}"': ([^$]+),v ([[:digit:].]+).*/{s//\1:\2/;p;}'`
+		[ -z "$ident" ] && continue
+
+		cvsfile=${ident%:*}
+		ver=${ident#*:}
+
+		if expr "$cvsfile" : '.*\/' >/dev/null
+		then
+			prefix=
+		else
+			prefix=$searchpath
+			[ -z "$prefix" ] && prefix=`pwd`
+		fi
+
+		while :
+		do
+			thefile=$repopath/$prefix/$cvsfile
+			if [ -f "$thefile" ]
+			then
+				if [ -z "$difforig" ]
+				then
+					if [ -n "$getfile" ]
+					then
+						cvs up -p "$thefile"
+					else
+						cvs diff -r "$ver" "$thefile"
+					fi
+				else
+					tmp=`mktemp -t diffto`
+					if [ -n "$origlast" ]
+					then
+						cvs up -p "$thefile" > $tmp
+					else
+						cvs up -p -r "$ver" "$thefile" > $tmp
+					fi
+					if [ -n "$getfile" ]
+					then
+						cat "$tmp"
+					else
+						diff -u "$tmp" "$file"
+					fi
+					rm -f "$tmp"
+				fi
+				break
+			fi
+
+			if expr "$prefix" : '.*\/' >/dev/null
+			then
+				prefix=${prefix#*/}
+			else
+				echo "Can't find path for '$cvsfile'!" >&2
+				break
+			fi
+		done
+	done
+}
+
+diffto "$searchpath" "$@"

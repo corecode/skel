@@ -1,0 +1,2 @@
+#!/bin/sh
+exec ssh -t chlamydia.fs.ei.tum.de irssi "$@"

@@ -1,0 +1,115 @@
+#!/bin/sh
+#
+# Copyright (c) 2002 Simon 'corecode' Schubert, corecode@corecode.ath.cx
+# All rights reserved.
+#
+# If you  use this product or  parts of it  on a regular basis,  you are
+# required to either donate or write feedback why you think this product
+# is not worth any donation.
+# For donations visit <http://corecode.ath.cx/#donate>
+#
+# Redistribution and  use in  source and binary  forms, with  or without
+# modification, are permitted provided that the following conditions are
+# met:
+# 1. Redistributions  of source  code  must retain  the above  copyright
+#    notice, and the entire permission notice in its entirety, including
+#    the following disclaimer.
+# 2. Redistributions in  binary form must reproduce  the above copyright
+#    notice,  this  list  of  conditions and  the  following  disclaimer
+#    in  the  documentation and/or  other  materials  provided with  the
+#    distribution.
+# 3. The  name of  the author  may  not be  used to  endorse or  promote
+#    products derived from this  software without specific prior written
+#    permission.
+#
+# ALTERNATIVELY, this  product may be distributed  and/or modified under
+# the terms of the GNU Public License (as published by the Free Software
+# Foundation; either version  2 of the License, or (at  your option) any
+# later version), in  which case the provisions of the  GPL are required
+# INSTEAD OF the above restrictions. (This  clause is necessary due to a
+# potential  bad  interaction  between  the  GPL  and  the  restrictions
+# contained in a BSD-style copyright.)
+#
+#   THIS SOFTWARE  IS PROVIDED  ``AS IS'' AND  ANY EXPRESS  OR IMPLIED
+#   WARRANTIES, INCLUDING, BUT NOT  LIMITED TO, THE IMPLIED WARRANTIES
+#   OF  MERCHANTABILITY  AND  FITNESS  FOR A  PARTICULAR  PURPOSE  ARE
+#   DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+#   INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+#   HOWEVER  CAUSED  AND  ON  ANY  THEORY  OF  LIABILITY,  WHETHER  IN
+#   CONTRACT,  STRICT  LIABILITY,  OR TORT  (INCLUDING  NEGLIGENCE  OR
+#   OTHERWISE) ARISING  IN ANY WAY  OUT OF  THE USE OF  THIS SOFTWARE,
+#   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# $corecode$
+#
+
+#
+# very simplistic documentation:
+# call as `genpatch <sourcedir> <destdir> [replace]'
+#
+# genpatch searches for .orig files  and the corresponding patched files
+# (also suits vims `set  patchmode=.orig'). `sourcedir' is the directory
+# the patches should be relative to and the files are located. `destdir'
+# is the  directory the ready done  patch-* files are written  to if you
+# specify  `replace'  this  string  will  be used  instead  of  `-'  for
+# seperation of directory names.
+#
+# example:
+#   genpatch myports/foo/work/foo-0.2 myports/foo/files '::'
+#
+# will result  in patch-*  files relative  to `myports/foo/work/foo-0.2'
+# being put  into `myports/foo/files'  where all directory  names within
+# the files are seperated by double colons (::).
+#
+
+repall=0
+source=${1%/}
+dest=${2%/}
+base=`basename $0`
+replace=${3:--}
+
+if [ -z "$source" -o -z "$dest" ]; then
+	echo "usage: `basename $0` <sourcedir> <destdir> [replace]" >&2
+	exit 1
+fi
+
+for f in `find ${source} -name '*.orig'`; do
+	f=${f##${source}/}
+	newf=${dest}/patch-`echo ${f%.orig} | sed -e "s|/|${replace}|g"`
+	if [ -f "${newf}" -a "${repall}" -ne 1 ]; then
+		overwrite=2
+		( cd $source; diff -u $f ${f%.orig} ) | diff -u ${newf} - | more
+		while [ "${overwrite}" -eq 2 ]; do
+			echo -n "${base}: ${newf} already exists. Overwrite? [Y/n/a/v/d] " >&2
+			read char
+			case "${char}" in
+			""|[yY]|[yY][eE]|[yY][eE][sS])
+				overwrite=1
+				;;
+			[nN]|[nN][oO])
+				overwrite=0
+				;;
+			[aA]|[aA][lL]|[aA][lL][wW]|[aA][lL][wW][aA]|[aA][lL][wW][aA][yY]|[aA][lL][wW][aA][yY][sS])
+				overwrite=1
+				repall=1
+				;;
+			[vV]|[nN][eE]|[nN][eE][vV]|[nN][eE][vV][eE]|[nN][eE][vV][eE][rR])
+				overwrite=0
+				repall=1
+				;;
+			[dD]|[dD][iI]|[dD][iI][fF]|[dD][iI][fF][fF])
+				overwrite=2
+				( cd $source; diff -u $f ${f%.orig} ) | diff -u ${newf} - | more
+				;;
+			*)
+				overwrite=2
+				;;
+			esac
+		done
+	fi
+	
+	[ ! -f "${newf}" ] || [ "${overwrite}" -eq 1 ] && \
+		( cd $source ; diff -u $f ${f%.orig} ) > ${newf}
+done

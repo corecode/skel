@@ -1,0 +1,22 @@
+#!/bin/sh
+filename=$1
+shift
+
+if [ $# -eq 0 -a -r "$filename" ]
+then
+	exec < $filename
+fi
+
+while :
+do
+	if [ $# -ne 0 ]
+	then
+		exec < $1
+		shift
+	fi
+	ssh chlamydia cat \> "'public_html/unsorted/$filename'" \&\& printf "'http://%s/~corecode/unsorted/%s\n'" '"`hostname`"' "'$filename'"
+	if [ $# -eq 0 ]
+	then
+		break
+	fi
+done

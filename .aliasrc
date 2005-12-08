@@ -1,0 +1,24 @@
+# vim:ft=zsh
+unalias -m \*	# kill existing aliases
+alias h='fc -l -25'
+alias j='jobs -l'
+if ls --help 2>&1 | grep -q -- --color; then
+	alias ls='ls -F --color=auto'
+else
+	alias ls='ls -FG'
+fi
+alias ll='ls -l'
+alias l='ll -a'
+alias g='egrep -i'
+alias su='su -m'
+alias p='pushd'
+alias pp='p +2'
+if rm 2>&1 | grep -q '\[[^]]*I'; then
+	alias rm='rm -I'
+fi
+alias ccvs='cvs -d crater:/cvs'
+
+cvsrm() {
+	rm "$@"
+	cvs rm "$@"
+}

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [ $# -lt 1 ]
+then
+	echo "Need section" >&2
+	exit 1
+fi
+
+srchdir=`grep "^$1" ~/.glmrc | sed -e 's/[^[:blank:]]*[[:blank:]]*//'`
+
+if [ -z "$srchdir" ]
+then
+	echo "No such section '$1'" >&2
+	exit 1
+fi
+
+shift
+
+exec glimpse -H "$srchdir" -n "$@"

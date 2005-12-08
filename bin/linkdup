@@ -1,0 +1,27 @@
+#!/bin/sh
+
+set -e
+
+if [ $# -ne 2 ]
+then
+	printf "usage: linkdup <source> <dest>\n" >&2
+	exit 1
+fi
+
+SOURCE=$1; shift
+DEST=$1; shift
+
+find "$SOURCE" -exec sh -c '
+set -e
+SOURCE=$1; shift
+DEST=$1; shift
+for f
+do
+	df=$DEST${f#$SOURCE}
+	if [ -d "$f" ]
+	then
+		mkdir "$df"
+	else
+		ln "$f" "$df"
+	fi
+done' dummy "$SOURCE" "$DEST" {} +

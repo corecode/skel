@@ -1,0 +1,121 @@
+#!/bin/sh -e
+
+args=`getopt c:CIs:uv $*`
+if [ $? -ne 0 ]
+then
+	printf "usage: updatecvs -cCIsuv\n" >&2
+	exit 1
+fi
+
+set -- $args
+
+unset VERBOSE SKIPSUP RECVS
+INDEX=-f
+CVSDIR=/space/cvs
+SRCDIR=/space/src
+
+for i
+do
+	case $i in
+	-c)
+		CVSDIR=$2; shift
+		shift
+		;;
+	-C)
+		RECVS=yes
+		shift
+		;;
+	-I)
+		INDEX=
+		shift
+		;;
+	-s)
+		SRCDIR=$2; shift
+		shift
+		;;
+	-u)
+		SKIPSUP=yes
+		shift
+		;;
+	-v)
+		VERBOSE=yes
+		shift
+		;;
+	--)
+		shift
+		break
+		;;
+	esac
+done
+
+if [ -n "$VERBOSE" ]
+then
+	verbose_cvsup="-L 2"
+	verbose_cvsync=-v
+	verbose_cvs=""
+	verbose_glimpse="/dev/stdout"
+else
+	verbose_cvsup="-L 0"
+	verbose_cvsync=
+	verbose_cvs="-Q"
+	verbose_glimpse="/dev/null"
+fi
+
+if [ $# -eq 0 ]
+then
+	repos=`cut -f 1 "$CVSDIR/.cvsrepos"`
+	set -- $repos
+fi
+
+cat "$CVSDIR/.cvsrepos" | while read name mode file
+do
+	case "$name" in
+	"#"*|"")
+		continue
+		;;
+	esac
+
+	dorepo=0
+	for checkrepo
+	do
+		if [ "$checkrepo" = "$name" ]
+		then
+			dorepo=1
+			break
+		fi
+	done
+
+	if [ $dorepo -eq 0 ]
+	then
+		continue
+	fi
+
+	docvs=0
+
+	cd "$SRCDIR/$name"
+	case "$mode" in
+	none|"")
+		;;
+	cvsync)
+		[ -n "$SKIPSUP" ] || cvsync $verbose_cvsync "$file"
+		docvs=1
+		;;
+	cvsup)
+		[ -n "$SKIPSUP" ] || cvsup $verbose_cvsup "$file"
+		docvs=1
+		;;
+	esac
+
+	if [ $docvs -ne 0 ]
+	then
+		[ -n "$RECVS" ] && rm -rf "$SRCDIR/$name/"*
+		cat .cvsinfo | while read module dir tag _rem
+		do
+			cvs $verbose_cvs -r -R -d "$CVSDIR/$name" \
+				co -PA -d "$dir" -r "$tag" "$module" || true
+		done
+	fi
+
+	[ -e .glimpse_exclude ] || echo "CVS/" > .glimpse_exclude
+	glimpseindex -o -n ${INDEX} -H "$SRCDIR/$name" `cut -f 1 .cvsinfo` > $verbose_glimpse
+done
