@@ -7,7 +7,8 @@ XTerm*cursorColor: yellow
 !XTerm*font: -b&h-lucidatypewriter-medium-*-*-*-12-*-*-*-*-*-iso10646-*
 !#else
 !XTerm*font: -b&h-lucidatypewriter-bold-*-*-*-14-140-*-*-*-*-iso10646-*
-XTerm*faceName: Bitstream Sans Mono Regular
+!XTerm*faceName: Bitstream Sans Mono Regular
+XTerm*faceName: Bitstream Vera Sans Mono
 XTerm*faceSize: 12
 !#endif
 XTerm*utf8: 1

@@ -10,6 +10,7 @@ set title
 set is
 set sm
 set bk
+set backupcopy=auto,breakhardlink
 filetype plugin on
 filetype indent on
 
