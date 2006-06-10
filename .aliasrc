@@ -5,7 +5,12 @@ alias j='jobs -l'
 if ls --help 2>&1 | grep -q -- --color; then
 	alias ls='ls -F --color=auto'
 else
-	alias ls='ls -FG'
+	if [ `uname` = OpenBSD ]
+	then
+		alias ls='ls -F'
+	else
+		alias ls='ls -FG'
+	fi
 fi
 alias ll='ls -l'
 alias l='ll -a'
