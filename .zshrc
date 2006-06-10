@@ -53,6 +53,7 @@ if which lesspipe.sh >/dev/null 2>&1; then
 fi
 
 typeset -U path
+path=(~/bin $path)
 
 if which keychain >/dev/null 2>&1; then
 	keychain -q id_dsa
