@@ -1,0 +1,3 @@
+startup_message off
+
+termcapinfo xterm|xterm-*|xterms|xs ti@:te=\E[2J
