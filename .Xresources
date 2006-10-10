@@ -8,8 +8,9 @@ XTerm*cursorColor: yellow
 !#else
 !XTerm*font: -b&h-lucidatypewriter-bold-*-*-*-14-140-*-*-*-*-iso10646-*
 !XTerm*faceName: Bitstream Sans Mono Regular
-XTerm*faceName: Bitstream Vera Sans Mono
-XTerm*faceSize: 12
+!XTerm*faceName: Bitstream Vera Sans Mono
+!XTerm*faceSize: 14
+XTerm*font: -*-terminus-medium-*-*-*-14-*-*-*-*-*-iso10646-1
 !#endif
 XTerm*utf8: 1
 !#if HEIGHT > 768
@@ -25,3 +26,4 @@ XTerm*boldColor: false
 XTerm*loginShell: true
 XTerm*eightBitInput: false
 XTerm*metaSendsEscape: true
+!XTerm*visualBell: true
