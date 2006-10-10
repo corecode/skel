@@ -11,8 +11,8 @@ set -- $args
 
 unset VERBOSE SKIPSUP RECVS
 INDEX=-f
-CVSDIR=/space/cvs
-SRCDIR=/space/src
+CVSDIR=/space/repos/cvs
+SRCDIR=/space/repos/src
 
 for i
 do
@@ -54,11 +54,13 @@ then
 	verbose_cvsync=-v
 	verbose_cvs=""
 	verbose_glimpse="/dev/stdout"
+	verbose_rsync="-v --progress"
 else
 	verbose_cvsup="-L 0"
 	verbose_cvsync=
 	verbose_cvs="-Q"
 	verbose_glimpse="/dev/null"
+	verbose_rsync=
 fi
 
 if [ $# -eq 0 ]
@@ -104,6 +106,16 @@ do
 		[ -n "$SKIPSUP" ] || cvsup $verbose_cvsup "$file"
 		docvs=1
 		;;
+	rsync)
+		if [ -z "$SKIPSUP" ]
+		then
+			for loc in $file
+			do
+				rsync -a --delete -z $verbose_rsync "$loc" "$CVSDIR/$name/"
+			done
+		fi
+		docvs=1
+		;;
 	esac
 
 	if [ $docvs -ne 0 ]
@@ -117,5 +129,5 @@ do
 	fi
 
 	[ -e .glimpse_exclude ] || echo "CVS/" > .glimpse_exclude
-	glimpseindex -o -n ${INDEX} -H "$SRCDIR/$name" `cut -f 1 .cvsinfo` > $verbose_glimpse
+	glimpseindex -o -n ${INDEX} -H "$SRCDIR/$name" `cut -f 2 .cvsinfo` > $verbose_glimpse
 done

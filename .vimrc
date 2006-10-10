@@ -11,6 +11,8 @@ set is
 set sm
 set bk
 set backupcopy=auto,breakhardlink
+set foldmethod=marker
+
 filetype plugin on
 filetype indent on
 
@@ -18,7 +20,7 @@ if has("gui")
 	if has("macunix")
 		set guifont=Monaco:h11
 	else
-		set guifont=Monospace\ 13
+		set guifont=Terminus\ 14
 	endif
 endif
 colorscheme 2c
@@ -40,6 +42,8 @@ endif
 
 let CVSCommandDiffOpt='u'
 let CVSCommandEdit='split'
+let HGCommandEnableBufferSetup=0
+let HGCommandEdit='split'
 
 set gfm+=%f:\ %l:\ %m
 
