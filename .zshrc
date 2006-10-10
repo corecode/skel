@@ -37,6 +37,15 @@ if [[ $TERM == (xterm|screen)* ]]; then
 	}
 fi
 
+if which todo >/dev/null 2>&1; then
+	function chpwd {
+		# only print stuff in the interactive case
+		[[ ! -o interactive ]] && return
+
+		todo
+	}
+fi
+
 if [[ -r ~/.aliasrc ]]; then
 	source ~/.aliasrc
 fi
@@ -64,6 +73,8 @@ bindkey '\e[H' beginning-of-line
 bindkey '\e[F' end-of-line
 bindkey '\eOH' beginning-of-line
 bindkey '\eOF' end-of-line
+bindkey '\e[1~' beginning-of-line
+bindkey '\e[4~' end-of-line
 autoload -U down-line-or-beginning-search
 autoload -U up-line-or-beginning-search
 zle -N down-line-or-beginning-search
@@ -77,6 +88,7 @@ bindkey '\e[3~' delete-char
 #WORDCHARS=${WORDCHARS//[\/&.;=]}
 autoload -U select-word-style
 select-word-style bash
+zstyle ':zle:transpose-words' word-style shell
 setopt NO_FLOW_CONTROL
 
 autoload -U compinit; compinit
@@ -84,3 +96,5 @@ autoload -U compinit; compinit
 if [[ -r ~/.zshrc.local ]]; then
 	source ~/.zshrc.local
 fi
+
+cd .
