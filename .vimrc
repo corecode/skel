@@ -62,6 +62,8 @@ set cino=:0,g0,t0,+4,(0,u0,W4
 let c_space_errors=1
 let c_gnu=1
 
+let g:tex_indent_items = 1
+
 " Search with *#/ in visual selection mode
 vnoremap * y/\V<C-R>=substitute(escape(@@,"/\\"),"\n","\\\\n","ge")<CR><CR>
 vnoremap # y?\V<C-R>=substitute(escape(@@,"?\\"),"\n","\\\\n","ge")<CR><CR> 
