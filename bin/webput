@@ -14,7 +14,7 @@ do
 		exec < $1
 		shift
 	fi
-	ssh chlamydia cat \> "'public_html/unsorted/$filename'" \&\& printf "'http://%s/~corecode/unsorted/%s\n'" '"`hostname`"' "'$filename'"
+	ssh -C chlamydia cat \> "'public_html/unsorted/$filename'" \&\& printf "'http://%s/~corecode/unsorted/%s\n'" '"`hostname`"' "'$filename'"
 	if [ $# -eq 0 ]
 	then
 		break
