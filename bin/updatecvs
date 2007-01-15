@@ -10,9 +10,11 @@ fi
 set -- $args
 
 unset VERBOSE SKIPSUP RECVS
+
+PREFIX=`head -n 1 $HOME/.updatecvsrc`
 INDEX=-f
-CVSDIR=/space/repos/cvs
-SRCDIR=/space/repos/src
+CVSDIR=$PREFIX/cvs
+SRCDIR=$PREFIX/src
 
 for i
 do
