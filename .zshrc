@@ -82,7 +82,9 @@ zle -N down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 bindkey '\e[B' down-line-or-beginning-search
 bindkey '\e[A' up-line-or-beginning-search
+autoload run-help
 bindkey '\eOP' run-help
+bindkey '\e[M' run-help
 bindkey '\e[1;5D' backward-word
 bindkey '\e[1;5C' forward-word
 bindkey '\e[3~' delete-char
