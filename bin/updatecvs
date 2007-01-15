@@ -124,10 +124,10 @@ do
 		cat .cvsinfo | while read module dir tag _rem
 		do
 			cvs $verbose_cvs -r -R -d "$CVSDIR/$name" \
-				co -PA -d "$dir" -r "$tag" "$module" || true
+				co -d $dir -PA -r "$tag" $module || true
 		done
 	fi
 
 	[ -e .glimpse_exclude ] || echo "CVS/" > .glimpse_exclude
-	glimpseindex -o -n ${INDEX} -H "$SRCDIR/$name" `cut -f 2 .cvsinfo` > $verbose_glimpse
+	glimpseindex -o -n -B -E -f -M 20 -t ${INDEX} -H "$SRCDIR/$name" `cut -f 2 .cvsinfo` > $verbose_glimpse
 done
