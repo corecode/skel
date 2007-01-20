@@ -1,3 +1,4 @@
 startup_message off
+vbell off
 
 termcapinfo xterm|xterm-*|xterms|xs ti@:te=\E[2J
