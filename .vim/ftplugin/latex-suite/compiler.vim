@@ -278,11 +278,11 @@ function! ViewLaTeX()
 						\ s:viewer == "kdvi"
 				exec '!kdvi --unique '.mainfname.'.dvi &'
 			else
-				exec '!'.s:viewer.' '.mainfname.'.dvi &'
+				exec '!nohup '.s:viewer.' '.mainfname.'.dvi >/dev/null 2>&1 </dev/null'
 			endif
 			redraw!
 		else
-			exec '!'.s:viewer.' '.mainfname.'.'.s:target.' &'
+			exec '!nohup '.s:viewer.' '.mainfname.'.'.s:target.' >/dev/null 2>&1 </dev/null'
 			redraw!
 		endif
 	end
