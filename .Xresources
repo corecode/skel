@@ -27,3 +27,5 @@ XTerm*loginShell: true
 XTerm*eightBitInput: false
 XTerm*metaSendsEscape: true
 !XTerm*visualBell: true
+Fig.latexfonts: true
+Fig.specialtext: true
