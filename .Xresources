@@ -3,15 +3,11 @@ XTerm*foreground: lightgrey
 !XTerm*color4: #5050ff
 !XTerm*colorBDMode: true
 XTerm*cursorColor: yellow
-!#if X_RESOLUTION > 4000
-!XTerm*font: -b&h-lucidatypewriter-medium-*-*-*-12-*-*-*-*-*-iso10646-*
-!#else
-!XTerm*font: -b&h-lucidatypewriter-bold-*-*-*-14-140-*-*-*-*-iso10646-*
-!XTerm*faceName: Bitstream Sans Mono Regular
-!XTerm*faceName: Bitstream Vera Sans Mono
-!XTerm*faceSize: 14
+#if X_RESOLUTION > 4000
 XTerm*font: -*-terminus-medium-*-*-*-20-*-*-*-*-*-iso10646-*
-!#endif
+#else
+XTerm*font: -*-terminus-medium-*-*-*-14-*-*-*-*-*-iso10646-*
+#endif
 XTerm*utf8: 1
 !#if HEIGHT > 768
 ;XTerm.vt100.geometry: 90x40
@@ -27,3 +23,5 @@ XTerm*loginShell: true
 XTerm*eightBitInput: false
 XTerm*metaSendsEscape: true
 !XTerm*visualBell: true
+Fig.latexfonts: true
+Fig.specialtext: true
