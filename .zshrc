@@ -61,9 +61,6 @@ if which lesspipe.sh >/dev/null 2>&1; then
 	export LESSOPEN="|`which lesspipe.sh` %s"
 fi
 
-typeset -U path
-path=(~/bin $path)
-
 if which keychain >/dev/null 2>&1; then
 	keychain -q id_dsa
 	source ~/.keychain/$HOST-sh
