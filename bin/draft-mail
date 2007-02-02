@@ -7,15 +7,16 @@ else
 	cnt=1
 	for f
 	do
-		printf "Sending [%d/%d]\r" "$cnt" "$#"
+		printf "\rSending [%d/%d] ... " "$cnt" "$#"
 
 		if [ ! -f "$f" ]
 		then
-			printf "error: '%s' is no valid file\n" "$f"
+			printf "\nerror: '%s' is no valid file\n" "$f"
 			exit 1
 		fi
 
 		"$0" < "$f"
 		cnt=$(($cnt + 1))
 	done
+	printf "done.\n"
 fi
