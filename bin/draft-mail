@@ -1,0 +1,21 @@
+#!/bin/sh
+
+if [ "$#" -eq 0 ]
+then
+	exec sendmail -oi corecode+drafts@fs.ei.tum.de
+else
+	cnt=1
+	for f
+	do
+		printf "Sending [%d/%d]\r" "$cnt" "$#"
+
+		if [ ! -f "$f" ]
+		then
+			printf "error: '%s' is no valid file\n" "$f"
+			exit 1
+		fi
+
+		"$0" < "$f"
+		cnt=$(($cnt + 1))
+	done
+fi
