@@ -1,3 +1,8 @@
 [user]
 	name = "Simon 'corecode' Schubert"
 	email = "corecode@fs.ei.tum.de"
+[color]
+	diff = auto
+[alias]
+	co = checkout
+	ci = commit
