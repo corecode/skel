@@ -62,7 +62,7 @@ if which lesspipe.sh >/dev/null 2>&1; then
 fi
 
 if which keychain >/dev/null 2>&1; then
-	keychain -q id_dsa
+	keychain -q id_dsa --nogui
 	source ~/.keychain/$HOST-sh
 fi
 
