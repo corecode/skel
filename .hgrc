@@ -2,6 +2,5 @@
 username = Simon 'corecode' Schubert <corecode@fs.ei.tum.de>
 
 [extensions]
-hgext.mq=
-hgext.cvscommit=/home/corecode/devel/cvscommit/cvscommit.py
+#hgext.cvscommit=/home/corecode/devel/cvscommit/cvscommit.py
 hgext.hgk=
