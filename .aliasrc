@@ -12,8 +12,8 @@ else
 		alias ls='ls -FG'
 	fi
 fi
-alias ll='ls -l'
-alias l='ll -a'
+alias l='ls -l'
+alias ll='l -a'
 alias g='egrep -i'
 alias su='su -m'
 alias p='pushd'
