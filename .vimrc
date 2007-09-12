@@ -10,7 +10,11 @@ set title
 set is
 set sm
 set bk
-set backupcopy=auto,breakhardlink
+if v:version >= 700
+	set backupcopy=auto,breakhardlink
+else
+	set backupcopy=auto
+endif
 set foldmethod=marker
 
 filetype plugin on
