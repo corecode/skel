@@ -131,5 +131,9 @@ do
 	fi
 
 	[ -e .glimpse_exclude ] || echo "CVS/" > .glimpse_exclude
-	glimpseindex -o -n -B -E -f -M 20 -t ${INDEX} -H "$SRCDIR/$name" `cut -f 2 .cvsinfo` > $verbose_glimpse
+	if [ -n "${INDEX}" ]
+	then
+		rm -f .glimpse_index
+	fi
+	glimpseindex -o -n -B -E -M 20 -t ${INDEX} -H "$SRCDIR/$name" `cut -w -f 2 .cvsinfo` > $verbose_glimpse
 done
