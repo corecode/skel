@@ -3,7 +3,7 @@ XTerm*foreground: lightgrey
 !XTerm*color4: #5050ff
 !XTerm*colorBDMode: true
 XTerm*cursorColor: yellow
-#if X_RESOLUTION > 4000
+#if X_RESOLUTION > 3500
 XTerm*font: -*-terminus-medium-*-*-*-20-*-*-*-*-*-iso10646-*
 #else
 XTerm*font: -*-terminus-medium-*-*-*-14-*-*-*-*-*-iso10646-*
@@ -22,6 +22,10 @@ XTerm*boldColor: false
 XTerm*loginShell: true
 XTerm*eightBitInput: false
 XTerm*metaSendsEscape: true
+XTerm*color4: #4040ff
 !XTerm*visualBell: true
 Fig.latexfonts: true
 Fig.specialtext: true
+#ifdef SRVR_nslpc6_epfl_ch
+XTerm*visualBell: true
+#endif

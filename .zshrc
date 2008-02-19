@@ -57,12 +57,14 @@ if which vim >/dev/null 2>&1; then
 fi
 export PAGER=less
 export BLOCKSIZE=K
-if which lesspipe.sh >/dev/null 2>&1; then
-	export LESSOPEN="|`which lesspipe.sh` %s"
+lesspipe=$(which lesspipe.sh 2>/dev/null) || \
+lesspipe=$(which lesspipe 2>/dev/null)
+if test -n "$lesspipe"; then
+	export LESSOPEN="|$lesspipe %s"
 fi
 
 if which keychain >/dev/null 2>&1; then
-	keychain -q id_dsa
+	keychain -q id_dsa --nogui
 	source ~/.keychain/$HOST-sh
 fi
 
