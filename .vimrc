@@ -16,6 +16,7 @@ else
 	set backupcopy=auto
 endif
 set foldmethod=marker
+set mouse=a
 
 filetype plugin on
 filetype indent on
@@ -44,10 +45,12 @@ if has("multi_byte")
 	set enc=utf-8
 endif
 
-let CVSCommandDiffOpt='u'
-let CVSCommandEdit='split'
-let HGCommandEnableBufferSetup=0
-let HGCommandEdit='split'
+" let CVSCommandDiffOpt='u'
+" let CVSCommandEdit='split'
+" let HGCommandEnableBufferSetup=0
+" let HGCommandEdit='split'
+set statusline=%<%f\ %{VCSCommandGetStatusLine()}%h%m%r%=%-14.(%l,%c%V%)\ %P
+let VCSCommandEnableBufferSetup=1
 
 set gfm+=%f:\ %l:\ %m
 
