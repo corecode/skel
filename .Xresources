@@ -22,6 +22,7 @@ XTerm*boldColor: false
 XTerm*loginShell: true
 XTerm*eightBitInput: false
 XTerm*metaSendsEscape: true
+XTerm*color4: #4040ff
 !XTerm*visualBell: true
 Fig.latexfonts: true
 Fig.specialtext: true
