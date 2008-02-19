@@ -94,6 +94,8 @@ do
 		continue
 	fi
 
+	[ -n "$VERBOSE" ] && printf "Updating %s\n" "$name"
+
 	docvs=0
 
 	cd "$SRCDIR/$name"
