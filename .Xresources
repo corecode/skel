@@ -3,7 +3,7 @@ XTerm*foreground: lightgrey
 !XTerm*color4: #5050ff
 !XTerm*colorBDMode: true
 XTerm*cursorColor: yellow
-#if X_RESOLUTION > 3500
+#if X_RESOLUTION > 5000
 XTerm*font: -*-terminus-medium-*-*-*-20-*-*-*-*-*-iso10646-*
 #else
 XTerm*font: -*-terminus-medium-*-*-*-14-*-*-*-*-*-iso10646-*
