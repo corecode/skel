@@ -18,12 +18,22 @@ endif
 set foldmethod=marker
 set mouse=a
 
+if has("win32")
+	let &runtimepath = '~/.vim,' . &runtimepath
+end
+
+if exists('+shellslash')
+	set shellslash
+endif
+
 filetype plugin on
 filetype indent on
 
 if has("gui")
 	if has("macunix")
 		set guifont=Monaco:h11
+	elseif has("win32")
+		set guifont=Terminus:h12
 	else
 		set guifont=Terminus\ 14
 	endif
@@ -70,6 +80,7 @@ let c_space_errors=1
 let c_gnu=1
 
 let g:tex_indent_items = 1
+let g:tex_flavor='latex'
 
 " Search with *#/ in visual selection mode
 vnoremap * y/\V<C-R>=substitute(escape(@@,"/\\"),"\n","\\\\n","ge")<CR><CR>
