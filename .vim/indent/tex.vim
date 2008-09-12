@@ -53,8 +53,6 @@ endif
 let b:did_indent = 1
 
 
-setlocal sw=2
-setlocal sts=2
 setlocal indentexpr=GetTeXIndent()
 setlocal nolisp
 setlocal nosmartindent
