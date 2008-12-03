@@ -40,6 +40,10 @@
 
 " Section: Plugin header {{{1
 
+if exists('VCSCommandDisableAll')
+	finish
+endif
+
 if v:version < 700
 	echohl WarningMsg|echomsg 'VCSCommand requires at least VIM 7.0'|echohl None
 	finish
@@ -112,9 +116,11 @@ function! s:gitFunctions.Annotate(argList)
 		let options = join(a:argList, ' ')
 	endif
 
+	let cursor = getpos('.')
+
 	let resultBuffer = s:DoCommand('blame ' . options . ' -- ', 'annotate', options, {})
 	if resultBuffer > 0
-		normal 1G
+		call setpos('.', cursor)
 		set filetype=gitAnnotate
 	endif
 	return resultBuffer
