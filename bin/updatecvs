@@ -79,6 +79,7 @@ do
 		;;
 	esac
 
+	dogit=
 	dorepo=0
 	for checkrepo
 	do
@@ -150,7 +151,8 @@ do
 		cat .gitinfo | while read dir tag _rem
 		do
 			[ -d $dir/.git ] || git clone -l -n $CVSDIR/$name $dir
-			cd $dir && git checkout origin/$tag
+			(cd $dir && git remote update)
+			(cd $dir && git checkout origin/$tag)
 		done
 		indexdirs=$(cut -w -f 1 .gitinfo)
 	fi
