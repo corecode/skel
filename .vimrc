@@ -35,9 +35,14 @@ if has("gui")
 	elseif has("win32")
 		set guifont=Terminus:h12
 	else
-		set guifont=Terminus\ 14
+		set guifont=Terminus\ 12
 	endif
 endif
+
+if has("gui")
+	let &guicursor = &guicursor.",a:blinkon0"
+endif
+
 colorscheme 2c
 set bg=dark
 
@@ -81,6 +86,12 @@ let c_gnu=1
 
 let g:tex_indent_items = 1
 let g:tex_flavor='latex'
+let g:Tex_MultipleCompileFormats = 'dvi,pdf'
+let g:Tex_DefaultTargetFormat = 'pdf'
+
+if executable('evince')
+	let g:Tex_ViewRule_pdf = 'evince'
+endif
 
 " Search with *#/ in visual selection mode
 vnoremap * y/\V<C-R>=substitute(escape(@@,"/\\"),"\n","\\\\n","ge")<CR><CR>
