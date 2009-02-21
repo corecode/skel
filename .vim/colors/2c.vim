@@ -10,7 +10,7 @@ let g:colors_name = "2c"
 
 hi Normal														guifg=#dddddd guibg=black
 hi Comment		term=bold		ctermfg=DarkCyan				guifg=DarkCyan
-hi Constant		term=underline	ctermfg=Magenta					guifg=Magenta
+hi Constant		term=underline	cterm=bold ctermfg=Magenta		guifg=Magenta
 hi Special		term=bold		cterm=bold ctermfg=Red			guifg=#ff7070 gui=bold
 hi Identifier	term=underline	cterm=bold ctermfg=Cyan			guifg=Cyan gui=bold
 hi Statement	term=bold		cterm=bold ctermfg=white		guifg=white gui=bold
