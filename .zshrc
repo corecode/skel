@@ -1,3 +1,5 @@
+PATH=~/bin${PATH:+:}$PATH
+
 SAVEHIST=5000
 HISTSIZE=8000
 HISTFILE=~/.zshhistory
