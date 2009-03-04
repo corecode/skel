@@ -30,10 +30,39 @@ if [[ $TERM == (xterm|screen)* ]]; then
 	}
 
 	function preexec {
+		emulate -L zsh
+		local -a cmd; cmd=(${(z)1})
+		local -a checkjobs
+
+		case $cmd[1] in
+		fg|wait)
+			if (( $#cmd == 1 ))
+			then
+				checkjobs=%+
+			else
+				checkjobs=$cmd[2]
+			fi
+			;;
+		%*)
+			checkjobs=$cmd[1]
+			;;
+		esac
+
 		print -n "${title[start]}"
-		print -Pn "%n@%m:%~"
+
+		if [[ -n "$checkjobs" ]]
+		then
+			# from: http://www.zsh.org/mla/workers/2000/msg03990.html
+			local -A jt; jt=(${(kv)jobtexts})	# Copy jobtexts for subshell
+			builtin jobs -l $checkjobs >>(read num rest
+				cmd=(${(z)${(e):-\$jt$num}})
+				print -nr "$cmd")
+		else
+			print -nr "$cmd"
+		fi
+
 		print -Pn " | %* | "
-		print -nr "$1"
+		print -Pn "%n@%m:%~"
 		print -n "${title[end]}"
 	}
 fi
