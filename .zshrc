@@ -21,8 +21,10 @@ if [[ $TERM == (xterm|screen)* && $oldterm != $TERM$WINDOWID ]]; then
 	export oldterm=$TERM$WINDOWID
 fi
 
-PS1="%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )%(2L.%{${fg_bold[yellow]}%}<%L>%{$reset_color%} .)%B%(#.%{${bg[red]}%}.)%m %(#..%{$fg[green]%})%#%{$reset_color%}%b "
-RPS1=" %{${fg_bold[green]}%}%~%{${fg_bold[black]}%}|%{${fg_bold[blue]}%}%(t.DING!.%*)%{$reset_color%}"
+#PS1="%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )%(2L.%{${fg_bold[yellow]}%}<%L>%{$reset_color%} .)%B%(#.%{${bg[red]}%}.)%m %(#..%{$fg[green]%})%#%{$reset_color%}%b "
+#RPS1=" "
+PS1="%{${fg_bold[blue]}%}%(t.DING!.%*)%{$reset_color%} %(2L.%{${fg_bold[yellow]}%}<%L>%{$reset_color%} .)%{${fg[magenta]}%}!%!$reset_color %l %(#.%{${bg[red]}%}.)%B%m%b:%{${fg_bold[green]}%}%~%b
+%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )%(#..%{$fg[green]%})%#%{$reset_color%}%b "
 
 if [[ $TERM == (xterm|screen)* ]]; then
 	function precmd {
