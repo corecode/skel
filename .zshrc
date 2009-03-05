@@ -8,6 +8,7 @@ setopt EXTENDED_HISTORY
 setopt HIST_EXPIRE_DUPS_FIRST
 #setopt HIST_FIND_NO_DUPS
 setopt HIST_REDUCE_BLANKS
+setopt PUSHD_IGNORE_DUPS
 
 autoload -U colors; colors
 
@@ -22,8 +23,10 @@ if [[ $TERM == (xterm|screen)* && $oldterm != $TERM$WINDOWID ]]; then
 	export oldterm=$TERM$WINDOWID
 fi
 
-PS1="%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )%(2L.%{${fg_bold[yellow]}%}<%L>%{$reset_color%} .)%B%(#.%{${bg[red]}%}.)%m %(#..%{$fg[green]%})%#%{$reset_color%}%b "
-RPS1=" %{${fg_bold[green]}%}%~%{${fg_bold[black]}%}|%{${fg_bold[blue]}%}%(t.DING!.%*)%{$reset_color%}"
+#PS1="%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )%(2L.%{${fg_bold[yellow]}%}<%L>%{$reset_color%} .)%B%(#.%{${bg[red]}%}.)%m %(#..%{$fg[green]%})%#%{$reset_color%}%b "
+#RPS1=" "
+PS1="%{${fg_bold[blue]}%}%(t.DING!.%*)%{$reset_color%} %(2L.%{${fg_bold[yellow]}%}<%L>%{$reset_color%} .)%{${fg[magenta]}%}!%!$reset_color %l %(#.%{${bg[red]}%}.)%B%m%b:%{${fg_bold[green]}%}%~%b
+%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )%(#..%{$fg[green]%})%#%{$reset_color%}%b "
 
 if [[ $TERM == (xterm|screen)* ]]; then
 	function precmd {
@@ -31,10 +34,39 @@ if [[ $TERM == (xterm|screen)* ]]; then
 	}
 
 	function preexec {
+		emulate -L zsh
+		local -a cmd; cmd=(${(z)1})
+		local -a checkjobs
+
+		case $cmd[1] in
+		fg|wait)
+			if (( $#cmd == 1 ))
+			then
+				checkjobs=%+
+			else
+				checkjobs=$cmd[2]
+			fi
+			;;
+		%*)
+			checkjobs=$cmd[1]
+			;;
+		esac
+
 		print -n "${title[start]}"
-		print -Pn "%n@%m:%~"
+
+		if [[ -n "$checkjobs" ]]
+		then
+			# from: http://www.zsh.org/mla/workers/2000/msg03990.html
+			local -A jt; jt=(${(kv)jobtexts})	# Copy jobtexts for subshell
+			builtin jobs -l $checkjobs >>(read num rest
+				cmd=(${(z)${(e):-\$jt$num}})
+				print -nr "$cmd")
+		else
+			print -nr "$cmd"
+		fi
+
 		print -Pn " | %* | "
-		print -nr "$1"
+		print -Pn "%n@%m:%~"
 		print -n "${title[end]}"
 	}
 fi
