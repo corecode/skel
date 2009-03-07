@@ -90,7 +90,7 @@ function prompt_git {
 	ref=${ref#refs/heads/}
 	if [[ -n "$ref" ]]
 	then
-		PS1="$PS1%{${fg[cyan]}}$ref%{$reset_color%} "
+		PS1="$PS1%{${fg[cyan]}%}$ref%{$reset_color%} "
 	fi
 }
 
