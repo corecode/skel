@@ -110,10 +110,16 @@ function prompt_jobs {
 	fi
 }
 
+function precmd {
+	title_generate
+	prompt_generate
+}
+
+function title_generate {}
+
 if [[ $TERM == (xterm|screen)* ]]; then
-	function precmd {
+	function title_generate {
 		print -Pn "${title[start]}%n@%m:%~${title[end]}"
-		prompt_generate
 	}
 
 	function preexec {
