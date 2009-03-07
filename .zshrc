@@ -59,7 +59,7 @@ function prompt_generate {
 	# return value
 	PS1="$PS1%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )"
 	# prompt!
-	PS1="$PS1%(#..%{$fg[green]%})%#%{$reset_color%}%b "
+	PS1="$PS1%(#.%{${bg[red]%}%B.%{$fg[green]%})%# %{$reset_color%}"
 }
 
 typeset -g lastding
@@ -73,7 +73,7 @@ function prompt_time {
 	hour=$curtime[0]
 	minute=$curtime[2]
 
-	t=$(print -Pn "%*")
+	t="%*"
 	if [[ $minute -eq 0 && $lastding -ne $hour ]]; then
 		lastding=$hour
 		# not using ^G here, because then cat'ing
