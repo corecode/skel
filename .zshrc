@@ -16,21 +16,82 @@ typeset -A title
 title[start]="\e]0;"
 title[end]="\a"
 
-REPORTTIME=10
 
 if [[ $TERM == (xterm|screen)* && $oldterm != $TERM$WINDOWID ]]; then
 	SHLVL=1
 	export oldterm=$TERM$WINDOWID
 fi
 
+REPORTTIME=1
+TIMEFMT="%E=%U+%S"
+
 #PS1="%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )%(2L.%{${fg_bold[yellow]}%}<%L>%{$reset_color%} .)%B%(#.%{${bg[red]}%}.)%m %(#..%{$fg[green]%})%#%{$reset_color%}%b "
-#RPS1=" "
-PS1="%{${fg_bold[blue]}%}%(t.DING!.%*)%{$reset_color%} %(2L.%{${fg_bold[yellow]}%}<%L>%{$reset_color%} .)%{${fg[magenta]}%}!%!$reset_color %l %(#.%{${bg[red]}%}.)%B%m%b:%{${fg_bold[green]}%}%~%b
-%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )%(#..%{$fg[green]%})%#%{$reset_color%}%b "
+#RPS1=" %{${fg_bold[green]}%}%~%{${fg_bold[black]}%}|%{${fg_bold[blue]}%}%(t.DING!.%*)%{$reset_color%}"
+
+setopt PROMPT_PERCENT
+# Substitute vars.  Notice that we're in "", so $vars here are
+# replaced already here.  All dynamic content needs to go
+# in escaped \$vars.
+#setopt PROMPT_SUBST
+function prompt_generate {
+	# time
+	PS1="%{${fg_bold[blue]}%}%(t.DING!.%*)%{$reset_color%} "
+	# history number
+	PS1="$PS1%{${fg[magenta]}%}!%!$reset_color "
+	# shell nesting
+	PS1="$PS1%(2L.%{${fg_bold[yellow]}%}<%L>%{$reset_color%} .)"
+	# jobs display
+	prompt_jobs
+	# tty name
+	#PS1="$PS1%l "
+	# git dynamic content, i.e. branch name
+	prompt_git
+	# switch to red background when root
+	PS1="$PS1%(#.%{${bg[red]}%}.)"
+	# hostname
+	PS1="$PS1%B%m%b:"
+	# path
+	PS1="$PS1%{${fg_bold[green]}%}%~%b"
+	# start second line
+	PS1="$PS1
+"
+	# return value
+	PS1="$PS1%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )"
+	# prompt!
+	PS1="$PS1%(#..%{$fg[green]%})%#%{$reset_color%}%b "
+}
+
+function prompt_git {
+	local ref
+
+	ref=$(git symbolic-ref HEAD 2>/dev/null)
+	ref=${ref#refs/heads/}
+	if [[ -n "$ref" ]]
+	then
+		PS1="$PS1%{${fg[cyan]}}$ref%{$reset_color%} "
+	fi
+}
+
+function prompt_jobs {
+	# from http://www.miek.nl/blog/archives/2008/02/20/my_zsh_prompt_setup/index.html
+	local js
+	local jobno
+
+	js=()
+	for jobno (${(k)jobstates}) {
+		local fullstate=$jobstates[$jobno]
+		local state="${${(@s,:,)fullstate}[2]}"
+		js+=($jobno${state//[^+-]/})
+	}
+	if [[ $#js -gt 0 ]]; then
+		PS1="$PS1%{${fg[yellow]}%}[${(j:,:)js}]%{$reset_color%} "
+	fi
+}
 
 if [[ $TERM == (xterm|screen)* ]]; then
 	function precmd {
 		print -Pn "${title[start]}%n@%m:%~${title[end]}"
+		prompt_generate
 	}
 
 	function preexec {
