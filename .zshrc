@@ -88,10 +88,20 @@ function prompt_git {
 
 	ref=$(git symbolic-ref HEAD 2>/dev/null)
 	ref=${ref#refs/heads/}
-	if [[ -n "$ref" ]]
-	then
+	if [[ -n $ref ]] {
+		# real symbolic ref
 		PS1="$PS1%{${fg[cyan]}%}$ref%{$reset_color%} "
-	fi
+		return
+	}
+
+	# maybe detached?
+	ref=$(git rev-parse HEAD 2>/dev/null)
+	ref=${ref[0,10]}
+	if [[ -n $ref ]] {
+		# detached head, print commitid
+		PS1="$PS1%{${bg[cyan]}${fg[black]}%}$ref%{$reset_color%} "
+		return
+	}
 }
 
 function prompt_jobs {
