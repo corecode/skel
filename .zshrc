@@ -34,8 +34,9 @@ setopt PROMPT_PERCENT
 # in escaped \$vars.
 #setopt PROMPT_SUBST
 function prompt_generate {
+	PS1=""
 	# time
-	PS1="%{${fg_bold[blue]}%}%(t.DING!.%*)%{$reset_color%} "
+	prompt_time
 	# history number
 	PS1="$PS1%{${fg[magenta]}%}!%!$reset_color "
 	# shell nesting
@@ -59,6 +60,27 @@ function prompt_generate {
 	PS1="$PS1%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )"
 	# prompt!
 	PS1="$PS1%(#..%{$fg[green]%})%#%{$reset_color%}%b "
+}
+
+typeset -g lastding
+function prompt_time {
+	local t
+	local -a curtime
+	local hour
+	local minute
+
+	curtime=(${(@s,:,)$(print -Pn "%D{%H:%M}")})
+	hour=$curtime[0]
+	minute=$curtime[2]
+
+	t=$(print -Pn "%*")
+	if [[ $minute -eq 0 && $lastding -ne $hour ]]; then
+		lastding=$hour
+		# not using ^G here, because then cat'ing
+		# this file will beep.
+		t="DING!$(printf '\a')  "
+	fi
+	PS1="$PS1%{${fg_bold[blue]}%}$t%{$reset_color%} "
 }
 
 function prompt_git {
