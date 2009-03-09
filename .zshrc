@@ -98,7 +98,8 @@ if test -n "$lesspipe"; then
 fi
 
 if which keychain >/dev/null 2>&1; then
-	keychain -q id_dsa --nogui
+	[ -f ~/.ssh/id_rsa ] && keychain -q id_rsa --nogui
+	[ -f ~/.ssh/id_dsa ] && keychain -q id_dsa --nogui
 	source ~/.keychain/$HOST-sh
 fi
 
