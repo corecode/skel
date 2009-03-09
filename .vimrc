@@ -9,7 +9,7 @@ set ls=2
 set title
 set is
 set sm
-set bk
+" writing backups is handled below in the autocommand
 if v:version >= 700
 	set backupcopy=auto,breakhardlink
 else
@@ -101,3 +101,14 @@ au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g'
 
 runtime ftplugin/man.vim
 nmap	K	\K
+
+func SetBackupMode(bufname)
+	let rs = system('hammer version ' . shellescape(a:bufname))
+	if v:shell_error == 0
+		set nowritebackup nobackup
+	else
+		set writebackup backup
+	endif
+endfunc
+
+au BufWritePre,FileAppendPre,FileWritePre * :call SetBackupMode(expand('<afile>'))
