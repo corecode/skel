@@ -37,25 +37,30 @@ function prompt_generate {
 	PS1=""
 	# time
 	prompt_time
-	# history number
-	PS1="$PS1%{${fg[magenta]}%}!%!$reset_color "
-	# shell nesting
-	PS1="$PS1%(2L.%{${fg_bold[yellow]}%}<%L>%{$reset_color%} .)"
-	# jobs display
-	prompt_jobs
-	# tty name
-	#PS1="$PS1%l "
-	# git dynamic content, i.e. branch name
-	prompt_git
 	# switch to red background when root
 	PS1="$PS1%(#.%{${bg[red]}%}.)"
 	# hostname
 	PS1="$PS1%B%m%b:"
 	# path
-	PS1="$PS1%{${fg_bold[green]}%}%~%b"
+	PS1="$PS1%{${fg_bold[green]}%}%~%b "
+	# git dynamic content, i.e. branch name
+	prompt_git
+	# history number
+	#PS1="$PS1%{${fg[magenta]}%}!%!$reset_color "
+	# jobs display
+	prompt_jobs
+	# shell nesting
+	PS1="$PS1%(2L.%{${fg_bold[yellow]}%}<%L>%{$reset_color%} .)"
+	# tty name
+	#PS1="$PS1%l "
 	# start second line
 	PS1="$PS1
 "
+	# If we're in paste mode, forget all the fancyness and only do
+	# the basic prompt.
+	if [[ -n $paste_mode ]] {
+		PS1=""
+	}
 	# return value
 	PS1="$PS1%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )"
 	# prompt!
