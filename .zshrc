@@ -162,7 +162,7 @@ if [[ $TERM == (xterm|screen)* ]]; then
 		then
 			# from: http://www.zsh.org/mla/workers/2000/msg03990.html
 			local -A jt; jt=(${(kv)jobtexts})	# Copy jobtexts for subshell
-			builtin jobs -l $checkjobs >>(read num rest
+			builtin jobs -l $checkjobs 2>/dev/null >>(read num rest
 				cmd=(${(z)${(e):-\$jt$num}})
 				print -nr "$cmd")
 		else
