@@ -6,7 +6,7 @@
 " 	That file sets up 3 maps BBB, BAS, and BBA which are easy wasy to type in
 " 	bibliographic entries.
 "
-" CVS: $Id: bib_latexSuite.vim,v 1.1 2005/07/02 22:48:03 corecode Exp $
+" CVS: $Id: bib_latexSuite.vim 997 2006-03-20 09:45:45Z srinathava $
 
 " source main.vim because we need a few functions from it.
 runtime ftplugin/latex-suite/main.vim

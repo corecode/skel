@@ -10,9 +10,9 @@ XTerm*font: -*-terminus-medium-*-*-*-14-*-*-*-*-*-iso10646-*
 #endif
 XTerm*utf8: 1
 !#if HEIGHT > 768
-;XTerm.vt100.geometry: 90x40
+!XTerm.vt100.geometry: 90x40
 !#else
-XTerm.vt100.geometry: 100x35
+XTerm*geometry: 100x35
 !#endif
 XTerm*saveLines: 2000
 XTerm*scrollBar: false

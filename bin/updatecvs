@@ -79,6 +79,7 @@ do
 		;;
 	esac
 
+	dogit=
 	dorepo=0
 	for checkrepo
 	do
@@ -120,22 +121,46 @@ do
 		fi
 		docvs=1
 		;;
+	git)
+		if [ -z "$SKIPSUP" ]
+		then
+			GIT_DIR="$CVSDIR/$name.git" git remote update
+		fi
+		dogit=1
+		;;
 	esac
+
+	indexdirs=.
 
 	if [ $docvs -ne 0 ]
 	then
+		indexdirs=
 		[ -n "$RECVS" ] && rm -rf "$SRCDIR/$name/"*
 		cat .cvsinfo | while read module dir tag _rem
 		do
 			cvs $verbose_cvs -r -R -d "$CVSDIR/$name" \
 				co -d $dir -PA -r "$tag" $module || true
 		done
+		indexdirs=$(cut -w -f 2 .cvsinfo)
 	fi
 
-	[ -e .glimpse_exclude ] || echo "CVS/" > .glimpse_exclude
+	if [ -n "$dogit" ]
+	then
+		indexdirs=
+		[ -n "$RECVS" ] && rm -rf "$SRCDIR/$name/"*
+		cat .gitinfo | while read dir tag _rem
+		do
+			[ -d $dir/.git ] || git clone -l -n $CVSDIR/$name $dir
+			(cd $dir && git remote update)
+			(cd $dir && git checkout origin/$tag)
+		done
+		indexdirs=$(cut -w -f 1 .gitinfo)
+	fi
+
+	[ -e .glimpse_exclude ] || printf "CVS/\n.git\n" > .glimpse_exclude
 	if [ -n "${INDEX}" ]
 	then
 		rm -f .glimpse_index
 	fi
-	glimpseindex -o -n -B -E -M 20 -t ${INDEX} -H "$SRCDIR/$name" `cut -w -f 2 .cvsinfo` > $verbose_glimpse
+	glimpseindex -o -n -B -E -M 20 -t ${INDEX} -H "$SRCDIR/$name" $indexdirs > $verbose_glimpse
 done

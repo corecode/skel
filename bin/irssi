@@ -1,5 +1,5 @@
 #!/bin/sh
-if [ "`hostname -s`" = "chlamydia" ]
+if [ "`hostname`" = "chlamydia.fs.ei.tum.de" ]
 then
 	exec screen -x -R -U -S "$@" irssi /usr/pkg/bin/irssi
 else

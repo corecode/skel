@@ -1,4 +1,6 @@
+defscrollback 2000
 startup_message off
 vbell off
 
 termcapinfo xterm|xterm-*|xterms|xs ti@:te=\E[2J
+termcapinfo xterm* hs:ts=\E]2;:fs=\007:ds=\E]2;screen\007
