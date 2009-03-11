@@ -83,7 +83,7 @@ function prompt_time {
 		lastding=$hour
 		# not using ^G here, because then cat'ing
 		# this file will beep.
-		t="DING!$(printf '\a')  "
+		t="DING!$(printf '\a')   "
 	fi
 	PS1="$PS1%{${fg_bold[blue]}%}$t%{$reset_color%} "
 }
