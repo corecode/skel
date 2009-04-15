@@ -111,4 +111,7 @@ func SetBackupMode(bufname)
 	endif
 endfunc
 
+command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
+	 	\ | wincmd p | diffthis
+
 au BufWritePre,FileAppendPre,FileWritePre * :call SetBackupMode(expand('<afile>'))
