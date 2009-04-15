@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+data = []
+
+$stdin.each do |line|
+  data << line.to_f
+end
+
+data.sort!
+
+data.each_with_index do |d, i|
+  puts "#{d}\t#{i.to_f/data.length}"
+end
