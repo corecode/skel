@@ -105,6 +105,9 @@ nmap	K	\K
 func SetBackupMode(bufname)
 	let rs = system('hammer version ' . shellescape(a:bufname))
 	if v:shell_error == 0
+		let rs = system('ls -lo ' . shellescape(a:bufname) . '|cut -w -f 5 | grep -v -E "no(u)?history"')
+	end
+	if v:shell_error == 0
 		set nowritebackup nobackup
 	else
 		set writebackup backup
