@@ -951,13 +951,14 @@ def main():
   flatouline = []
   file = open(inputfile,"r")
   if (slides == 0):
-    firstLine = beautifyLine(lstrip(rstrip(file.readline())))
+    plainFirstLine = file.readline()
+    firstLine = beautifyLine(lstrip(rstrip(plainFirstLine)))
     printHeader(firstLine)
     if (showTitle == 1):
       printFirstLine(firstLine)
-      linein = beautifyLine(lstrip(rstrip(file.readline())))
+      linein = file.readline()
     else:
-      linein = firstLine
+      linein = plainFirstLine
     while linein != "":
       processLine(linein)
       linein = file.readline()
