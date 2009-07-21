@@ -11,7 +11,7 @@ elseif exists("b:current_syntax")
   finish
 endif
 
-syn include @riRuby <sfile>:p:h/ruby.vim
+syn include @riRuby syntax/ruby.vim
 
 syn region	riNonUniqueTerm	start=+^\w+ end=+^\s\{5}\w.*$+ contains=riTermString,riMethodSpec,riClassFold
 syn match	riTermString	contained "`[^']*'"
