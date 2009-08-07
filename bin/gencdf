@@ -9,5 +9,5 @@ end
 data.sort!
 
 data.each_with_index do |d, i|
-  puts "#{d}\t#{i.to_f/data.length}"
+  puts "#{d}\t#{(i.to_f + 1)/data.length}"
 end
