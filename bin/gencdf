@@ -1,13 +1,81 @@
 #!/usr/bin/env ruby
 
-data = []
-
-$stdin.each do |line|
-  data << line.to_f
+# compress a set of values into a single
+# representative value
+def compress(vals)
+  #vals.inject(0){|s,v| s+v} / vals.count.to_f
+  vals[-1]
 end
 
-data.sort!
+data = []
+
+if ARGV[0]
+  f = File.open(ARGV[0])
+  le = nil
+  len = 0
+  dul = 0
+  f.each do |l|
+    len += 1
+    e = l.to_f
+    if not le
+      dul = 1
+      le = e
+    end
+    if e != le
+      dul += 1
+      raise RuntimeError.new "input not sorted!" if e < le
+    end
+  end
+  f.seek(0)
+  class FileWrapper
+    include Enumerable
+
+    attr_reader :length
+    def initialize(f, l)
+      @f = f
+      @length = l
+    end
+
+    def each
+      @f.each do |e|
+        yield e.to_f
+      end
+    end
+  end
+  data = FileWrapper.new(f, len)
+else
+  $stdin.each do |line|
+    data << line.to_f
+  end
+
+  data.sort!
+
+  dul = data.uniq.length
+end
+
+if dul > 1000
+  # gen maximum of 1000 points (0.1%)
+  dataperpoint = data.length / 1000.0
+  nd = []
+  p = 0
+  tmpa = []
+  data.each_with_index do |d, i|
+    tmpa << d
+    if (i + 1) >= (p + 1) * dataperpoint
+      nd << [compress(tmpa), (i+1).to_f/data.length]
+      tmpa = []
+      p += 1
+    end
+  end
+  data = nd
+end
 
 data.each_with_index do |d, i|
-  puts "#{d}\t#{(i.to_f + 1)/data.length}"
+  pos = nil
+  if Array === d
+    d, pos = d
+  else
+    pos = (i.to_f + 1)/data.length
+  end
+  puts "#{d}\t#{pos}"
 end
