@@ -18,6 +18,27 @@ endif
 set foldmethod=marker
 set mouse=a
 
+" long line treatment: wrap on words, use cursor keys to
+" move across wrapped lines
+set linebreak
+set showbreak=+
+nnoremap <Up> gk
+vnoremap <Up> gk
+inoremap <Up> <C-O>gk
+nnoremap <Down> gj
+vnoremap <Down> gj
+inoremap <Down> <C-O>gj
+nnoremap <Home> g0
+vnoremap <Home> g0
+inoremap <Home> <C-O>g0
+nnoremap <End> g$
+vnoremap <End> g$
+inoremap <End> <C-O>g$
+
+" split vertically when using CTRL-W_f
+nmap <C-W><C-F> :vsplit<CR>gf
+nmap <C-W>f :vsplit<CR>gf
+
 if has("win32")
 	let &runtimepath = '~/.vim,' . &runtimepath
 end
