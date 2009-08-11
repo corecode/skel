@@ -6,3 +6,4 @@
 "endif
 
 set iskeyword+=:
+setl spell
