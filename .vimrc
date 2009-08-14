@@ -20,8 +20,6 @@ set mouse=a
 
 " long line treatment: wrap on words, use cursor keys to
 " move across wrapped lines
-set linebreak
-set showbreak=+
 nnoremap <Up> gk
 vnoremap <Up> gk
 inoremap <Up> <C-O>gk

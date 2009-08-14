@@ -7,3 +7,6 @@
 
 set iskeyword+=:
 setl spell
+
+set linebreak
+set showbreak=+
