@@ -412,8 +412,10 @@ def handleTable(linein,lineLevel):
 # output: modified line
 
 def linkOrImage(line):
-  line = sub('\[(\S+?)\]','<img src="\\1" alt="\\1">',line)
-  line = sub('\[(\S+)\s(.*?)\]','<a href="\\1">\\2</a>',line)
+  line = sub('\[img\s+(\S+?)\]','<img src="\\1" alt="\\1">',line)
+  line = sub('\[(\S+)(\s+(.*?))?\]',
+            lambda m: '<a href="%s">%s</a>' % (m.group(1), m.group(2) or m.group(1)),
+            line)
   line = replace(line,'<img src="X" alt="X">','[X]')
   line = replace(line,'<img src="_" alt="_">','[_]')
   return line
@@ -460,20 +462,18 @@ def beautifyLine(line):
   out = line
   line = ""
 
-  while (line != out):
-
-	  line = out
-	  out = linkOrImage(out)
-	# out = replace(out,'**','<strong>',1)
-	  out = sub('\*\*(.*?)\*\*','<strong>\\1</strong>',out)
-	# out = replace(out,'//','<i>',1)
-	  out = sub('\/\/(.*?)\/\/','<i>\\1</i>',out)
-	# out = replace(out,'+++','<code>',1)
-	  out = sub('\+\+\+(.*?)\+\+\+','<code>\\1</code>',out)
-	# out = replace(out,'---','<strike>',1)
-	  out = sub('\-\-\-(.*?)\-\-\-','<strike>\\1</strike>',out)
-	  out = sub('\(c\)','&copy;',out)
-	  out = sub('\(C\)','&copy;',out)
+  line = out
+# out = replace(out,'**','<strong>',1)
+  out = sub('\*\*(.*?)\*\*','<strong>\\1</strong>',out)
+# out = replace(out,'//','<i>',1)
+  out = sub('\/\/(.*?)\/\/','<i>\\1</i>',out)
+# out = replace(out,'+++','<code>',1)
+  out = sub('\+\+\+(.*?)\+\+\+','<code>\\1</code>',out)
+# out = replace(out,'---','<strike>',1)
+  out = sub('\-\-\-(.*?)\-\-\-','<strike>\\1</strike>',out)
+  out = sub('\(c\)','&copy;',out)
+  out = sub('\(C\)','&copy;',out)
+  out = linkOrImage(out)
   return out
 
 # closeLevels
