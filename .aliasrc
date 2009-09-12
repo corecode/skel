@@ -21,7 +21,8 @@ alias pp='p +2'
 if rm 2>&1 | grep -q '\[[^]]*I'; then
 	alias rm='rm -I'
 fi
-alias ccvs='cvs -d crater:/cvs'
+
+alias po='pushd $(make -V .OBJDIR)'
 
 cvsrm() {
 	rm "$@"
