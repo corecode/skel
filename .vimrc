@@ -83,6 +83,7 @@ set grepprg=grep\ -nH\ $*
 set cino=:0,g0,t0,+4,(0,u0,W4
 let c_space_errors=1
 let c_gnu=1
+let java_highlight_functions='yes'
 
 let g:tex_indent_items = 1
 let g:tex_flavor='latex'
