@@ -192,6 +192,7 @@ umask 22
 
 if which vim >/dev/null 2>&1; then
 	export EDITOR=`which vim`
+	export VISUAL=$EDITOR
 fi
 export PAGER=less
 export BLOCKSIZE=K
