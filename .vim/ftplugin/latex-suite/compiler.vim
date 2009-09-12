@@ -117,7 +117,12 @@ function! Tex_CompileLatex()
 	if Tex_GetVarValue('Tex_UseMakefile') && (glob('makefile') != '' || glob('Makefile') != '')
 		let _makeprg = &l:makeprg
 		call Tex_Debug("Tex_CompileLatex: using the makefile in the current directory", "comp")
-		let &l:makeprg = 'make $*'
+		let &l:makeprg = Tex_GetVarValue('Tex_MakePrg')
+		if !strlen(&l:makeprg)
+			let &l:makeprg = 'make'
+		endif
+		let &l:makeprg = &l:makeprg.' $*'
+		call Tex_Debug('Tex_CompileLatex: using makeprg '.&l:makeprg, 'comp')
 		if exists('s:target')
 			call Tex_Debug('Tex_CompileLatex: execing [make! '.s:target.']', 'comp')
 			exec 'make! '.s:target

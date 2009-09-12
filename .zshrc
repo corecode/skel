@@ -64,7 +64,7 @@ function prompt_generate {
 	# return value
 	PS1="$PS1%(?..%{${fg_bold[red]}%}%?%{$reset_color%} )"
 	# prompt!
-	PS1="$PS1%(#.%{${bg[red]%}%B.%{$fg[green]%})%# %{$reset_color%}"
+	PS1="$PS1%(#.%{${bg_bold[red]}%}.%{$fg[green]%})%# %{$reset_color%}"
 }
 
 typeset -g lastding
