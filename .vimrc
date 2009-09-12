@@ -20,18 +20,18 @@ set mouse=a
 
 " long line treatment: wrap on words, use cursor keys to
 " move across wrapped lines
-nnoremap <Up> gk
-vnoremap <Up> gk
-inoremap <Up> <C-O>gk
-nnoremap <Down> gj
-vnoremap <Down> gj
-inoremap <Down> <C-O>gj
-nnoremap <Home> g0
-vnoremap <Home> g0
-inoremap <Home> <C-O>g0
-nnoremap <End> g$
-vnoremap <End> g$
-inoremap <End> <C-O>g$
+nnoremap <C-Up> gk
+vnoremap <C-Up> gk
+inoremap <C-Up> <C-O>gk
+nnoremap <C-Down> gj
+vnoremap <C-Down> gj
+inoremap <C-Down> <C-O>gj
+nnoremap <C-Home> g0
+vnoremap <C-Home> g0
+inoremap <C-Home> <C-O>g0
+nnoremap <C-End> g$
+vnoremap <C-End> g$
+inoremap <C-End> <C-O>g$
 
 " split vertically when using CTRL-W_f
 nmap <C-W><C-F> :vsplit<CR>gf
