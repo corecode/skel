@@ -65,51 +65,19 @@ else
 	verbose_rsync=
 fi
 
-if [ $# -eq 0 ]
-then
-	repos=`cut -f 1 "$CVSDIR/.cvsrepos"`
-	set -- $repos
-fi
+update_scm() {
+	name=$1
+	mode=$2
+	file=$3
 
-cat "$CVSDIR/.cvsrepos" | while read name mode file
-do
-	case "$name" in
-	"#"*|"")
-		continue
-		;;
-	esac
-
-	dogit=
-	dorepo=0
-	for checkrepo
-	do
-		if [ "$checkrepo" = "$name" ]
-		then
-			dorepo=1
-			break
-		fi
-	done
-
-	if [ $dorepo -eq 0 ]
-	then
-		continue
-	fi
-
-	[ -n "$VERBOSE" ] && printf "Updating %s\n" "$name"
-
-	docvs=0
-
-	cd "$SRCDIR/$name"
 	case "$mode" in
 	none|"")
 		;;
 	cvsync)
 		[ -n "$SKIPSUP" ] || cvsync $verbose_cvsync "$file"
-		docvs=1
 		;;
 	cvsup)
 		[ -n "$SKIPSUP" ] || cvsup $verbose_cvsup "$file"
-		docvs=1
 		;;
 	rsync)
 		if [ -z "$SKIPSUP" ]
@@ -119,20 +87,23 @@ do
 				rsync -a --delete -z $verbose_rsync "$loc" "$CVSDIR/$name/"
 			done
 		fi
-		docvs=1
 		;;
 	git)
 		if [ -z "$SKIPSUP" ]
 		then
-			GIT_DIR="$CVSDIR/$name.git" git remote update
+			GIT_DIR="$CVSDIR/$name.git" git remote update -p
 		fi
-		dogit=1
 		;;
 	esac
+}
+
+update_src() {
+	name=$1
 
 	indexdirs=.
 
-	if [ $docvs -ne 0 ]
+	cd "$SRCDIR/$name"
+	if [ -f "$SRCDIR/$name/.cvsinfo" ]
 	then
 		indexdirs=
 		[ -n "$RECVS" ] && rm -rf "$SRCDIR/$name/"*
@@ -144,7 +115,7 @@ do
 		indexdirs=$(cut -w -f 2 .cvsinfo)
 	fi
 
-	if [ -n "$dogit" ]
+	if [ -f "$SRCDIR/$name/.gitinfo" ]
 	then
 		indexdirs=
 		[ -n "$RECVS" ] && rm -rf "$SRCDIR/$name/"*
@@ -157,10 +128,44 @@ do
 		indexdirs=$(cut -w -f 1 .gitinfo)
 	fi
 
-	[ -e .glimpse_exclude ] || printf "CVS/\n.git\n" > .glimpse_exclude
+	if [ ! -e .glimpse_exclude ]
+	then
+		echo "CVS/" >> .glimpse_exclude
+		echo ".git" >> .glimpse_exclude
+		echo "cscope.*" >> .glimpse_exclude
+		echo ".*.sw[po]" >> .glimpse_exclude
+	fi
+
 	if [ -n "${INDEX}" ]
 	then
 		rm -f .glimpse_index
 	fi
 	glimpseindex -o -n -B -E -M 20 -t ${INDEX} -H "$SRCDIR/$name" $indexdirs > $verbose_glimpse
+}
+
+update_repo() {
+	repo=$1
+
+	grep "^$repo[[:space:]:]" "$CVSDIR/.cvsrepos" | while read name mode file
+	do
+		name=${name#*:}
+
+		[ -n "$VERBOSE" ] && printf "Updating %s\n" "$name"
+
+		update_scm $name $mode $file
+	done
+
+	update_src $repo
+}
+
+repos=`sed -e '/^#/d;s/[[:space:]:].*//' "$CVSDIR/.cvsrepos" | uniq`
+
+if [ $# -eq 0 ]
+then
+	set -- $repos
+fi
+
+for repo
+do
+	update_repo $repo
 done

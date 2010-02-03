@@ -1,5 +1,5 @@
 [ui]
-username = Simon 'corecode' Schubert <corecode@fs.ei.tum.de>
+username = Simon Schubert <2@0x2c.org>
 
 [extensions]
 #hgext.cvscommit=/home/corecode/devel/cvscommit/cvscommit.py
