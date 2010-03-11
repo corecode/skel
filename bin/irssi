@@ -1,7 +1,7 @@
 #!/bin/sh
-if [ "`hostname`" = "chlamydia.fs.ei.tum.de" ]
+if [ "`hostname`" = "0x2c.org" ]
 then
 	exec screen -x -R -U -S "$@" irssi /usr/pkg/bin/irssi
 else
-	exec ssh -t chlamydia.fs.ei.tum.de irssi "$@"
+	exec ssh -t 0x2c.org irssi "$@"
 fi

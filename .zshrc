@@ -196,6 +196,7 @@ if which vim >/dev/null 2>&1; then
 fi
 export PAGER=less
 export BLOCKSIZE=K
+export EMAIL=2@0x2c.org
 lesspipe=$(which lesspipe.sh 2>/dev/null) || \
 lesspipe=$(which lesspipe 2>/dev/null)
 if test -n "$lesspipe"; then

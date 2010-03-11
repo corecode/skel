@@ -6,3 +6,8 @@
 [alias]
 	co = checkout
 	ci = commit
+[imap]
+	folder = Drafts
+	host = imaps://0x2c.org
+	user = 2
+	preformattedHTML = true
