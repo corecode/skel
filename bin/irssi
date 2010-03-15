@@ -1,7 +1,7 @@
 #!/bin/sh
 if [ "`hostname`" = "0x2c.org" ]
 then
-	exec screen -x -R -U -S "$@" irssi /usr/pkg/bin/irssi
+	exec screen -x -R -U -S "$@" irssi /usr/bin/irssi
 else
 	exec ssh -t 0x2c.org irssi "$@"
 fi
