@@ -37,6 +37,9 @@ inoremap <C-End> <C-O>g$
 nmap <C-W><C-F> :vsplit<CR>gf
 nmap <C-W>f :vsplit<CR>gf
 
+nmap <Esc>[5;5~ <C-PageUp>
+nmap <Esc>[6;5~ <C-PageDown>
+
 if has("win32")
 	let &runtimepath = '~/.vim,' . &runtimepath
 end
