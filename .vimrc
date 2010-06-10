@@ -125,19 +125,27 @@ au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g'
 runtime ftplugin/man.vim
 nmap	K	\K
 
-func SetBackupMode(bufname)
-	let rs = system('hammer version ' . shellescape(a:bufname))
-	if v:shell_error == 0
-		let rs = system('ls -lo ' . shellescape(a:bufname) . '|cut -w -f 5 | grep -v -E "no(u)?history"')
-	end
-	if v:shell_error == 0
-		set nowritebackup nobackup
-	else
-		set writebackup backup
+""func SetBackupMode(bufname)
+""	let rs = system('hammer version ' . shellescape(a:bufname))
+""	if v:shell_error == 0
+""		let rs = system('ls -lo ' . shellescape(a:bufname) . '|cut -w -f 5 | grep -v -E "no(u)?history"')
+""	end
+""	if v:shell_error == 0
+""		set nowritebackup nobackup
+""	else
+""		set writebackup backup
+""	endif
+""endfunc
+""
+""command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
+""	 	\ | wincmd p | diffthis
+""
+""au BufWritePre,FileAppendPre,FileWritePre * :call SetBackupMode(expand('<afile>'))
+
+func MaybeSessionSave()
+	if !empty(v:this_session)
+		execute 'silent mksession! ' . v:this_session
 	endif
 endfunc
 
-command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
-	 	\ | wincmd p | diffthis
-
-au BufWritePre,FileAppendPre,FileWritePre * :call SetBackupMode(expand('<afile>'))
+au BufWritePost,VimLeavePre * :call MaybeSessionSave()
