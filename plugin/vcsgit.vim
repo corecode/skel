@@ -112,8 +112,9 @@ endfunction
 function! s:gitFunctions.Annotate(argList)
 	if len(a:argList) == 0
 		if &filetype == 'gitannotate'
-			" Perform annotation of the version indicated by the current line.
-			let options = matchstr(getline('.'),'^\x\+')
+			" Perform annotation of the parent of the version
+			" indicated by the current line.
+			let options = matchstr(getline('.'),'^\x\+') . '^'
 		else
 			let options = ''
 		endif
