@@ -56,6 +56,7 @@ call s:InitVariable("g:NERDCreateDefaultMappings", 1)
 call s:InitVariable("g:NERDDefaultNesting", 1)
 call s:InitVariable("g:NERDMenuMode", 3)
 call s:InitVariable("g:NERDLPlace", "[>")
+call s:InitVariable("g:NERDLeader", '')
 call s:InitVariable("g:NERDUsePlaceHolders", 1)
 call s:InitVariable("g:NERDRemoveAltComs", 1)
 call s:InitVariable("g:NERDRemoveExtraSpaces", 1)
@@ -2726,21 +2727,25 @@ function! s:CreateMaps(target, combo)
 endfunction
 
 if g:NERDCreateDefaultMappings
-    call s:CreateMaps('<plug>NERDCommenterComment',    '<leader>cc')
-    call s:CreateMaps('<plug>NERDCommenterToggle',     '<leader>c<space>')
-    call s:CreateMaps('<plug>NERDCommenterMinimal',    '<leader>cm')
-    call s:CreateMaps('<plug>NERDCommenterSexy',       '<leader>cs')
-    call s:CreateMaps('<plug>NERDCommenterInvert',     '<leader>ci')
-    call s:CreateMaps('<plug>NERDCommenterYank',       '<leader>cy')
-    call s:CreateMaps('<plug>NERDCommenterAlignLeft',  '<leader>cl')
-    call s:CreateMaps('<plug>NERDCommenterAlignBoth',  '<leader>cb')
-    call s:CreateMaps('<plug>NERDCommenterNest',       '<leader>cn')
-    call s:CreateMaps('<plug>NERDCommenterUncomment',  '<leader>cu')
-    call s:CreateMaps('<plug>NERDCommenterToEOL',      '<leader>c$')
-    call s:CreateMaps('<plug>NERDCommenterAppend',     '<leader>cA')
+    let leader = g:NERDLeader
+    if empty(leader)
+	let leader = '<leader>'
+    endif
+    call s:CreateMaps('<plug>NERDCommenterComment',    leader . 'cc')
+    call s:CreateMaps('<plug>NERDCommenterToggle',     leader . 'c<space>')
+    call s:CreateMaps('<plug>NERDCommenterMinimal',    leader . 'cm')
+    call s:CreateMaps('<plug>NERDCommenterSexy',       leader . 'cs')
+    call s:CreateMaps('<plug>NERDCommenterInvert',     leader . 'ci')
+    call s:CreateMaps('<plug>NERDCommenterYank',       leader . 'cy')
+    call s:CreateMaps('<plug>NERDCommenterAlignLeft',  leader . 'cl')
+    call s:CreateMaps('<plug>NERDCommenterAlignBoth',  leader . 'cb')
+    call s:CreateMaps('<plug>NERDCommenterNest',       leader . 'cn')
+    call s:CreateMaps('<plug>NERDCommenterUncomment',  leader . 'cu')
+    call s:CreateMaps('<plug>NERDCommenterToEOL',      leader . 'c$')
+    call s:CreateMaps('<plug>NERDCommenterAppend',     leader . 'cA')
 
     if !hasmapto('<plug>NERDCommenterAltDelims', 'n')
-        nmap <leader>ca <plug>NERDCommenterAltDelims
+        exec 'nmap ' . leader . 'ca <plug>NERDCommenterAltDelims'
     endif
 endif
 
