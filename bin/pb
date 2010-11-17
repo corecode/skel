@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+
+require 'net/http'
+require 'uri'
+
+class Pastebin
+  ApiKey = 'aCT1yubScrrmgZkn73GqZOMVx+s7Dvq9'
+  PostUri = 'http://pastebin.ca/quiet-paste.php'
+  PasteUri = 'http://pastebin.ca/'
+
+  Types = {
+    'raw' => 1,
+    'diff' => 34,
+    'c' => 3,
+    'ruby' => 10,
+    'sh' => 23,
+    'js' => 27,
+  }
+
+  def initialize(content, type='raw')
+    @content = content
+    @ptype = Types[type] || type.to_i
+  end
+
+  def submit
+    res = Net::HTTP.post_form(URI.parse(PostUri), {
+              'content' => @content,
+              'type' => @ptype,
+              'key' => ApiKey
+            })
+
+    throw RuntimeError if not Net::HTTPSuccess === res or res.body !~ /^SUCCESS:([[:digit:]]+)/
+
+    PasteUri + $1
+  end
+end
+
+if $0 == __FILE__
+  begin
+    puts Pastebin.new($stdin.read).submit
+  rescue e
+    $stderr.puts 'pastebin error'
+  end
+end

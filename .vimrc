@@ -40,6 +40,8 @@ nmap <C-W>f :vsplit<CR>gf
 nmap <Esc>[5;5~ <C-PageUp>
 nmap <Esc>[6;5~ <C-PageDown>
 
+let g:NERDLeader = ','
+
 if has("win32")
 	let &runtimepath = '~/.vim,' . &runtimepath
 end

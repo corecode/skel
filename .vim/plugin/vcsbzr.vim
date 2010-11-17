@@ -174,6 +174,8 @@ function! s:bzrFunctions.GetBufferInfo()
     return []
   endif
 
+  let revision = substitute(revision, '\n$', '', '')
+
   " File not under BZR control.
   if statusText =~ '^?'
     return ['Unknown']
@@ -186,7 +188,7 @@ function! s:bzrFunctions.GetBufferInfo()
   elseif flags =~ '^A'
     return ['New', 'New']
   else
-    return [revision, repository]
+    return [revision]
   endif
 endfunction
 
