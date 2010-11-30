@@ -181,7 +181,11 @@ function! s:bzrFunctions.GetBufferInfo()
     return ['Unknown']
   endif
 
-  let [flags, repository] = matchlist(statusText, '^\(.\{3}\)\s\+\(\S\+\)')[1:2]
+  let mlist = matchlist(statusText, '^\(.\{3}\)\s\+\(\S\+\)')
+  let flags = ''
+  if !empty(mlist)
+    let flags = mlist[1]
+  endif
   if revision == ''
     " Error
     return ['Unknown']
