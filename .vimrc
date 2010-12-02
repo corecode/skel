@@ -50,6 +50,10 @@ if exists('+shellslash')
 	set shellslash
 endif
 
+" add all bundles
+call pathogen#runtime_append_all_bundles() 
+call pathogen#helptags()
+
 filetype plugin on
 filetype indent on
 
@@ -123,9 +127,6 @@ vnoremap * y/\V<C-R>=substitute(escape(@@,"/\\"),"\n","\\\\n","ge")<CR><CR>
 vnoremap # y?\V<C-R>=substitute(escape(@@,"?\\"),"\n","\\\\n","ge")<CR><CR> 
 
 au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g'\"" | endif
-
-runtime ftplugin/man.vim
-nmap	K	\K
 
 ""func SetBackupMode(bufname)
 ""	let rs = system('hammer version ' . shellescape(a:bufname))

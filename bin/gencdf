@@ -7,6 +7,11 @@ def compress(vals)
   vals[-1]
 end
 
+if ARGV[0] == '--gnuplot'
+  ARGV.shift
+  do_gnuplot = true
+end
+
 data = []
 
 if ARGV[0]
@@ -70,6 +75,11 @@ if dul > 1000
   data = nd
 end
 
+if do_gnuplot
+  $stdout = IO.popen('gnuplot --persist -', 'w')
+  puts 'plot "-" with steps'
+end
+
 data.each_with_index do |d, i|
   pos = nil
   if Array === d
@@ -78,4 +88,8 @@ data.each_with_index do |d, i|
     pos = (i.to_f + 1)/data.length
   end
   puts "#{d}\t#{pos}"
+end
+
+if do_gnuplot
+  puts "e"
 end
