@@ -54,6 +54,11 @@ endif
 call pathogen#runtime_append_all_bundles() 
 call pathogen#helptags()
 
+" fix snipmate search path
+let s:sniplist = split(globpath(&rtp, 'snippets/'), '\n')
+call remove(s:sniplist, match(s:sniplist, 'bundle/snipmate/snippets/'))
+let g:snippets_dir = join(s:sniplist, ',')
+
 filetype plugin on
 filetype indent on
 
