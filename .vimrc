@@ -157,3 +157,5 @@ func MaybeSessionSave()
 endfunc
 
 au BufWritePost,VimLeavePre * :call MaybeSessionSave()
+
+nnoremap <silent> <F8> :TlistToggle<CR>
