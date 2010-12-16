@@ -9,12 +9,12 @@ set ls=2
 set title
 set is
 set sm
-" writing backups is handled below in the autocommand
 if v:version >= 700
 	set backupcopy=auto,breakhardlink
 else
 	set backupcopy=auto
 endif
+set writebackup backup
 set foldmethod=marker
 set mouse=a
 
