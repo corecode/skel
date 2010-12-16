@@ -1,0 +1,84 @@
+[submodule ".vim/bundle/nerdtree"]
+	path = .vim/bundle/nerdtree
+	url = git://github.com/scrooloose/nerdtree.git
+[submodule ".vim/bundle/snipmate"]
+	path = .vim/bundle/snipmate
+	url = git://github.com/msanders/snipmate.vim.git
+[submodule ".vim/bundle/molokai"]
+	path = .vim/bundle/molokai
+	url = git://github.com/vim-scripts/molokai.git
+[submodule ".vim/bundle/taglist"]
+	path = .vim/bundle/taglist
+	url = git://github.com/vim-scripts/taglist.vim.git
+[submodule ".vim/bundle/vcscommand"]
+	path = .vim/bundle/vcscommand
+	url = git://repo.or.cz/vcscommand.git
+[submodule ".vim/bundle/a"]
+	path = .vim/bundle/a
+	url = git://github.com/vim-scripts/a.vim.git
+[submodule ".vim/bundle/Align"]
+	path = .vim/bundle/Align
+	url = git://github.com/vim-scripts/Align.git
+[submodule ".vim/bundle/vim-surround"]
+	path = .vim/bundle/vim-surround
+	url = git://github.com/tpope/vim-surround.git
+[submodule ".vim/bundle/vim-rails"]
+	path = .vim/bundle/vim-rails
+	url = git://github.com/tpope/vim-rails.git
+[submodule ".vim/bundle/vim-unimpaired"]
+	path = .vim/bundle/vim-unimpaired
+	url = git://github.com/tpope/vim-unimpaired.git
+[submodule ".vim/bundle/vim-git"]
+	path = .vim/bundle/vim-git
+	url = git://github.com/tpope/vim-git.git
+[submodule ".vim/bundle/vim-fugitive"]
+	path = .vim/bundle/vim-fugitive
+	url = git://github.com/tpope/vim-fugitive.git
+[submodule ".vim/bundle/vim-markdown"]
+	path = .vim/bundle/vim-markdown
+	url = git://github.com/tpope/vim-markdown.git
+[submodule ".vim/bundle/vim-ragtag"]
+	path = .vim/bundle/vim-ragtag
+	url = git://github.com/tpope/vim-ragtag.git
+[submodule ".vim/bundle/vim-afterimage"]
+	path = .vim/bundle/vim-afterimage
+	url = git://github.com/tpope/vim-afterimage.git
+[submodule ".vim/bundle/syntastic"]
+	path = .vim/bundle/syntastic
+	url = git://github.com/scrooloose/syntastic.git
+[submodule ".vim/bundle/nerdcommenter"]
+	path = .vim/bundle/nerdcommenter
+	url = git://github.com/scrooloose/nerdcommenter.git
+[submodule ".vim/bundle/vim-space"]
+	path = .vim/bundle/vim-space
+	url = git://github.com/spiiph/vim-space.git
+[submodule ".vim/bundle/vim-vividchalk"]
+	path = .vim/bundle/vim-vividchalk
+	url = git://github.com/tpope/vim-vividchalk.git
+[submodule ".vim/bundle/vim-latex"]
+	path = .vim/bundle/vim-latex
+	url = git://vim-latex.git.sourceforge.net/gitroot/vim-latex/vim-latex
+[submodule ".vim/bundle/vim-repeat"]
+	path = .vim/bundle/vim-repeat
+	url = git://github.com/tpope/vim-repeat.git
+[submodule ".vim/bundle/vim-endwise"]
+	path = .vim/bundle/vim-endwise
+	url = git://github.com/tpope/vim-endwise.git
+[submodule ".vim/bundle/snippets/snippets"]
+	path = .vim/bundle/snippets/snippets
+	url = git://github.com/scrooloose/snipmate-snippets.git
+[submodule ".vim/bundle/AutoClose"]
+	path = .vim/bundle/AutoClose
+	url = git://github.com/vim-scripts/AutoClose.git
+[submodule ".vim/bundle/vim-cucumber"]
+	path = .vim/bundle/vim-cucumber
+	url = git://github.com/tpope/vim-cucumber.git
+[submodule ".vim/bundle/ManPageView"]
+	path = .vim/bundle/ManPageView
+	url = git://github.com/vim-scripts/ManPageView.git
+[submodule ".vim/bundle/xmledit"]
+	path = .vim/bundle/xmledit
+	url = git://github.com/sukima/xmledit.git
+[submodule ".vim/bundle/vim-conque"]
+	path = .vim/bundle/vim-conque
+	url = git://github.com/rson/vim-conque.git

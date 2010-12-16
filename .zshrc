@@ -209,6 +209,8 @@ if which keychain >/dev/null 2>&1; then
 	source ~/.keychain/$HOST-sh
 fi
 
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+
 bindkey -e
 bindkey '\e[H' beginning-of-line
 bindkey '\e[F' end-of-line
