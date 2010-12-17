@@ -69,7 +69,7 @@
 	url = git://github.com/scrooloose/snipmate-snippets.git
 [submodule ".vim/bundle/AutoClose"]
 	path = .vim/bundle/AutoClose
-	url = git://github.com/vim-scripts/AutoClose.git
+	url = git@github.com:corecode/AutoClose.git
 [submodule ".vim/bundle/vim-cucumber"]
 	path = .vim/bundle/vim-cucumber
 	url = git://github.com/tpope/vim-cucumber.git
