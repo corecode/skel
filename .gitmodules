@@ -57,7 +57,7 @@
 	url = git://github.com/tpope/vim-vividchalk.git
 [submodule ".vim/bundle/vim-latex"]
 	path = .vim/bundle/vim-latex
-	url = git://vim-latex.git.sourceforge.net/gitroot/vim-latex/vim-latex
+	url = git@github.com:corecode/vim-latex.git
 [submodule ".vim/bundle/vim-repeat"]
 	path = .vim/bundle/vim-repeat
 	url = git://github.com/tpope/vim-repeat.git
