@@ -4,34 +4,23 @@ require 'net/http'
 require 'uri'
 
 class Pastebin
-  ApiKey = 'aCT1yubScrrmgZkn73GqZOMVx+s7Dvq9'
-  PostUri = 'http://pastebin.ca/quiet-paste.php'
-  PasteUri = 'http://pastebin.ca/'
+  PostUri = 'http://pastebin.com/api_public.php'
+  PasteUri = 'http://pastebin.com/'
 
-  Types = {
-    'raw' => 1,
-    'diff' => 34,
-    'c' => 3,
-    'ruby' => 10,
-    'sh' => 23,
-    'js' => 27,
-  }
-
-  def initialize(content, type='raw')
+  def initialize(content, type='text')
     @content = content
-    @ptype = Types[type] || type.to_i
+    @ptype = type
   end
 
   def submit
     res = Net::HTTP.post_form(URI.parse(PostUri), {
-              'content' => @content,
-              'type' => @ptype,
-              'key' => ApiKey
+              'paste_code' => @content,
+              'paste_format' => @ptype,
             })
 
-    throw RuntimeError if not Net::HTTPSuccess === res or res.body !~ /^SUCCESS:([[:digit:]]+)/
+    throw RuntimeError if not Net::HTTPSuccess === res
 
-    PasteUri + $1
+    res.body
   end
 end
 
