@@ -40,7 +40,13 @@ nmap <C-W>f :vsplit<CR>gf
 nmap <Esc>[5;5~ <C-PageUp>
 nmap <Esc>[6;5~ <C-PageDown>
 
-let g:NERDLeader = ','
+let g:NERDCreateDefaultMappings = 0
+nmap ,cc <plug>NERDCommenterComment
+vmap ,cc <plug>NERDCommenterComment
+nmap ,c<space> <plug>NERDCommenterToggle
+vmap ,c<space> <plug>NERDCommenterToggle
+nmap ,cu <plug>NERDCommenterUncomment
+vmap ,cu <plug>NERDCommenterUncomment
 
 if has("win32")
 	let &runtimepath = '~/.vim,' . &runtimepath
