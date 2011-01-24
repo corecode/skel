@@ -82,3 +82,9 @@
 [submodule ".vim/bundle/delimitMate"]
 	path = .vim/bundle/delimitMate
 	url = git://github.com/Raimondi/delimitMate.git
+[submodule ".emacs.d/emacswiki.org"]
+	path = .emacs.d/emacswiki.org
+	url = git://github.com/emacsmirror/emacswiki.org.git
+[submodule ".emacs.d/auto-complete"]
+	path = .emacs.d/auto-complete
+	url = git://github.com/m2ym/auto-complete.git
