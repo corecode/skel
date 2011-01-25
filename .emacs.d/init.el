@@ -15,6 +15,23 @@
 (require 'color-theme-2c)
 (color-theme-2c)
 
+;; default font
+;;(set-default-font "Terminus-10")
+(set-default-font "Monospace-10")
+
+;; disable blinking cursor
+(blink-cursor-mode -1)
+
+;; show matching parentheses
+(show-paren-mode t)
+
+;; show trailing whitespace
+(setq whitespace-style
+      '(trailing
+        space-before-tab))
+(require 'whitespace)
+(global-whitespace-mode)
+
 ;; save history across invocations
 (setq savehist-additional-variables
       '(kill-ring search-ring regexp-search-ring))
@@ -32,22 +49,17 @@
 			 '(2 "_NET_WM_STATE_FULLSCREEN" 0)))
 (global-set-key [f11] 'toggle-fullscreen)
 
+;; automatically line break in text mode
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
-
-(set-default-font "DejaVu Sans Mono-10")
-
-(show-paren-mode t)
 
 ;; needed for auto-indent-mode
 (require 'shrink-whitespaces)
 (setq auto-indent-key-for-end-of-line-then-newline "<M-return>")
 (setq auto-indent-key-for-end-of-line-insert-char-then-newline "<M-S-return>")
+
+;; automatically indent
 (require 'auto-indent-mode)
 (auto-indent-global-mode 1)
 
-;; show trailing whitespace
-(setq whitespace-style
-      '(trailing
-	space-before-tab))
-(require 'whitespace)
-(global-whitespace-mode)
+(require 'ffap)
+(ffap-bindings)
