@@ -1,1 +1,8 @@
-*
+/*
+!.zsh*
+.zshhistory*
+*~
+.*.sw[po]
+#*#
+!.emacs.d
+!.vim
