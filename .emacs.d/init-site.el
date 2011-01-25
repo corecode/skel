@@ -1,29 +1,13 @@
-(require 'cl)
-
-;; make all subdirs of ~/.emacs.d/ loadable
-(let* ((default-directory "~/.emacs.d/"))
-  (normal-top-level-add-subdirs-to-load-path))
-
-;; disable menu bar without X
-(if (and (boundp 'window-system))
-    (window-system nil)
-  (menu-bar-mode -1))
-;; disable toolbar
-(tool-bar-mode -1)
-
-;; colortheme
-(require 'color-theme-2c)
-(color-theme-2c)
+;; make all subdirs of ~/.emacs.d/vendor loadable
+(let* ((default-directory (concat dotfiles-dir "vendor")))
+  (if (file-exists-p default-directory)
+      (progn
+        (add-to-list 'load-path default-directory)
+        (normal-top-level-add-subdirs-to-load-path))))
 
 ;; default font
 ;;(set-default-font "Terminus-10")
 (set-default-font "Monospace-10")
-
-;; disable blinking cursor
-(blink-cursor-mode -1)
-
-;; show matching parentheses
-(show-paren-mode t)
 
 ;; show trailing whitespace
 (setq whitespace-style
@@ -48,9 +32,6 @@
   (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
 			 '(2 "_NET_WM_STATE_FULLSCREEN" 0)))
 (global-set-key [f11] 'toggle-fullscreen)
-
-;; automatically line break in text mode
-(add-hook 'text-mode-hook 'turn-on-auto-fill)
 
 ;; needed for auto-indent-mode
 (require 'shrink-whitespaces)
