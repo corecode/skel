@@ -57,7 +57,7 @@
      (fringe ((t (:background "grey25"))))
      (header-line ((t (:box (:line-width -1 :style released-button) :background "grey90" :foreground "grey20" :box nil))))
      (help-argument-name ((t (:italic t :slant italic))))
-     (highlight ((t (:background "darkseagreen2"))))
+     (highlight ((t (:background "darkgreen"))))
      (isearch ((t (:background "yellow" :foreground "black"))))
      (isearch-fail ((t (:background "red4" :foreground "darkgray"))))
      (italic ((t (:italic t :slant italic))))
