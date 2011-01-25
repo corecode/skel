@@ -1,65 +1,79 @@
+;;; init.el --- Where all the magic begins
+;;
+;; Part of the Emacs Starter Kit
+;;
+;; This is the first thing to get loaded.
+;;
+;; "Emacs outshines all other editing software in approximately the
+;; same way that the noonday sun does the stars. It is not just bigger
+;; and brighter; it simply makes everything else vanish."
+;; -Neal Stephenson, "In the Beginning was the Command Line"
+
+;; Turn off mouse interface early in startup to avoid momentary display
+;; You really don't need these; trust me.
+(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+(if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+(if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+
+;; Load path etc.
+
+(setq dotfiles-dir (file-name-directory
+                    (or (buffer-file-name) load-file-name)))
+
+;; Load up ELPA, the package manager
+
+(add-to-list 'load-path dotfiles-dir)
+
+(add-to-list 'load-path (concat dotfiles-dir "/elpa-to-submit"))
+
+(setq autoload-file (concat dotfiles-dir "loaddefs.el"))
+(setq package-user-dir (concat dotfiles-dir "elpa"))
+(setq custom-file (concat dotfiles-dir "custom.el"))
+
+(require 'package)
+(dolist (source '(("technomancy" . "http://repo.technomancy.us/emacs/")
+                  ("elpa" . "http://tromey.com/elpa/")))
+  (add-to-list 'package-archives source t))
+(package-initialize)
+(require 'starter-kit-elpa)
+
+;; These should be loaded on startup rather than autoloaded on demand
+;; since they are likely to be used in every session
+
 (require 'cl)
-
-;; make all subdirs of ~/.emacs.d/ loadable
-(let* ((default-directory "~/.emacs.d/"))
-  (normal-top-level-add-subdirs-to-load-path))
-
-;; disable menu bar without X
-(if (and (boundp 'window-system))
-    (window-system nil)
-  (menu-bar-mode -1))
-;; disable toolbar
-(tool-bar-mode -1)
-
-;; colortheme
-(require 'color-theme-2c)
-(color-theme-2c)
-
-;; default font
-;;(set-default-font "Terminus-10")
-(set-default-font "Monospace-10")
-
-;; disable blinking cursor
-(blink-cursor-mode -1)
-
-;; show matching parentheses
-(show-paren-mode t)
-
-;; show trailing whitespace
-(setq whitespace-style
-      '(trailing
-        space-before-tab))
-(require 'whitespace)
-(global-whitespace-mode)
-
-;; save history across invocations
-(setq savehist-additional-variables
-      '(kill-ring search-ring regexp-search-ring))
-(savehist-mode 1)
-
-;; setup auto-complete
-(require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
-(ac-config-default)
-
-;; set f11 as full screen toggle
-(defun toggle-fullscreen ()
-  (interactive)
-  (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-			 '(2 "_NET_WM_STATE_FULLSCREEN" 0)))
-(global-set-key [f11] 'toggle-fullscreen)
-
-;; automatically line break in text mode
-(add-hook 'text-mode-hook 'turn-on-auto-fill)
-
-;; needed for auto-indent-mode
-(require 'shrink-whitespaces)
-(setq auto-indent-key-for-end-of-line-then-newline "<M-return>")
-(setq auto-indent-key-for-end-of-line-insert-char-then-newline "<M-S-return>")
-
-;; automatically indent
-(require 'auto-indent-mode)
-(auto-indent-global-mode 1)
-
+(require 'saveplace)
 (require 'ffap)
-(ffap-bindings)
+(require 'uniquify)
+(require 'ansi-color)
+(require 'recentf)
+
+;; backport some functionality to Emacs 22 if needed
+(require 'dominating-file)
+
+;; Load up starter kit customizations
+
+(require 'starter-kit-defuns)
+(require 'starter-kit-bindings)
+(require 'starter-kit-misc)
+(require 'starter-kit-registers)
+(require 'starter-kit-eshell)
+(require 'starter-kit-lisp)
+(require 'starter-kit-perl)
+(require 'starter-kit-ruby)
+(require 'starter-kit-js)
+
+(regen-autoloads)
+(load custom-file 'noerror)
+
+;; You can keep system- or user-specific customizations here
+(setq system-specific-config (concat dotfiles-dir system-name ".el")
+      user-specific-config (concat dotfiles-dir user-login-name ".el")
+      user-specific-dir (concat dotfiles-dir user-login-name))
+(add-to-list 'load-path user-specific-dir)
+
+(if (file-exists-p system-specific-config) (load system-specific-config))
+(if (file-exists-p user-specific-config) (load user-specific-config))
+(if (file-exists-p user-specific-dir)
+  (mapc #'load (directory-files user-specific-dir nil ".*el$")))
+
+;;; init.el ends here
