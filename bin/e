@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -z "$SUDO_COMMAND" ]
+then
+    emacsclient -t -a "" "$@"
+else
+    emacs "$@"
+fi

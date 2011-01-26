@@ -60,6 +60,14 @@
 (require 'auto-indent-mode)
 (auto-indent-global-mode 1)
 
+;; default to indent 8, indent with tabs
+(setq-default standard-indent 8
+              sh-basic-offset 8
+              indent-tabs-mode t)
+;; (setq sh-indent-after-if 8
+;;       sh-indent-after-do 8
+;;       sh-indent-after-case 8)
+
 ;; don't require ffap for now - ido does a good job
 ;;(require 'ffap)
 ;;(ffap-bindings)
