@@ -28,14 +28,29 @@
 				 'magit
 				 'project-local-variables
 				 'ruby-mode
-				 'yaml-mode))
+				 'yaml-mode
+				 'yari))
 
 ;; make all subdirs of ~/.emacs.d/vendor loadable
+
 (let* ((default-directory (concat dotfiles-dir "vendor")))
-  (if (file-exists-p default-directory)
-      (progn
-        (add-to-list 'load-path default-directory)
-        (normal-top-level-add-subdirs-to-load-path))))
+  (when (file-exists-p default-directory)
+    (progn
+      (add-to-list 'load-path default-directory)
+      (normal-top-level-add-subdirs-to-load-path))))
+
+;;; version like above, just adds directories to the end of load-path
+;; (let* ((default-directory (concat dotfiles-dir "vendor")))
+;;   (when (file-exists-p default-directory)
+;;       (progn
+;;         (add-to-list 'load-path default-directory t)
+;; 	(mapc #'(lambda (full-name)
+;; 		  (let* ((dir-name (file-name-nondirectory full-name)))
+;; 		    (when (and (file-directory-p full-name)
+;; 			       (not (string= dir-name "."))
+;; 			       (not (string= dir-name "..")))
+;; 		      (add-to-list 'load-path full-name t))))
+;; 	      (directory-files default-directory t)))))
 
 ;; color theme handling: set color theme only for X frames
 ;; otherwise gnome-terminal sets a weird background color.
@@ -96,13 +111,9 @@
 (setq-default standard-indent 8
               sh-basic-offset 8
               indent-tabs-mode t)
-;; (setq sh-indent-after-if 8
-;;       sh-indent-after-do 8
-;;       sh-indent-after-case 8)
 
-;; don't require ffap for now - ido does a good job
-;;(require 'ffap)
-;;(ffap-bindings)
+;; key bindings
+(global-set-key (kbd "C-h r") 'yari)
 
 ;; start the emacs server
 (server-start)
