@@ -5,16 +5,34 @@
         (add-to-list 'load-path default-directory)
         (normal-top-level-add-subdirs-to-load-path))))
 
-;; default font
-;;(set-default-font "Terminus-10")
-(set-default-font "Monospace-10")
+;; color theme handling: set color theme only for X frames
+;; otherwise gnome-terminal sets a weird background color.
+;; this also sets the default font
+(require 'color-theme)
+(setq color-theme-is-global nil)
+(defun frame-select-color-theme (&optional frame)
+  "Set the right color theme for a new frame."
+  (let* ((frame (or frame (selected-frame))))
+    (select-frame frame)
+    (when (and (fboundp 'window-system)
+               (window-system))
+
+      ;; default color scheme for X
+      (color-theme-blackboard)
+      
+      ;; default font
+      (set-default-font "Terminus-10"))))
+(add-hook 'after-make-frame-functions 'frame-select-color-theme)
+
+;; set color theme for this frame
+(frame-select-color-theme)
 
 ;; show trailing whitespace
 (setq whitespace-style
       '(trailing
         space-before-tab))
 (require 'whitespace)
-(global-whitespace-mode)
+(global-whitespace-mode t)
 
 ;; save history across invocations
 (setq savehist-additional-variables
@@ -42,5 +60,9 @@
 (require 'auto-indent-mode)
 (auto-indent-global-mode 1)
 
-(require 'ffap)
-(ffap-bindings)
+;; don't require ffap for now - ido does a good job
+;;(require 'ffap)
+;;(ffap-bindings)
+
+;; start the emacs server
+(server-start)
