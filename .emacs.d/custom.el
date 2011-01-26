@@ -1,3 +1,35 @@
+(setq starter-kit-packages (list 'kill-ring-search
+				 'lisppaste
+				 'xml-rpc
+				 'org
+				 'paredit
+				 'rinari
+				 'jump
+				 'inflections
+				 'findr
+				 'ruby-compilation
+				 'c-eldoc
+				 'css-mode
+				 'guess-style
+				 'htmlize
+				 'http-post-simple
+				 'auto-dictionary
+				 'Save-visited-files
+				 'slime
+				 'smart-operator
+				 'smex
+				 'textmate
+				 'yasnippet-bundle
+				 'auctex
+				 'find-file-in-project
+				 'gist
+				 'idle-highlight
+				 'inf-ruby
+				 'magit
+				 'project-local-variables
+				 'ruby-mode
+				 'yaml-mode))
+
 ;; make all subdirs of ~/.emacs.d/vendor loadable
 (let* ((default-directory (concat dotfiles-dir "vendor")))
   (if (file-exists-p default-directory)
