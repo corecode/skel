@@ -11,6 +11,7 @@
 				 'c-eldoc
 				 'css-mode
 				 'guess-style
+				 'highlight-symbol
 				 'htmlize
 				 'http-post-simple
 				 'auto-dictionary
@@ -117,7 +118,35 @@
               indent-tabs-mode t)
 
 ;; key bindings
+(require 'yari)
 (global-set-key (kbd "C-h r") 'yari)
+
+
+;; make C-* mimic vim's `*' search
+(defun vim-isearch-word-at-point ()
+  (interactive)
+  (call-interactively 'isearch-forward-regexp))
+
+(defun vim-isearch-yank-word-hook ()
+  (when (equal this-command 'vim-isearch-word-at-point)
+    (let ((string (concat "\\<"
+                          (buffer-substring-no-properties
+                           (progn (skip-syntax-backward "w_") (point))
+                           (progn (skip-syntax-forward "w_") (point)))
+                          "\\>")))
+      (if (and isearch-case-fold-search
+               (eq 'not-yanks search-upper-case))
+          (setq string (downcase string)))
+      (setq isearch-string string
+            isearch-message
+            (concat isearch-message
+                    (mapconcat 'isearch-text-char-description
+                               string ""))
+            isearch-yank-flag t)
+      (isearch-search-and-update))))
+
+(add-hook 'isearch-mode-hook 'vim-isearch-yank-word-hook)
+(global-set-key (kbd "C-*") 'vim-isearch-word-at-point)
 
 ;; start the emacs server
 (server-start)
