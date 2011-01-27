@@ -139,15 +139,13 @@
                            (progn (skip-syntax-backward "w_") (point))
                            (progn (skip-syntax-forward "w_") (point)))
                           "\\>")))
-      (if (and isearch-case-fold-search
-               (eq 'not-yanks search-upper-case))
-          (setq string (downcase string)))
-      (setq isearch-string string
-            isearch-message
-            (concat isearch-message
-                    (mapconcat 'isearch-text-char-description
-                               string ""))
-            isearch-yank-flag t)
+      (setq isearch-case-fold-search nil ; search is case-sensitive
+	    isearch-string string
+	    isearch-message
+	    (concat isearch-message
+		    (mapconcat 'isearch-text-char-description
+			       string ""))
+	    isearch-yank-flag t)
       (isearch-search-and-update))))
 
 (add-hook 'isearch-mode-hook 'vim-isearch-yank-word-hook)
