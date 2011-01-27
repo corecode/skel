@@ -22,6 +22,10 @@ if [[ $TERM == (xterm|screen)* && $oldterm != $TERM$WINDOWID ]]; then
 	export oldterm=$TERM$WINDOWID
 fi
 
+if [[ $TERM == xterm && $COLORTERM == gnome-terminal ]]; then
+	TERM=xterm-256color
+fi
+
 REPORTTIME=1
 TIMEFMT="%E=%U+%S"
 
