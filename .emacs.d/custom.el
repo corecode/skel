@@ -110,6 +110,9 @@
 (setq auto-indent-key-for-end-of-line-then-newline "<M-return>")
 (setq auto-indent-key-for-end-of-line-insert-char-then-newline "<M-S-return>")
 
+;; kill whole line
+(global-set-key (kbd "C-S-k") 'kill-whole-line)
+
 ;; automatically indent
 (require 'auto-indent-mode)
 (auto-indent-global-mode 1)
