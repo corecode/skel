@@ -57,23 +57,25 @@
 ;; 		      (add-to-list 'load-path full-name t))))
 ;; 	      (directory-files default-directory t)))))
 
-;; color theme handling: set color theme only for X frames
+;; color theme handling: tweak color theme for tty frames
 ;; otherwise gnome-terminal sets a weird background color.
-;; this also sets the default font
+;; this also sets the default font for X frames
 (require 'color-theme)
 (setq color-theme-is-global nil)
 (defun frame-select-color-theme (&optional frame)
   "Set the right color theme for a new frame."
   (let* ((frame (or frame (selected-frame))))
     (select-frame frame)
-    (when (and (fboundp 'window-system)
-               (window-system))
+    ;; default color theme
+    (color-theme-blackboard)
+    (if (and (fboundp 'window-system)
+	     (window-system))
 
-      ;; default color scheme for X
-      (color-theme-blackboard)
-      
-      ;; default font
-      (set-default-font "Terminus-10"))))
+	;; default font
+	(set-default-font "Terminus-10")
+
+      ;; else tty - fix up background
+      (face-spec-set 'default '((t (:background "black"))) (selected-frame)))))
 (add-hook 'after-make-frame-functions 'frame-select-color-theme)
 
 ;; set color theme for this frame
