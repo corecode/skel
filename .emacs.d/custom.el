@@ -107,20 +107,35 @@
 
 ;; needed for auto-indent-mode
 (require 'shrink-whitespaces)
+(setq auto-indent-indentation-function 'newline-and-indent)
 (setq auto-indent-key-for-end-of-line-then-newline "<M-return>")
 (setq auto-indent-key-for-end-of-line-insert-char-then-newline "<M-S-return>")
-
-;; kill whole line
-(global-set-key (kbd "C-S-k") 'kill-whole-line)
 
 ;; automatically indent
 (require 'auto-indent-mode)
 (auto-indent-global-mode 1)
 
+(define-key global-map (kbd "RET") 'newline-and-indent)
+
+;; kill whole line
+(global-set-key (kbd "C-S-k") 'kill-whole-line)
+
 ;; default to indent 8, indent with tabs
-(setq-default standard-indent 8
-              sh-basic-offset 8
-              indent-tabs-mode t)
+(setq standard-indent 8
+      tab-always-indent t
+      indent-tabs-mode t)
+
+(require 'cl-macs)
+
+(defun custom-set-tabbing-for-mode ()
+  "Sets the tab characteristic for a mode"
+  (case major-mode
+    ('emacs-lisp-mode 'ruby-mode) (setq indent-tabs-mode nil)
+    ('sh-mode) (setq sh-basic-offset 8
+		     sh-indent-for-case-label 0
+		     sh-indent-for-case-alt "+")))
+
+(add-hook 'change-major-mode-hook 'custom-set-tabbing-for-mode)
 
 ;; key bindings
 (require 'yari)
@@ -149,7 +164,7 @@
       (isearch-search-and-update))))
 
 (add-hook 'isearch-mode-hook 'vim-isearch-yank-word-hook)
-(global-set-key (kbd "C-*") 'vim-isearch-word-at-point)
+(define-key global-map (kbd "C-*") 'vim-isearch-word-at-point)
 
 ;; start the emacs server
 (server-start)
