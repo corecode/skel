@@ -4,7 +4,20 @@ if [ -z "$SUDO_COMMAND" ]
 then
 	case "$DISPLAY" in
 	:*)
-		emacsopt=-c
+		# check for existing frame
+		case $(emacsclient -e "(condition-case err (eq 'x (framep-on-display \"$DISPLAY\"))) ('error nil))" 2>/dev/null) in
+		t)
+			# without arguments we just raise the current frame
+			if [ $# -eq 0 ]
+			then
+				emacsopt="-e (raise-frame)"
+			else
+				emacsopt=
+			fi
+			;;
+		*)
+			emacsopt=-c ;;
+		esac
 		;;
 	*)
 		emacsopt=-nw
