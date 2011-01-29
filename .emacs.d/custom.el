@@ -125,17 +125,34 @@
       tab-always-indent t
       indent-tabs-mode t)
 
-(require 'cl-macs)
-
 (defun custom-set-tabbing-for-mode ()
   "Sets the tab characteristic for a mode"
   (case major-mode
-    ('emacs-lisp-mode 'ruby-mode) (setq indent-tabs-mode nil)
-    ('sh-mode) (setq sh-basic-offset 8
-		     sh-indent-for-case-label 0
-		     sh-indent-for-case-alt "+")))
+    (('emacs-lisp-mode 'ruby-mode)
+     (setq indent-tabs-mode nil))
+    (('sh-mode)
+     (setq sh-basic-offset 8
+	   sh-indent-for-case-label 0
+	   sh-indent-for-case-alt "+"))))
 
 (add-hook 'change-major-mode-hook 'custom-set-tabbing-for-mode)
+
+;; disable messages for flyspell (also unbreaks flyspell on Ubuntu 10.10)
+(setq flyspell-issue-welcome-flag nil
+      flyspell-issue-message-flag nil)
+
+;; latex settings
+(setq-default TeX-master 'dwim)
+(setq TeX-auto-save t
+      TeX-parse-self t
+      reftex-plug-into-AUCTeX t)
+
+(add-hook 'LaTeX-mode-hook (lambda ()
+			     (visual-line-mode t)
+			     (flyspell-mode t)
+			     (LaTeX-math-mode t)
+			     (turn-on-reftex)
+			     (TeX-PDF-mode t)))
 
 ;; key bindings
 (require 'yari)
