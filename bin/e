@@ -2,12 +2,14 @@
 
 if [ -z "$SUDO_COMMAND" ]
 then
-	if [ -n "$DISPLAY" ]
-	then
+	case "$DISPLAY" in
+	:*)
 		emacsopt=-c
-	else
+		;;
+	*)
 		emacsopt=-nw
-	fi
+		;;
+	esac
 	emacsclient $emacsopt -a "" "$@"
 else
 	emacs "$@"
