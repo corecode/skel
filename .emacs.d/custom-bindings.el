@@ -43,3 +43,7 @@
 ;; FIXME: maybe move to custom-ruby.el?
 (require 'yari)
 (global-set-key (kbd "C-h r") 'yari)
+
+;; hook up man
+(define-key help-map (kbd "C-m") 'man)
+(define-key help-map (kbd "M") 'man)
