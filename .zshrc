@@ -17,13 +17,13 @@ title[start]="\e]0;"
 title[end]="\a"
 
 
+if [[ $TERM == xterm && $COLORTERM == gnome-terminal ]]; then
+	TERM=xterm-256color
+fi
+
 if [[ $TERM == (xterm|screen)* && $oldterm != $TERM$WINDOWID ]]; then
 	SHLVL=1
 	export oldterm=$TERM$WINDOWID
-fi
-
-if [[ $TERM == xterm && $COLORTERM == gnome-terminal ]]; then
-	TERM=xterm-256color
 fi
 
 REPORTTIME=1
@@ -131,7 +131,18 @@ function prompt_jobs {
 
 function precmd {
 	title_generate
+	if [[ $TERM == eterm* ]]; then
+		emacs_tramp_generate
+	fi
 	prompt_generate
+}
+
+function emacs_tramp_generate {
+	ansih='\eAnSiT'
+
+	print -P "${ansih}u %n"
+	print -P "${ansih}c %/"
+	print -P "${ansih}h %M"
 }
 
 function title_generate {}
@@ -229,6 +240,8 @@ zle -N down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 bindkey '\e[B' down-line-or-beginning-search
 bindkey '\e[A' up-line-or-beginning-search
+bindkey '\eOB' down-line-or-beginning-search
+bindkey '\eOA' up-line-or-beginning-search
 autoload run-help
 bindkey '\eOP' run-help
 bindkey '\e[M' run-help
