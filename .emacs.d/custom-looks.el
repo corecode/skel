@@ -10,6 +10,8 @@
     (select-frame frame)
     ;; default color theme
     (color-theme-blackboard)
+    ;; modify modeline
+    (face-spec-set 'mode-line '((t (:background "darkred" :foreground "white" :box (:line-width -1 :style released-button)))) (selected-frame))
     (if (and (fboundp 'window-system)
              (window-system))
 
