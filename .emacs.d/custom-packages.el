@@ -95,5 +95,6 @@
         ;; yasnippet
         ))
 
-;; install with
-;; (el-get 'wait)
+;; install directly
+(require 'el-get)
+(el-get 'wait)
