@@ -54,13 +54,13 @@
 ;; to actually install, eval
 ;; (starter-kit-elpa-install)
 
-(require 'el-get)
+(setq el-get-recipe-path (list "~/.emacs.d/vendor/el-get/recipes/"))
 (setq el-get-sources
       '(
-        ;; ac-slime
+        ac-slime
         ;; auctex
         ;; auto-complete
-        ;; browse-kill-ring
+        browse-kill-ring
         ;; emacs-goodies-el
         ;; emacs-textmate
         ;; flymake-point
@@ -71,12 +71,12 @@
         ;; hl-sexp
         ;; magit
         ;; markdown-mode
-        ;; multi-term
+        multi-term
         ;; org-mode
         ;; package
         ;; paredit
-        ;; pastebin
-        ;; popup-kill-ring
+        pastebin
+        popup-kill-ring
         ;; python-mode
         rinari
         ;; ruby-compilation
@@ -90,7 +90,7 @@
         ;; smex
         ;; sudo-save
         ;; xcscope
-        ;; yari
+        yari
         ;; yaml-mode
         ;; yasnippet
         ))
