@@ -83,7 +83,7 @@
         ;; ruby-block
         ;; ruby-end
         ;; ruby-mode
-        ;; rvm
+        rvm
         ;; session
         ;; slime
         ;; smart-tab
