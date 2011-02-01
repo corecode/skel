@@ -92,7 +92,7 @@
         ;; xcscope
         yari
         ;; yaml-mode
-        ;; yasnippet
+        yasnippet
         ))
 
 ;; install directly
