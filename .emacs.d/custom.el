@@ -14,6 +14,10 @@
 	(dolist (dir tailpart)
 	  (add-to-list 'load-path (expand-file-name dir) t))))))
 
+(let ((local-dir (concat dotfiles-dir "local")))
+  (when (file-directory-p local-dir)
+    (add-to-list 'load-path local-dir nil)))
+
 ;; load all other custom-*.el files
 (mapc #'load (directory-files dotfiles-dir nil "^custom-.*[.]el$"))
 
