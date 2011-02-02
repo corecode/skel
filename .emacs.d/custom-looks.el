@@ -3,7 +3,7 @@
 ;; this also sets the default font for X frames
 
 (require 'color-theme)
-(setq color-theme-is-global nil)
+(setq-default color-theme-is-global nil)
 (defun frame-select-color-theme (&optional frame)
   "Set the right color theme for a new frame."
   (let* ((frame (or frame (selected-frame))))

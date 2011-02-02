@@ -1,7 +1,7 @@
 (setq-default TeX-master 'dwim)
-(setq TeX-auto-save t
-      TeX-parse-self t
-      reftex-plug-into-AUCTeX t)
+(setq-default TeX-auto-save t
+              TeX-parse-self t
+              reftex-plug-into-AUCTeX t)
 
 (add-hook 'LaTeX-mode-hook (lambda ()
                              (visual-line-mode t)

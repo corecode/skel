@@ -1,1 +1,1 @@
-(setq c-default-style "bsd")
+(setq-default c-default-style "bsd")

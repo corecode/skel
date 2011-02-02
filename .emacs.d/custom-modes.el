@@ -1,13 +1,13 @@
 ;; show trailing whitespace
-(setq whitespace-style
-      '(trailing
-        space-before-tab))
+(setq-default whitespace-style
+	      '(trailing
+		space-before-tab))
 (require 'whitespace)
 (global-whitespace-mode t)
 
 ;; save history across invocations
-(setq savehist-additional-variables
-      '(kill-ring search-ring regexp-search-ring))
+(setq-default savehist-additional-variables
+	      '(kill-ring search-ring regexp-search-ring))
 (savehist-mode 1)
 
 ;; setup auto-complete
@@ -22,10 +22,11 @@
 (auto-indent-global-mode 1)
 
 ;; default to indent 8, indent with tabs
-(setq standard-indent 8
-      tab-always-indent t
-      indent-tabs-mode t)
+(setq-default standard-indent 8
+	      tab-always-indent t
+	      indent-tabs-mode t
+	      backward-delete-char-untabify-method nil)
 
 ;; disable messages for flyspell (also unbreaks flyspell on Ubuntu 10.10)
-(setq flyspell-issue-welcome-flag nil
-      flyspell-issue-message-flag nil)
+(setq-default flyspell-issue-welcome-flag nil
+	      flyspell-issue-message-flag nil)
