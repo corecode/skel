@@ -3,6 +3,7 @@
 (setq term-unbind-key-list
       '("M-x"
         "C-x"
+        "C-t"
         "S-<left>"
         "S-<right>"
         "S-<up>"
