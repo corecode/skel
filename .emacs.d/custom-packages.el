@@ -76,6 +76,7 @@
         ;; package
         ;; paredit
         pastebin
+        php-mode
         popup-kill-ring
         ;; python-mode
         rinari
@@ -97,4 +98,4 @@
 
 ;; install directly
 (require 'el-get)
-(el-get 'wait)
+(el-get 'sync)
