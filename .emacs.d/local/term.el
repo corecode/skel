@@ -886,6 +886,40 @@ is buffer-local.")
   ;; It's convenient to have execute-extended-command here.
   (define-key term-raw-escape-map [?\M-x] 'execute-extended-command))
 
+
+;; Helper to send keys with a modifier.
+;; from ncurses' terminfo.src:
+;; From ctlseqs.ms:
+;;    Code     Modifiers
+;;  ---------------------------------
+;;     2       Shift
+;;     3       Alt
+;;     4       Shift + Alt
+;;     5       Control
+;;     6       Shift + Control
+;;     7       Alt + Control
+;;     8       Shift + Alt + Control
+;;  ---------------------------------
+;;
+;; For now we only support 2 (Shift), 3 (Alt), 5 (Control) in the terminfo.
+(defun term-set-special-key (key fun)
+  "Define special key in term-raw-map, including modifiers."
+  (dolist (modkey '(("" . nil)
+                    ("S-" . 2)
+                    ("M-" . 3)
+                    ("C-" . 5)))
+    (let* ((prefix (car modkey))
+           (mode (cdr modkey))
+           (modfun (if mode
+                       (let* ((uncurried (intern-soft (format "%s-mod" (symbol-name fun))))
+                              (curried (eval `(lambda ()
+                                                (interactive)
+                                                (,uncurried ,mode)))))
+                         (and uncurried curried))
+                     fun)))
+      (when modfun
+        (define-key term-raw-map (read-kbd-macro (format "%s<%s>" prefix key)) modfun)))))
+
 (let* ((map (make-keymap))
        (esc-map (make-keymap))
        (i 0))
@@ -908,21 +942,22 @@ is buffer-local.")
     (define-key term-raw-map [mouse-2] 'term-mouse-paste)
     (define-key term-raw-map [menu-bar terminal] term-terminal-menu)
     (define-key term-raw-map [menu-bar signals] term-signals-menu))
-  (define-key term-raw-map [up] 'term-send-up)
-  (define-key term-raw-map [down] 'term-send-down)
-  (define-key term-raw-map [right] 'term-send-right)
-  (define-key term-raw-map [left] 'term-send-left)
-  (define-key term-raw-map [delete] 'term-send-del)
-  (define-key term-raw-map [deletechar] 'term-send-del)
-  (define-key term-raw-map [backspace] 'term-send-backspace)
-  (define-key term-raw-map [home] 'term-send-home)
-  (define-key term-raw-map [end] 'term-send-end)
-  (define-key term-raw-map [insert] 'term-send-insert)
+  (term-set-special-key "up" 'term-send-up)
+  (term-set-special-key "down" 'term-send-down)
+  (term-set-special-key "right" 'term-send-right)
+  (term-set-special-key "left" 'term-send-left)
+  (term-set-special-key "delete" 'term-send-del)
+  (term-set-special-key "deletechar" 'term-send-del)
+  (term-set-special-key "backspace" 'term-send-backspace)
+  (term-set-special-key "home" 'term-send-home)
+  (term-set-special-key "end" 'term-send-end)
+  (term-set-special-key "insert" 'term-send-insert)
+  (term-set-special-key "prior" 'term-send-prior)
+  (term-set-special-key "next" 'term-send-next)
+  ;; special functions
   (define-key term-raw-map [S-prior] 'scroll-down)
   (define-key term-raw-map [S-next] 'scroll-up)
-  (define-key term-raw-map [S-insert] 'term-paste)
-  (define-key term-raw-map [prior] 'term-send-prior)
-  (define-key term-raw-map [next] 'term-send-next))
+  (define-key term-raw-map [S-insert] 'term-paste))
 
 (term-set-escape-char ?\C-c)
 
@@ -1234,17 +1269,34 @@ without any interpretation."
 ;; For my configuration it's definitely better \eOA but YMMV. -mm
 ;; For example: vi works with \eOA while elm wants \e[A ...
 ;;; (terminfo: kcuu1, kcud1, kcuf1, kcub1, khome, kend, kpp, knp, kdch1, kbs)
-(defun term-send-up    () (interactive) (term-send-raw-string "\eOA"))
-(defun term-send-down  () (interactive) (term-send-raw-string "\eOB"))
-(defun term-send-right () (interactive) (term-send-raw-string "\eOC"))
-(defun term-send-left  () (interactive) (term-send-raw-string "\eOD"))
-(defun term-send-home  () (interactive) (term-send-raw-string "\e[1~"))
-(defun term-send-insert() (interactive) (term-send-raw-string "\e[2~"))
-(defun term-send-end   () (interactive) (term-send-raw-string "\e[4~"))
-(defun term-send-prior () (interactive) (term-send-raw-string "\e[5~"))
-(defun term-send-next  () (interactive) (term-send-raw-string "\e[6~"))
-(defun term-send-del   () (interactive) (term-send-raw-string "\e[3~"))
-(defun term-send-backspace  () (interactive) (term-send-raw-string "\C-?"))
+(defun term-send-raw-string-mod (str mod)
+  (term-send-raw-string (format str mod)))
+
+(defun term-send-up        ()    (interactive) (term-send-raw-string     "\eOA"))
+(defun term-send-up-mod    (mod) (interactive) (term-send-raw-string-mod "\e[1;%dA" mod))
+(defun term-send-down      ()    (interactive) (term-send-raw-string     "\eOB"))
+(defun term-send-down-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%dB" mod))
+(defun term-send-right     ()    (interactive) (term-send-raw-string     "\eOC"))
+(defun term-send-right-mod (mod) (interactive) (term-send-raw-string-mod "\e[1;%dC" mod))
+(defun term-send-left      ()    (interactive) (term-send-raw-string     "\eOD"))
+(defun term-send-left-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%dD" mod))
+(defun term-send-home      ()    (interactive) (term-send-raw-string     "\e[1~"))
+(defun term-send-home-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%d~" mod))
+(defun term-send-insert    ()    (interactive) (term-send-raw-string     "\e[2~"))
+(defun term-send-end       ()    (interactive) (term-send-raw-string     "\e[4~"))
+(defun term-send-end-mod   (mod) (interactive) (term-send-raw-string-mod "\e[4;%d~" mod))
+(defun term-send-prior     ()    (interactive) (term-send-raw-string     "\e[5~"))
+(defun term-send-prior-mod (mod) (interactive) (term-send-raw-string-mod "\e[5;%d~" mod))
+(defun term-send-next      ()    (interactive) (term-send-raw-string     "\e[6~"))
+(defun term-send-next-mod  (mod) (interactive) (term-send-raw-string-mod "\e[6;%d~" mod))
+(defun term-send-del       ()    (interactive) (term-send-raw-string     "\e[3~"))
+(defun term-send-backspace ()    (interactive) (term-send-raw-string     "\C-?"))
+(defun term-send-backspace-mod (mod)
+  (interactive)
+  ;; map any of control or alt to esc, then send backspace as usual
+  (when (>= mod 3)
+    (term-send-raw-string   "\e"))
+  (term-send-backspace))
 
 (defun term-char-mode ()
   "Switch to char (\"raw\") sub-mode of term mode.
@@ -1430,18 +1482,21 @@ The main purpose is to get rid of the local keymap."
 ;;; Using "emacs" loses, because bash disables editing if TERM == emacs.
 (defvar term-term-name "eterm-color")
 ; Format string, usage:
-; (format term-termcap-string emacs-term-name "TERMCAP=" 24 80)
+; (format term-termcap-string "TERMCAP=" emacs-term-name 80 24)
 (defvar term-termcap-format
-  "%s%s:li#%d:co#%d:cl=\\E[H\\E[J:cd=\\E[J:bs:am:xn:cm=\\E[%%i%%d;%%dH\
-:nd=\\E[C:up=\\E[A:ce=\\E[K:ho=\\E[H:pt\
-:al=\\E[L:dl=\\E[M:DL=\\E[%%dM:AL=\\E[%%dL:cs=\\E[%%i%%d;%%dr:sf=^J\
-:dc=\\E[P:DC=\\E[%%dP:IC=\\E[%%d@:im=\\E[4h:ei=\\E[4l:mi:\
-:so=\\E[7m:se=\\E[m:us=\\E[4m:ue=\\E[m:md=\\E[1m:mr=\\E[7m:me=\\E[m\
-:UP=\\E[%%dA:DO=\\E[%%dB:LE=\\E[%%dD:RI=\\E[%%dC\
-:kl=\\EOD:kd=\\EOB:kr=\\EOC:ku=\\EOA:kN=\\E[6~:kP=\\E[5~:@7=\\E[4~:kh=\\E[1~\
-:mk=\\E[8m:cb=\\E[1K:op=\\E[39;49m:Co#8:pa#64:AB=\\E[4%%dm:AF=\\E[3%%dm:cr=^M\
-:bl=^G:do=^J:le=^H:ta=^I:se=\\E[27m:ue=\\E24m\
-:kb=^?:kD=^[[3~:sc=\\E7:rc=\\E8:r1=\\Ec:"
+  "%s%s:am:mi:xn:\
+:Co#8:co#%d:li#%d:pa#64:\
+:#2=\\E[1;2~:#4=\\E[1;2D:%%c=\\E[6;2~:%%e=\\E[5;2~:%%i=\\E[1;2C:\
+:*7=\\E[4;2~:@7=\\E[4~:AB=\\E[%%+(m:AF=\\E[%%+^^m:AL=\\E[%%dL:\
+:DC=\\E[%%dP:DL=\\E[%%dM:DO=\\E[%%dB:IC=\\E[%%d@:LE=\\E[%%dD:\
+:RI=\\E[%%dC:UP=\\E[%%dA:al=\\E[L:bl=^G:cb=\\E[1K:cd=\\E[J:\
+:ce=\\E[K:cl=\\E[H\\E[J:cm=\\E[%%i%%d;%%dH:cr=^M:cs=\\E[%%i%%d;%%dr:\
+:dc=\\E[P:dl=\\E[M:do=^J:ei=\\E[4l:ho=\\E[H:im=\\E[4h:kD=\\E[3~:\
+:kI=\\E[2~:kN=\\E[6~:kP=\\E[5~:kb=\\177:kd=\\EOB:kh=\\E[1~:\
+:kl=\\EOD:kr=\\EOC:ku=\\EOA:le=^H:md=\\E[1m:me=\\E[m:mk=\\E[8m:\
+:mr=\\E[7m:nd=\\E[C:op=\\E[39;49m:r1=\\Ec:rc=\\E8:sc=\\E7:\
+:se=\\E[27m:sf=^J:so=\\E[7m:sr=\\EM:ta=^I:ue=\\E[24m:up=\\E[A:\
+:us=\\E[4m:"
 ;;; : -undefine ic
 ;;; don't define :te=\\E[2J\\E[?47l\\E8:ti=\\E7\\E[?47h\
   "Termcap capabilities supported.")
@@ -1461,7 +1516,7 @@ The main purpose is to get rid of the local keymap."
 	   (format "TERM=%s" term-term-name)
 	   (format "TERMINFO=%s" data-directory)
 	   (format term-termcap-format "TERMCAP="
-		   term-term-name term-height term-width)
+		   term-term-name term-width term-height)
 	   ;; We are going to get rid of the binding for EMACS,
 	   ;; probably in Emacs 23, because it breaks
 	   ;; `./configure' of some packages that expect it to
