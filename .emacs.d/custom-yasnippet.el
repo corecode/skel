@@ -1,4 +1,5 @@
 (require 'yasnippet)
+(require 'find-func)
 
 (add-to-list 'yas/snippet-dirs (concat (file-name-directory (find-library-name "yasnippet"))
                                        "snippets"))
