@@ -885,9 +885,8 @@ is buffer-local.")
   (define-key term-raw-escape-map "\C-j" 'term-line-mode)
   ;; It's convenient to have execute-extended-command here.
   (define-key term-raw-escape-map [?\M-x] 'execute-extended-command))
-
-
-;; Helper to send keys with a modifier.
+
+;; Helper to send special keys (with a modifier).
 ;; from ncurses' terminfo.src:
 ;; From ctlseqs.ms:
 ;;    Code     Modifiers
@@ -902,6 +901,40 @@ is buffer-local.")
 ;;  ---------------------------------
 ;;
 ;; For now we only support 2 (Shift), 3 (Alt), 5 (Control) in the terminfo.
+
+;; Which would be better:  "\e[A" or "\eOA"? readline accepts either.
+;; For my configuration it's definitely better \eOA but YMMV. -mm
+;; For example: vi works with \eOA while elm wants \e[A ...
+;;; (terminfo: kcuu1, kcud1, kcuf1, kcub1, khome, kend, kpp, knp, kdch1, kbs)
+(defun term-send-raw-string-mod (str mod)
+  (term-send-raw-string (format str mod)))
+
+(defun term-send-up        ()    (interactive) (term-send-raw-string     "\eOA"))
+(defun term-send-up-mod    (mod) (interactive) (term-send-raw-string-mod "\e[1;%dA" mod))
+(defun term-send-down      ()    (interactive) (term-send-raw-string     "\eOB"))
+(defun term-send-down-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%dB" mod))
+(defun term-send-right     ()    (interactive) (term-send-raw-string     "\eOC"))
+(defun term-send-right-mod (mod) (interactive) (term-send-raw-string-mod "\e[1;%dC" mod))
+(defun term-send-left      ()    (interactive) (term-send-raw-string     "\eOD"))
+(defun term-send-left-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%dD" mod))
+(defun term-send-home      ()    (interactive) (term-send-raw-string     "\e[1~"))
+(defun term-send-home-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%d~" mod))
+(defun term-send-insert    ()    (interactive) (term-send-raw-string     "\e[2~"))
+(defun term-send-end       ()    (interactive) (term-send-raw-string     "\e[4~"))
+(defun term-send-end-mod   (mod) (interactive) (term-send-raw-string-mod "\e[4;%d~" mod))
+(defun term-send-prior     ()    (interactive) (term-send-raw-string     "\e[5~"))
+(defun term-send-prior-mod (mod) (interactive) (term-send-raw-string-mod "\e[5;%d~" mod))
+(defun term-send-next      ()    (interactive) (term-send-raw-string     "\e[6~"))
+(defun term-send-next-mod  (mod) (interactive) (term-send-raw-string-mod "\e[6;%d~" mod))
+(defun term-send-del       ()    (interactive) (term-send-raw-string     "\e[3~"))
+(defun term-send-backspace ()    (interactive) (term-send-raw-string     "\C-?"))
+(defun term-send-backspace-mod (mod)
+  (interactive)
+  ;; map any of control or alt to esc, then send backspace as usual
+  (when (>= mod 3)
+    (term-send-raw-string   "\e"))
+  (term-send-backspace))
+
 (defun term-set-special-key (key fun)
   "Define special key in term-raw-map, including modifiers."
   (dolist (modkey '(("" . nil)
@@ -1264,39 +1297,6 @@ without any interpretation."
   "Insert the last stretch of killed text at point."
   (interactive)
    (term-send-raw-string (current-kill 0)))
-
-;; Which would be better:  "\e[A" or "\eOA"? readline accepts either.
-;; For my configuration it's definitely better \eOA but YMMV. -mm
-;; For example: vi works with \eOA while elm wants \e[A ...
-;;; (terminfo: kcuu1, kcud1, kcuf1, kcub1, khome, kend, kpp, knp, kdch1, kbs)
-(defun term-send-raw-string-mod (str mod)
-  (term-send-raw-string (format str mod)))
-
-(defun term-send-up        ()    (interactive) (term-send-raw-string     "\eOA"))
-(defun term-send-up-mod    (mod) (interactive) (term-send-raw-string-mod "\e[1;%dA" mod))
-(defun term-send-down      ()    (interactive) (term-send-raw-string     "\eOB"))
-(defun term-send-down-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%dB" mod))
-(defun term-send-right     ()    (interactive) (term-send-raw-string     "\eOC"))
-(defun term-send-right-mod (mod) (interactive) (term-send-raw-string-mod "\e[1;%dC" mod))
-(defun term-send-left      ()    (interactive) (term-send-raw-string     "\eOD"))
-(defun term-send-left-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%dD" mod))
-(defun term-send-home      ()    (interactive) (term-send-raw-string     "\e[1~"))
-(defun term-send-home-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%d~" mod))
-(defun term-send-insert    ()    (interactive) (term-send-raw-string     "\e[2~"))
-(defun term-send-end       ()    (interactive) (term-send-raw-string     "\e[4~"))
-(defun term-send-end-mod   (mod) (interactive) (term-send-raw-string-mod "\e[4;%d~" mod))
-(defun term-send-prior     ()    (interactive) (term-send-raw-string     "\e[5~"))
-(defun term-send-prior-mod (mod) (interactive) (term-send-raw-string-mod "\e[5;%d~" mod))
-(defun term-send-next      ()    (interactive) (term-send-raw-string     "\e[6~"))
-(defun term-send-next-mod  (mod) (interactive) (term-send-raw-string-mod "\e[6;%d~" mod))
-(defun term-send-del       ()    (interactive) (term-send-raw-string     "\e[3~"))
-(defun term-send-backspace ()    (interactive) (term-send-raw-string     "\C-?"))
-(defun term-send-backspace-mod (mod)
-  (interactive)
-  ;; map any of control or alt to esc, then send backspace as usual
-  (when (>= mod 3)
-    (term-send-raw-string   "\e"))
-  (term-send-backspace))
 
 (defun term-char-mode ()
   "Switch to char (\"raw\") sub-mode of term mode.
