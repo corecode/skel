@@ -41,8 +41,8 @@
                 smart-operator
                 smex
                 textmate
-                yasnippet-bundle
-                auctex
+                ;; yasnippet-bundle
+                ;; auctex
                 find-file-in-project
                 gist
                 idle-highlight
@@ -60,7 +60,7 @@
 (setq-default el-get-sources
               '(
                 ac-slime
-                ;; auctex
+                auctex
                 ;; auto-complete
                 browse-kill-ring
                 ;; emacs-goodies-el
