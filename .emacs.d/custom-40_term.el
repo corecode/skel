@@ -1,5 +1,3 @@
-(require 'multi-term)
-
 (setq-default term-unbind-key-list
               '("M-x"
                 "C-x"
