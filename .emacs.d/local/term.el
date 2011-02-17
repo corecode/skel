@@ -738,12 +738,12 @@ Buffer local variable.")
 
 ;;; faces -mm
 
-(defcustom term-default-fg-color (face-foreground term-current-face)
+(defcustom term-default-fg-color nil
   "Default color for foreground in `term'."
   :group 'term
   :type 'string)
 
-(defcustom term-default-bg-color (face-background term-current-face)
+(defcustom term-default-bg-color nil
   "Default color for background in `term'."
   :group 'term
   :type 'string)
@@ -1179,8 +1179,7 @@ Entry to this mode runs the hooks on `term-mode-hook'."
   (make-local-variable 'term-pending-delete-marker)
   (setq term-pending-delete-marker (make-marker))
   (make-local-variable 'term-current-face)
-  (setq term-current-face (list :background term-default-bg-color
-				:foreground term-default-fg-color))
+  (setq term-current-face nil)
   (make-local-variable 'term-pending-frame)
   (setq term-pending-frame nil)
   ;; Cua-mode's keybindings interfere with the term keybindings, disable it.
@@ -3175,8 +3174,7 @@ See `term-prompt-regexp'."
   (setq term-scroll-start 0)
   (setq term-scroll-end term-height)
   (setq term-insert-mode nil)
-  (setq term-current-face (list :background term-default-bg-color
-				:foreground term-default-fg-color))
+  (setq term-current-face nil)
   (setq term-ansi-current-underline nil)
   (setq term-ansi-current-bold nil)
   (setq term-ansi-current-reverse nil)
@@ -3238,8 +3236,7 @@ See `term-prompt-regexp'."
 
 ;;; 0 (Reset) or unknown (reset anyway)
    (t
-    (setq term-current-face (list :background term-default-bg-color
-				  :foreground term-default-fg-color))
+    (setq term-current-face nil)
     (setq term-ansi-current-underline nil)
     (setq term-ansi-current-bold nil)
     (setq term-ansi-current-reverse nil)
@@ -3259,66 +3256,37 @@ See `term-prompt-regexp'."
 
 
   (unless term-ansi-face-already-done
-      (if term-ansi-current-reverse
-	  (if term-ansi-current-invisible
-	      (setq term-current-face
-		    (if (= term-ansi-current-color 0)
-			(list :background
-			      term-default-fg-color
-			      :foreground
-			      term-default-fg-color)
-		      (list :background
-			    (elt ansi-term-color-vector term-ansi-current-color)
-			    :foreground
-			    (elt ansi-term-color-vector term-ansi-current-color)))
-		    ;; No need to bother with anything else if it's invisible
-		    )
-	    (setq term-current-face
-		  (list :background
-			(if (= term-ansi-current-color 0)
-			    term-default-fg-color
-			  (elt ansi-term-color-vector term-ansi-current-color))
-			:foreground
-			(if (= term-ansi-current-bg-color 0)
-			    term-default-bg-color
-			  (elt ansi-term-color-vector term-ansi-current-bg-color))))
-	    (when term-ansi-current-bold
-	      (setq term-current-face
-		    (append '(:weight bold) term-current-face)))
-	    (when term-ansi-current-underline
-	      (setq term-current-face
-		    (append '(:underline t) term-current-face))))
-	(if term-ansi-current-invisible
-	    (setq term-current-face
-		  (if (= term-ansi-current-bg-color 0)
-		      (list :background
-			    term-default-bg-color
-			    :foreground
-			    term-default-bg-color)
-		    (list :foreground
-			  (elt ansi-term-color-vector term-ansi-current-bg-color)
-			  :background
-			  (elt ansi-term-color-vector term-ansi-current-bg-color)))
-		  ;; No need to bother with anything else if it's invisible
-		  )
-	  (setq term-current-face
-		(list :foreground
-		      (if (= term-ansi-current-color 0)
-			  term-default-fg-color
-			(elt ansi-term-color-vector term-ansi-current-color))
-		      :background
-		      (if (= term-ansi-current-bg-color 0)
-			  term-default-bg-color
-			(elt ansi-term-color-vector term-ansi-current-bg-color))))
-	  (when term-ansi-current-bold
-	    (setq term-current-face
-		  (append '(:weight bold) term-current-face)))
-	  (when term-ansi-current-underline
-	    (setq term-current-face
-		  (append '(:underline t) term-current-face))))))
+    (setq term-current-face
+          (list
+           (when (/= term-ansi-current-color 0)
+             (list :foreground (elt ansi-term-color-vector term-ansi-current-color)))
+           (when (/= term-ansi-current-bg-color 0)
+             (list :background (elt ansi-term-color-vector term-ansi-current-bg-color)))))
+    (when term-ansi-current-invisible
+      (setq term-current-face
+            ;; TODO: handle invisible
+            (if (= term-ansi-current-bg-color 0)
+                (list :background
+                      term-default-bg-color
+                      :foreground
+                      term-default-bg-color)
+              (list :foreground
+                    (elt ansi-term-color-vector term-ansi-current-bg-color)
+                    :background
+                    (elt ansi-term-color-vector term-ansi-current-bg-color)))
+            ;; No need to bother with anything else if it's invisible
+            ))
+    (when term-ansi-current-bold
+      (setq term-current-face
+            (append '(:weight bold) term-current-face)))
+    (when term-ansi-current-underline
+      (setq term-current-face
+            (append '(:underline t) term-current-face)))
+    (when term-ansi-current-reverse
+      (add-to-list 'term-current-face '(:inverse-video t)))
 
 ;;;	(message "Debug %S" term-current-face)
-  (setq term-ansi-face-already-done nil))
+    (setq term-ansi-face-already-done nil)))
 
 
 ;;; Handle a character assuming (eq terminal-state 2) -
