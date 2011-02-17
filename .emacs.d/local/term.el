@@ -3287,7 +3287,8 @@ See `term-prompt-regexp'."
       (setq term-current-face
             (append '(:inverse-video t) term-current-face)))
 
-    ;; (message "Debug %S" term-current-face))
+    ;; (message "Debug %S" term-current-face)
+    )
   (setq term-ansi-face-already-done nil))
 
 
