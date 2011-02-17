@@ -3245,23 +3245,24 @@ See `term-prompt-regexp'."
     (setq term-ansi-face-already-done t)
     (setq term-ansi-current-bg-color 0)))
 
-;	(message "Debug: U-%d R-%d B-%d I-%d D-%d F-%d B-%d"
-;		   term-ansi-current-underline
-;		   term-ansi-current-reverse
-;		   term-ansi-current-bold
-;		   term-ansi-current-invisible
-;		   term-ansi-face-already-done
-;		   term-ansi-current-color
-;		   term-ansi-current-bg-color)
+  ;; (message "Debug: U-%S R-%S B-%S I-%S D-%S F-%S B-%S"
+  ;;       	   term-ansi-current-underline
+  ;;       	   term-ansi-current-reverse
+  ;;       	   term-ansi-current-bold
+  ;;       	   term-ansi-current-invisible
+  ;;       	   term-ansi-face-already-done
+  ;;       	   term-ansi-current-color
+  ;;       	   term-ansi-current-bg-color)
 
 
   (unless term-ansi-face-already-done
-    (setq term-current-face
-          (list
-           (when (/= term-ansi-current-color 0)
-             (list :foreground (elt ansi-term-color-vector term-ansi-current-color)))
-           (when (/= term-ansi-current-bg-color 0)
-             (list :background (elt ansi-term-color-vector term-ansi-current-bg-color)))))
+    (setq term-current-face nil)
+    (when (/= term-ansi-current-color 0)
+      (setq term-current-face
+            (append (list :foreground (elt ansi-term-color-vector term-ansi-current-color)) term-current-face)))
+    (when (/= term-ansi-current-bg-color 0)
+      (setq term-current-face
+            (append (list :background (elt ansi-term-color-vector term-ansi-current-bg-color)) term-current-face)))
     (when term-ansi-current-invisible
       (setq term-current-face
             ;; TODO: handle invisible
@@ -3283,10 +3284,11 @@ See `term-prompt-regexp'."
       (setq term-current-face
             (append '(:underline t) term-current-face)))
     (when term-ansi-current-reverse
-      (add-to-list 'term-current-face '(:inverse-video t)))
+      (setq term-current-face
+            (append '(:inverse-video t) term-current-face)))
 
-;;;	(message "Debug %S" term-current-face)
-    (setq term-ansi-face-already-done nil)))
+    ;; (message "Debug %S" term-current-face))
+  (setq term-ansi-face-already-done nil))
 
 
 ;;; Handle a character assuming (eq terminal-state 2) -
