@@ -63,7 +63,8 @@
                 auctex
                 ;; auto-complete
                 browse-kill-ring
-                ;; emacs-goodies-el
+		color-theme
+                emacs-goodies-el
                 ;; emacs-textmate
                 ;; flymake-point
                 ;; flymake-ruby
@@ -74,7 +75,7 @@
                 ;; magit
                 ;; markdown-mode
                 multi-term
-                ;; org-mode
+                org-mode
                 ;; package
                 ;; paredit
                 pastebin
