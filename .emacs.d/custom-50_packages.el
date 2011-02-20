@@ -63,6 +63,7 @@
                 auctex
                 ;; auto-complete
                 browse-kill-ring
+                csharp-mode
 		color-theme
                 emacs-goodies-el
                 ;; emacs-textmate
