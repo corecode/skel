@@ -18,6 +18,8 @@
 ;; needed for auto-indent-mode
 (require 'shrink-whitespaces)
 ;; automatically indent
+(setq-default auto-indent-untabify-on-save-file nil
+              auto-indent-blank-lines-on-move nil)
 (require 'auto-indent-mode)
 (auto-indent-global-mode 1)
 
