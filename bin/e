@@ -1,29 +1,77 @@
 #!/bin/sh
 
-if [ -z "$SUDO_COMMAND" ]
+invoke=
+
+# if we're invoked as root, make tramp path and run emacs
+if [ "$(id -u)" = 0 ]
 then
-	case "$DISPLAY" in
-	:*)
-		# check for existing frame
-		case $(emacsclient -e "(condition-case err (eq 'x (framep-on-display \"$DISPLAY\"))) ('error nil))" 2>/dev/null) in
-		t)
-			# without arguments we just raise the current frame
-			if [ $# -eq 0 ]
+	real_user=$SUDO_USER
+	: ${real_user:=$LOGNAME}
+
+	# however, if we can't become non-root, we have to try
+	# a non-TRAMP fallback.
+	if [ "$(id -u $real_user)" = 0 ]
+	then
+		for cmd in vim vi emacs
+		do
+			if which $cmd >/dev/null 2>&1
 			then
-				emacsopt="-e (raise-frame)"
-			else
-				emacsopt=
+				$cmd "$@"
+				exit
 			fi
+		done
+		echo "could not find any editor" >&2
+		exit 1
+	fi
+
+	invoke="sudo -u $real_user"
+	clear=y
+	for arg
+	do
+		# clear argv on first round
+		case "$clear" in
+		y)
+			clear=
+			set --
 			;;
-		*)
-			emacsopt=-c ;;
 		esac
+
+		if ! expr "$arg" : "^[+-]" >/dev/null || [ -e "$arg" ]
+		then
+			# make real path
+			case "$arg" in
+			/*) ;;
+			*) arg="$(pwd)/$arg" ;;
+			esac
+
+			# make sudo TRAMP path
+			arg="/sudo::$arg"
+		fi
+
+		set -- "$@" "$arg"
+	done
+fi
+		
+case "$DISPLAY" in
+:*)
+	# check for existing frame
+	case $($invoke emacsclient -e "(condition-case err (eq 'x (framep-on-display \"$DISPLAY\"))) ('error nil))" 2>/dev/null) in
+	t)
+		# without arguments we just raise the current frame
+		if [ $# -eq 0 ]
+		then
+			emacsopt="-e (raise-frame)"
+		else
+			emacsopt=
+		fi
 		;;
 	*)
-		emacsopt=-nw
-		;;
+		emacsopt=-c ;;
 	esac
-	emacsclient $emacsopt -a "" "$@"
-else
-	emacs "$@"
-fi
+	;;
+*)
+	emacsopt=-nw
+	;;
+esac
+
+$invoke emacsclient $emacsopt -a "" "$@"
