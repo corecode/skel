@@ -63,6 +63,7 @@
                 auctex
                 ;; auto-complete
                 browse-kill-ring
+                csharp-mode
 		color-theme
                 emacs-goodies-el
                 ;; emacs-textmate
@@ -101,4 +102,7 @@
 
 ;; install directly
 (require 'el-get)
-(el-get 'sync)
+(condition-case err
+    (el-get 'sync)
+  (error
+   (message "Problems installing el-get packages: %s" (error-message-string err))))

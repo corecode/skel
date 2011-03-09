@@ -20,6 +20,11 @@
 ;; automatically indent
 (setq-default auto-indent-untabify-on-save-file nil
               auto-indent-blank-lines-on-move nil)
+
+;; make M-RET like RET, just without breaking the current line
+(setq-default auto-indent-key-for-end-of-line-then-newline "<M-return>")
+(setq-default auto-indent-key-for-end-of-line-insert-char-then-newline "<M-S-return>")
+
 (require 'auto-indent-mode)
 (auto-indent-global-mode 1)
 

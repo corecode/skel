@@ -9,10 +9,6 @@
 (define-key global-map (kbd "RET") 'newline-and-indent)
 (setq-default auto-indent-indentation-function 'newline-and-indent)
 
-;; make M-RET like RET, just without breaking the current line
-(setq-default auto-indent-key-for-end-of-line-then-newline "<M-return>")
-(setq-default auto-indent-key-for-end-of-line-insert-char-then-newline "<M-S-return>")
-
 ;; kill whole line
 (global-set-key (kbd "C-S-k") 'kill-whole-line)
 
