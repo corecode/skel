@@ -85,9 +85,9 @@
                 ;; python-mode
                 rinari
                 ;; ruby-compilation
-                ;; ruby-block
-                ;; ruby-end
-                ;; ruby-mode
+                ruby-block
+                ruby-end
+                ruby-mode
                 rvm
                 ;; session
                 ;; slime
