@@ -65,7 +65,10 @@
                 browse-kill-ring
                 csharp-mode
 		color-theme
+                ecb
                 emacs-goodies-el
+                json
+                js2-mode
                 ;; emacs-textmate
                 ;; flymake-point
                 ;; flymake-ruby
@@ -90,11 +93,12 @@
                 ;; ruby-mode
                 rvm
                 ;; session
+                sinasi
                 ;; slime
                 ;; smart-tab
                 ;; smex
                 ;; sudo-save
-                ;; xcscope
+                xcscope
                 yari
                 ;; yaml-mode
                 yasnippet
