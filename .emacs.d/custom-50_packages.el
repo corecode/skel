@@ -65,8 +65,11 @@
                 browse-kill-ring
                 csharp-mode
 		color-theme
+                ecb
                 emacs-goodies-el
                 ess
+                json
+                js2-mode
                 ;; emacs-textmate
                 ;; flymake-point
                 ;; flymake-ruby
@@ -91,6 +94,7 @@
                 ruby-mode
                 rvm
                 ;; session
+                sinasi
                 ;; slime
                 ;; smart-tab
                 ;; smex
