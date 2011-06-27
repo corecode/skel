@@ -21,8 +21,8 @@
   (when (equal this-command 'vim-isearch-word-at-point)
     (let ((string (concat "\\<"
                           (buffer-substring-no-properties
-                           (progn (skip-syntax-backward "w_") (point))
-                           (progn (skip-syntax-forward "w_") (point)))
+                           (save-excursion (skip-syntax-backward "w_") (point))
+                           (save-excursion (skip-syntax-forward "w_") (point)))
                           "\\>")))
       (setq isearch-case-fold-search nil ; search is case-sensitive
             isearch-string string
