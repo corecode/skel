@@ -66,6 +66,7 @@
                 csharp-mode
 		color-theme
                 emacs-goodies-el
+                ess
                 ;; emacs-textmate
                 ;; flymake-point
                 ;; flymake-ruby
@@ -94,7 +95,7 @@
                 ;; smart-tab
                 ;; smex
                 ;; sudo-save
-                ;; xcscope
+                xcscope
                 yari
                 ;; yaml-mode
                 yasnippet
