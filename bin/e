@@ -1,5 +1,9 @@
 #!/bin/sh
 
+case "$1" in
+--force-x) force_x=yes; shift ;;
+esac
+
 invoke=
 
 # if we're invoked as root, make tramp path and run emacs
@@ -53,7 +57,11 @@ then
 fi
 		
 case "$DISPLAY" in
-:*)
+:*) try_x=yes ;;
+esac
+
+if [ -n "$try_x" -o -n "$force_x" ]
+then
 	# check for existing frame
 	case $($invoke emacsclient -e "(condition-case err (eq 'x (framep-on-display \"$DISPLAY\"))) ('error nil))" 2>/dev/null) in
 	t)
@@ -66,12 +74,15 @@ case "$DISPLAY" in
 		fi
 		;;
 	*)
+		# merge xauth
+		xauthfile=$(mktemp --tmpdir xauth-emacs.XXXXXXXX)
+		xauth nlist > $xauthfile
+		$invoke emacsclient -e "(call-process-shell-command \"xauth nmerge $xauthfile\")"
+
 		emacsopt=-c ;;
 	esac
-	;;
-*)
+else
 	emacsopt=-nw
-	;;
-esac
+fi
 
 $invoke emacsclient $emacsopt -a "" "$@"
