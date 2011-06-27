@@ -14,12 +14,18 @@
 (require 'auto-complete-config)
 (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
 (ac-config-default)
+(define-key ac-completing-map "\r" nil)
 
 ;; needed for auto-indent-mode
 (require 'shrink-whitespaces)
 ;; automatically indent
 (setq-default auto-indent-untabify-on-save-file nil
               auto-indent-blank-lines-on-move nil)
+
+;; make M-RET like RET, just without breaking the current line
+(setq-default auto-indent-key-for-end-of-line-then-newline "<M-return>")
+(setq-default auto-indent-key-for-end-of-line-insert-char-then-newline "<M-S-return>")
+
 (require 'auto-indent-mode)
 (auto-indent-global-mode 1)
 

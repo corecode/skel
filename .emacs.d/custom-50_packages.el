@@ -88,9 +88,9 @@
                 ;; python-mode
                 rinari
                 ;; ruby-compilation
-                ;; ruby-block
-                ;; ruby-end
-                ;; ruby-mode
+                ruby-block
+                ruby-end
+                ruby-mode
                 rvm
                 ;; session
                 sinasi
@@ -106,4 +106,7 @@
 
 ;; install directly
 (require 'el-get)
-(el-get 'sync)
+(condition-case err
+    (el-get 'sync)
+  (error
+   (message "Problems installing el-get packages: %s" (error-message-string err))))
