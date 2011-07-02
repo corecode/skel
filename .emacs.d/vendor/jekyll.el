@@ -2,7 +2,7 @@
 ;; 
 ;; Emacs support for Jekyll blogs.
 ;;
-;; To use, just put this file somewhere in the load path and 
+;; To use, just put this file somewhere in the load path and
 ;;   (require 'jekyll)
 ;;
 ;; Here are my key bindings:
@@ -66,8 +66,8 @@ contains the date."
   (interactive)
   (cond
    ((not (equal 
-          (file-name-directory (buffer-file-name (current-buffer)))
-          (concat jekyll-directory jekyll-drafts-dir)))
+          (expand-file-name (file-name-directory (buffer-file-name (current-buffer))))
+          (expand-file-name (concat jekyll-directory jekyll-drafts-dir))))
     (message "This is not a draft post.")
     (insert (file-name-directory (buffer-file-name (current-buffer))) "\n"
             (concat jekyll-directory jekyll-drafts-dir)))
