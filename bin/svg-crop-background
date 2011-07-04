@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -e
+
+f=$1; shift
+o=$1; shift
+
+t=$(mktemp --tmpdir)
+
+inkscape -z -D --export-pdf="$t" "$f"
+pdf2svg "$t" /dev/stdout |\
+ruby -pe '
+if (/<svg[^>]*viewBox="([^"]*)"/)
+	x, y, x2, y2 = $1.split.map(&:to_f)
+	$_ += "<rect x=\"#{x}\" y=\"#{y}\" width=\"#{x2-x}\" height=\"#{y2-y}\" fill=\"black\" />\n";
+end' |\
+scour --create-groups --enable-id-stripping --enable-comment-stripping --shorten-ids --remove-metadata --enable-viewboxing --indent=none -i /dev/stdin -o "$o"
+rm "$t"
