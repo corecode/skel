@@ -57,7 +57,7 @@
 ;; (starter-kit-elpa-install)
 
 (setq-default el-get-recipe-path (list "~/.emacs.d/vendor/el-get/recipes/"))
-(setq-default el-get-sources
+(setq my:el-get-packages
               '(
                 ac-slime
                 auctex
@@ -65,7 +65,8 @@
                 browse-kill-ring
                 csharp-mode
 		color-theme
-                ecb
+                color-theme-solarized
+                ;; ecb
                 emacs-goodies-el
                 ess
                 json
@@ -94,7 +95,7 @@
                 ruby-mode
                 rvm
                 ;; session
-                sinasi
+                ;; sinasi
                 ;; slime
                 ;; smart-tab
                 ;; smex
@@ -105,9 +106,14 @@
                 yasnippet
                 ))
 
+(setq my:el-get-packages
+      (append my:el-get-packages
+	      (loop for src in (bound-and-true-p el-get-sources)
+		    collect (el-get-source-name src))))
+
 ;; install directly
 (require 'el-get)
 (condition-case err
-    (el-get 'sync)
+    (el-get 'sync my:el-get-packages)
   (error
    (message "Problems installing el-get packages: %s" (error-message-string err))))
