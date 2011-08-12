@@ -80,6 +80,7 @@
                 ;; hl-sexp
                 ;; magit
                 ;; markdown-mode
+                mediawiki
                 multi-term
                 org-mode
                 ;; package
