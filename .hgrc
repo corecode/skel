@@ -3,4 +3,5 @@ username = Simon Schubert <2@0x2c.org>
 
 [extensions]
 #hgext.cvscommit=/home/corecode/devel/cvscommit/cvscommit.py
-hgext.hgk=
+hgk=
+purge=
