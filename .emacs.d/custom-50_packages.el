@@ -67,8 +67,10 @@
 		color-theme
                 color-theme-solarized
                 ;; ecb
+                elscreen
                 emacs-goodies-el
                 ess
+                haskell-mode
                 json
                 js2-mode
                 ;; emacs-textmate
