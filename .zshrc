@@ -244,7 +244,9 @@ autoload run-help
 bindkey '\eOP' run-help
 bindkey '\e[M' run-help
 bindkey '\e[1;5D' backward-word
+bindkey '\eOd' backward-word
 bindkey '\e[1;5C' forward-word
+bindkey '\eOc' forward-word
 bindkey '\e[3~' delete-char
 #WORDCHARS=${WORDCHARS//[\/&.;=]}
 autoload -U select-word-style
