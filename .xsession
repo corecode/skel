@@ -31,5 +31,7 @@ xset dpms 0 0 300
 # background and default cursor
 xsetroot -solid "#504050" -cursor_name left_ptr &
 
+xcompmgr &
+
 # go!
 exec xmonad
