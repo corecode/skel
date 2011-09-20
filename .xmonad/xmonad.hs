@@ -30,6 +30,7 @@
 -- Shift+Alt+Left/Right  switch to previous/next workspace
 -- Alt+Tab              focus next window
 -- Alt+Shift+Tab        focus previous window
+-- Win+W/E/R            focus 1st/2nd/3rd Xinerama screen
 --
 -- Window management:
 -- Shift+Alt+F1..F10    move window to workspace
@@ -52,6 +53,7 @@
 -- Win+Enter            start a terminal
 -- Win+P                dmenu
 -- Shift+Win+P          gmrun
+-- Shift+Win+E          run "e" == emacsclient
 -- Win+Q                restart XMonad
 -- Win+Shift+Q          quit session
 -- Ctrl+Alt+L           lock session
@@ -131,7 +133,7 @@ altMask = mod1Mask
 
 myKeys conf = M.fromList $
     [ ((myModMask              , xK_Return), spawn $ XMonad.terminal conf)
-    , ((myModMask              , xK_e     ), spawn "e")
+    , ((myModMask .|. shiftMask, xK_e     ), spawn "e")
     , ((altMask .|. controlMask, xK_l     ), spawn "xlock")
     , ((myModMask,               xK_p     ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"") -- %! Launch dmenu
     , ((myModMask .|. shiftMask, xK_p     ), spawn "gmrun") -- %! Launch gmrun
@@ -156,18 +158,17 @@ myKeys conf = M.fromList $
     -- Alt+F1..F10 switches to workspace
     -- (Alt is in a nicer location for the thumb than the Windows key,
     -- and 1..9 keys are already in use by Firefox, irssi, ...)
-    [ ((altMask, k), windows $ S.greedyView i)
-        | (i, k) <- zip myWorkspaces workspaceKeys
-    ] ++
-    -- Win+F1..F10 also switches to workspace
-    [ ((myModMask, k), windows $ S.greedyView i)
-        | (i, k) <- zip myWorkspaces workspaceKeys
-    ] ++
-    -- shift+alt+F1..F10 moves window to workspace and switches to that workspace
-    [ ((altMask .|. shiftMask, k), (windows $ S.shift i) >> (windows $ S.greedyView i))
-        | (i, k) <- zip myWorkspaces workspaceKeys
-    ]
-    where workspaceKeys = [xK_F1 .. xK_F10]
+    [((m .|. altMask, k), f i)
+    | (i, k) <- zip (XMonad.workspaces conf) [xK_F1 .. xK_F10]
+    , (f, m) <- [(\ws -> windows $ S.greedyView ws, 0),
+                 (\ws -> (windows $ S.shift ws) >> (windows $ S.greedyView ws), shiftMask)]]
+    ++
+    -- mod-{w,e,r} %! Switch to physical/Xinerama screens 1, 2, or 3
+    -- mod-shift-{w,e,r} %! Move client to screen 1, 2, or 3
+    [((m .|. myModMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
+    | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
+    , (f, m) <- [(S.view, 0), (S.shift, shiftMask)]]
+    
 
 -- mouse bindings that mimic Gnome's
 myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
