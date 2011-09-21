@@ -26,14 +26,14 @@
 -- The bindings are set up to be comfortable to use on a dvorak keyboard layout.
 --
 -- Navigation:
--- Alt+F1..F10          switch to workspace
--- Shift+Alt+Left/Right  switch to previous/next workspace
+-- Alt/Win+F1..F10      switch to workspace
+-- Shift+Alt+Left/Right switch to previous/next workspace
 -- Alt+Tab              focus next window
 -- Alt+Shift+Tab        focus previous window
--- Win+W/E/R            focus 1st/2nd/3rd Xinerama screen
+-- Alt/Win+W/E/R        focus 1st/2nd/3rd Xinerama screen
 --
 -- Window management:
--- Shift+Alt+F1..F10    move window to workspace
+-- Shift+Alt/Win+F1..F10 move window to workspace
 -- Win+Up/Down          move window up/down
 -- Win+C                close window
 -- Alt+ScrollUp/Down    move focused window up/down
@@ -155,19 +155,20 @@ myKeys conf = M.fromList $
     , ((altMask .|. shiftMask, xK_Left  ), prevWS)
     , ((altMask .|. shiftMask, xK_Right ), nextWS)
     ] ++
-    -- Alt+F1..F10 switches to workspace
+    -- Alt/Win+F1..F10 switches to workspace
     -- (Alt is in a nicer location for the thumb than the Windows key,
     -- and 1..9 keys are already in use by Firefox, irssi, ...)
-    [((m .|. altMask, k), f i)
+    [((m .|. mod, k), windows $ f i)
     | (i, k) <- zip (XMonad.workspaces conf) [xK_F1 .. xK_F10]
-    , (f, m) <- [(\ws -> windows $ S.greedyView ws, 0),
-                 (\ws -> (windows $ S.shift ws) >> (windows $ S.greedyView ws), shiftMask)]]
+    , (f, m) <- [(S.greedyView, 0),
+                 (liftM2 (.) S.greedyView S.shift, shiftMask)]
+    , mod <- [myModMask, altMask]]
     ++
     -- mod-{w,e,r} %! Switch to physical/Xinerama screens 1, 2, or 3
     -- mod-shift-{w,e,r} %! Move client to screen 1, 2, or 3
     [((m .|. myModMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
     | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
-    , (f, m) <- [(S.view, 0), (S.shift, shiftMask)]]
+    , (f, m) <- [(S.view, 0), (liftM2 (.) S.view nS.shift, shiftMask)]]
     
 
 -- mouse bindings that mimic Gnome's
