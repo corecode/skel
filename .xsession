@@ -31,7 +31,11 @@ xset dpms 0 0 300
 # background and default cursor
 xsetroot -solid "#504050" -cursor_name left_ptr &
 
+# for transparency
 xcompmgr &
+
+# drop cursor if not needed
+unclutter &
 
 # go!
 exec xmonad
