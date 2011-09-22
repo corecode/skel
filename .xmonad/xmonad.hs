@@ -168,7 +168,7 @@ myKeys conf = M.fromList $
     -- mod-shift-{w,e,r} %! Move client to screen 1, 2, or 3
     [((m .|. myModMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
     | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
-    , (f, m) <- [(S.view, 0), (liftM2 (.) S.view nS.shift, shiftMask)]]
+    , (f, m) <- [(S.view, 0), (liftM2 (.) S.view S.shift, shiftMask)]]
     
 
 -- mouse bindings that mimic Gnome's
