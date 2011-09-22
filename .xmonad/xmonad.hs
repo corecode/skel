@@ -134,7 +134,7 @@ altMask = mod1Mask
 myKeys conf = M.fromList $
     [ ((myModMask              , xK_Return), spawn $ XMonad.terminal conf)
     , ((altMask .|. shiftMask  , xK_e     ), spawn "e -c")
-    , ((altMask .|. controlMask, xK_l     ), spawn "xlock")
+    , ((altMask .|. controlMask, xK_l     ), spawn "xscreensaver-command -lock")
     , ((myModMask,               xK_p     ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"") -- %! Launch dmenu
     , ((myModMask .|. shiftMask, xK_p     ), spawn "gmrun") -- %! Launch gmrun
     , ((myModMask              , xK_c     ), kill)
