@@ -24,10 +24,6 @@ xset r rate 400 30 &
 # bell off
 xset b off &
 
-# enable dpms, no standby, no suspend, off after 5 min
-xset +dpms &
-xset dpms 0 0 300
-
 # background and default cursor
 xsetroot -solid "#504050" -cursor_name left_ptr &
 
@@ -36,6 +32,13 @@ xcompmgr &
 
 # drop cursor if not needed
 unclutter &
+
+# xscreensaver does blanking and locking
+xscreensaver -nosplash &
+
+# enable dpms, disable automatic off (xscreensaver handles this instead)
+xset +dpms &
+xset dpms 0 0 0 &
 
 # go!
 exec xmonad
