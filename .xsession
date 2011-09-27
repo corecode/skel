@@ -36,8 +36,10 @@ unclutter &
 xscreensaver -nosplash &
 
 # enable dpms, disable automatic off (xscreensaver handles this instead)
-xset +dpms &
-xset dpms 0 0 0 &
+{
+	xset +dpms
+	xset dpms 0 0 0
+} &
 
 # go!
 exec xmonad
