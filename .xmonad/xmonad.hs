@@ -33,20 +33,21 @@
 -- Alt/Win+W/E/R        focus 1st/2nd/3rd Xinerama screen
 --
 -- Window management:
--- Shift+Alt/Win+F1..F10 move window to workspace
+-- Control+Alt/Win+F1..F10 move window to workspace
+-- Control+Win+W/E/R    move window to screen
 -- Win+Up/Down          move window up/down
 -- Win+C                close window
 -- Alt+ScrollUp/Down    move focused window up/down
 -- Win+M                move window to master area
 -- Win+N                refresh the current window
--- Alt+LMB              move floating window
--- Alt+RMB              resize floating window
--- Shift+Alt+LMB        unfloat floating window
+-- Win+LMB              move floating window
+-- Win+RMB              resize floating window
+-- Shift+Win+LMB        unfloat floating window
 -- Win+T                unfloat floating window
 --
 -- Layout management:
 -- Win+Left/Right       shrink/expand master area
--- Win+W/V              move more/less windows into master area
+-- Win+B/V              move more/less windows into master area
 -- Win+Space            cycle layouts
 --
 -- Other:
@@ -65,6 +66,7 @@ import XMonad.Actions.CycleWS
 import XMonad.Config.Gnome
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.Combo
 import XMonad.Layout.Grid
 import XMonad.Layout.LayoutModifier
@@ -95,7 +97,6 @@ myFocusedBorderColor = "#A0A0D0"
 -- workspaces
 myWorkspaces = ["web", "editor", "terms"] ++ (miscs 5) ++ ["fullscreen", "im"]
     where miscs = map (("misc" ++) . show) . (flip take) [1..]
-isFullscreen = (== "fullscreen")
 
 -- layouts
 basicLayout = Tall nmaster delta ratio where
@@ -113,14 +114,15 @@ imLayout = avoidStruts $ reflectHoriz $ withIMs ratio rosters chatLayout where
     pidginRoster    = And (ClassName "Pidgin") (Role "buddy_list")
     skypeRoster     = (ClassName "Skype") `And` (Not (Title "Options")) `And` (Not (Role "Chats")) `And` (Not (Role "CallWindowForm"))
 
-myLayoutHook = fullscreen $ im $ normal where
+myLayoutHook = smartBorders (fullscreen $ im $ normal) where
     normal     = tallLayout ||| wideLayout ||| singleLayout
     fullscreen = onWorkspace "fullscreen" fullscreenLayout
     im         = onWorkspace "im" imLayout
 
 -- special treatment for specific windows:
 -- put the Pidgin and Skype windows in the im workspace
-myManageHook = imManageHooks <+> manageHook myBaseConfig
+myManageHook = fullscreenManageHooks <+> imManageHooks <+> manageHook myBaseConfig
+fullscreenManageHooks = composeAll [isFullscreen --> (doF S.focusDown <+> doFullFloat)]
 imManageHooks = composeAll [isIM --> moveToIM] where
     isIM     = foldr1 (<||>) [isPidgin, isSkype]
     isPidgin = className =? "Pidgin"
@@ -133,7 +135,7 @@ altMask = mod1Mask
 
 myKeys conf = M.fromList $
     [ ((myModMask              , xK_Return), spawn $ XMonad.terminal conf)
-    , ((altMask .|. shiftMask  , xK_e     ), spawn "e -c")
+    , ((myModMask .|. shiftMask, xK_e     ), spawn "e -c")
     , ((altMask .|. controlMask, xK_l     ), spawn "xscreensaver-command -lock")
     , ((myModMask,               xK_p     ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"") -- %! Launch dmenu
     , ((myModMask .|. shiftMask, xK_p     ), spawn "gmrun") -- %! Launch gmrun
@@ -148,7 +150,7 @@ myKeys conf = M.fromList $
     , ((myModMask              , xK_Left  ), sendMessage Shrink)
     , ((myModMask              , xK_Right ), sendMessage Expand)
     , ((myModMask              , xK_t     ), withFocused $ windows . S.sink)
-    , ((myModMask              , xK_w     ), sendMessage (IncMasterN 1))
+    , ((myModMask              , xK_b     ), sendMessage (IncMasterN 1))
     , ((myModMask              , xK_v     ), sendMessage (IncMasterN (-1)))
     , ((myModMask              , xK_q     ), broadcastMessage ReleaseResources >> restart "xmonad" True)
     , ((myModMask .|. shiftMask, xK_q     ), io (exitWith ExitSuccess)) -- %! Quit xmonad
@@ -161,23 +163,23 @@ myKeys conf = M.fromList $
     [((m .|. mod, k), windows $ f i)
     | (i, k) <- zip (XMonad.workspaces conf) [xK_F1 .. xK_F10]
     , (f, m) <- [(S.greedyView, 0),
-                 (liftM2 (.) S.greedyView S.shift, shiftMask)]
+                 (liftM2 (.) S.greedyView S.shift, controlMask)]
     , mod <- [myModMask, altMask]]
     ++
     -- mod-{w,e,r} %! Switch to physical/Xinerama screens 1, 2, or 3
     -- mod-shift-{w,e,r} %! Move client to screen 1, 2, or 3
     [((m .|. myModMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
     | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
-    , (f, m) <- [(S.view, 0), (liftM2 (.) S.view S.shift, shiftMask)]]
+    , (f, m) <- [(S.view, 0), (liftM2 (.) S.view S.shift, controlMask)]]
     
 
 -- mouse bindings that mimic Gnome's
 myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
-    [ ((altMask, button1), (\w -> focus w >> mouseMoveWindow w))
-    , ((altMask, button3), (\w -> focus w >> mouseResizeWindow w))
-    , ((altMask .|. shiftMask, button1), (\w -> focus w >> (withFocused $ windows . S.sink)))
-    , ((altMask, button4), (const $ windows S.swapUp))
-    , ((altMask, button5), (const $ windows S.swapDown))
+    [ ((myModMask, button1), (\w -> focus w >> mouseMoveWindow w))
+    , ((myModMask, button3), (\w -> focus w >> mouseResizeWindow w))
+    , ((myModMask .|. shiftMask, button1), (\w -> focus w >> (withFocused $ windows . S.sink)))
+    , ((myModMask, button4), (const $ windows S.swapUp))
+    , ((myModMask, button5), (const $ windows S.swapDown))
     ]
 
 -- put it all together
