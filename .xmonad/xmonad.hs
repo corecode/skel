@@ -55,8 +55,8 @@
 -- Win+P                dmenu
 -- Shift+Win+P          gmrun
 -- Shift+Win+E          run "e" == emacsclient
--- Win+Q                restart XMonad
--- Win+Shift+Q          quit session
+-- Ctrl+Win+Q           restart XMonad
+-- Shift+Ctrl+Win+Q     quit session
 -- Ctrl+Alt+L           lock session
 
 import XMonad
@@ -152,10 +152,10 @@ myKeys conf = M.fromList $
     , ((myModMask              , xK_t     ), withFocused $ windows . S.sink)
     , ((myModMask              , xK_b     ), sendMessage (IncMasterN 1))
     , ((myModMask              , xK_v     ), sendMessage (IncMasterN (-1)))
-    , ((myModMask              , xK_q     ), broadcastMessage ReleaseResources >> restart "xmonad" True)
-    , ((myModMask .|. shiftMask, xK_q     ), io (exitWith ExitSuccess)) -- %! Quit xmonad
-    , ((altMask .|. shiftMask, xK_Left  ), prevWS)
-    , ((altMask .|. shiftMask, xK_Right ), nextWS)
+    , ((myModMask .|. controlMask, xK_q   ), broadcastMessage ReleaseResources >> restart "xmonad" True)
+    , ((myModMask .|. shiftMask .|. controlMask, xK_q     ), io (exitWith ExitSuccess)) -- %! Quit xmonad
+    , ((altMask .|. shiftMask  , xK_Left  ), prevWS)
+    , ((altMask .|. shiftMask  , xK_Right ), nextWS)
     ] ++
     -- Alt/Win+F1..F10 switches to workspace
     -- (Alt is in a nicer location for the thumb than the Windows key,
