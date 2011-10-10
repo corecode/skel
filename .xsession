@@ -30,7 +30,7 @@ xsetroot -solid "#504050" -cursor_name left_ptr &
 xcompmgr &
 
 # drop cursor if not needed
-unclutter &
+unclutter -noevents &
 
 # xscreensaver does blanking and locking
 xscreensaver -nosplash &
