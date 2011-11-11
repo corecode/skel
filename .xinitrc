@@ -1,5 +1,20 @@
-#!/bin/sh
+#!/bin/zsh
 cd $HOME
+
+exec > .xsession-errors 2>&1
+
+if [ -z "$ZSH_VERSION" ] && which zsh 2>/dev/null >&2
+then
+	exec zsh -l "$0" "$@"
+fi
+
+if [ -d /etc/X11/xinit/xinitrc.d ]; then
+        for f in /etc/X11/xinit/xinitrc.d/*; do
+                [ -x "$f" ] && . "$f"
+        done
+        unset f
+fi
+
 [ -f .Xresources ] && xrdb .Xresources
 [ -f .xsession.local ] && . $HOME/.xsession.local
 #setxkbmap -symbols 'us(intl)+us(pc101)+ctrl(nocaps)+altwin(meta_win)+group(rwin_switch)'
