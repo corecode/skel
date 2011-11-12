@@ -8,4 +8,5 @@
       (when (file-directory-p snipdir)
 	(add-to-list 'yas/snippet-dirs snipdir nil))) ; prepend to list
 
+    (yas/reload-all)
     (yas/global-mode 1)))
