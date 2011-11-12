@@ -28,3 +28,5 @@ cvsrm() {
 	rm "$@"
 	cvs rm "$@"
 }
+
+which hd >/dev/null 2>&1 || alias hd='hexdump -C'
