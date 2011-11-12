@@ -9,3 +9,6 @@
                              (LaTeX-math-mode t)
                              (turn-on-reftex)
                              (TeX-PDF-mode t)))
+
+(setq reftex-label-alist
+      '(("compactenum" ?i "item:" nil item nil)))
