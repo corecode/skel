@@ -8,6 +8,10 @@ setopt HIST_EXPIRE_DUPS_FIRST
 setopt HIST_REDUCE_BLANKS
 setopt PUSHD_IGNORE_DUPS
 
+# XXX hack.  /etc/profile overwrites $PATH after .zshenv is sourced
+typeset -U path
+path=(~/bin $path)
+
 autoload -U colors; colors
 
 typeset -A title
@@ -19,7 +23,7 @@ if [[ $TERM == xterm && $COLORTERM == gnome-terminal ]]; then
 	TERM=xterm-256color
 fi
 
-if [[ $TERM == (xterm|screen)* && $oldterm != $TERM$WINDOWID ]]; then
+if [[ $TERM == (rxvt|xterm|screen)* && $oldterm != $TERM$WINDOWID ]]; then
 	SHLVL=1
 	export oldterm=$TERM$WINDOWID
 fi
@@ -226,6 +230,8 @@ fi
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 
 bindkey -e
+bindkey "$(echoti khome)" beginning-of-line
+bindkey "$(echoti kend)" end-of-line
 bindkey '\e[H' beginning-of-line
 bindkey '\e[F' end-of-line
 bindkey '\eOH' beginning-of-line
