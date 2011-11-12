@@ -103,6 +103,7 @@
                 ;; smart-tab
                 ;; smex
                 ;; sudo-save
+                tuareg-mode
                 xcscope
                 yari
                 ;; yaml-mode
