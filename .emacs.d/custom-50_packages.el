@@ -61,7 +61,7 @@
               '(
                 ac-slime
                 auctex
-                ;; auto-complete
+                auto-complete
                 browse-kill-ring
                 csharp-mode
 		color-theme
