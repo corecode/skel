@@ -56,7 +56,7 @@ URxvt*transparent:	false
 //URxvt*perl-lib:		/home/cfl/.urxvt
 //URxvt*perl-ext:		selection,mark-yank-urls
 URxvt*perl-ext-common:		default,matcher,url-select
-URxvt*urlLauncher:		sensible-browser
+URxvt*urlLauncher:		open-url
 URxvt*underlineURLs:		true
 URxvt*matcher.button:		1
 URxvt*keysym.M-u:		perl:url-select:select_next
