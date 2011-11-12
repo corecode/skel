@@ -37,8 +37,10 @@ URxvt*foreground:       grey90
 URxvt*cursorColor:      #e0e080
 URxvt*underlineColor:	yellow
 URxvt*loginShell:	true
-URxvt*font:		-*-terminus-medium-*-*-*-14-*-*-*-*-*-iso10646-*
-URxvt*boldFont:		-*-terminus-bold-*-*-*-14-*-*-*-*-*-iso10646-*
+!URxvt*font:		-*-terminus-medium-*-*-*-14-*-*-*-*-*-iso10646-*
+!URxvt*boldFont:		-*-terminus-bold-*-*-*-14-*-*-*-*-*-iso10646-*
+URxvt*font:		xft:Terminus:regular
+URxvt*boldFont:		xft:Terminus:bold
 URxvt*italicFont:	xft:Bitstream Vera Sans Mono:italic:autohint=true
 URxvt*bolditalicFont:	xft:Bitstream Vera Sans Mono:bold:italic:autohint=true
 URxvt*saveLines:	10000
