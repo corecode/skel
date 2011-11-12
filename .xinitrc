@@ -3,6 +3,9 @@ cd $HOME
 
 exec > .xsession-errors 2>&1
 
+# tell xdg-open that we want to use exo-open
+export DESKTOP_SESSION=xfce
+
 if [ -z "$ZSH_VERSION" ] && which zsh 2>/dev/null >&2
 then
 	exec zsh -l "$0" "$@"
