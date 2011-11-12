@@ -8,10 +8,6 @@ setopt HIST_EXPIRE_DUPS_FIRST
 setopt HIST_REDUCE_BLANKS
 setopt PUSHD_IGNORE_DUPS
 
-# XXX hack.  /etc/profile overwrites $PATH after .zshenv is sourced
-typeset -U path
-path=(~/bin $path)
-
 autoload -U colors; colors
 
 typeset -A title
