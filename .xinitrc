@@ -59,5 +59,8 @@ xscreensaver -nosplash &
 	xset dpms 0 0 0
 } &
 
+# automatic mount + popup
+thunar --daemon &
+
 # go!
 exec xmonad
