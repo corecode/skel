@@ -64,6 +64,7 @@
                 auto-complete
                 browse-kill-ring
                 csharp-mode
+                coffee-mode
 		color-theme
                 color-theme-solarized
                 ;; ecb
