@@ -245,6 +245,7 @@ bindkey '\eOA' up-line-or-beginning-search
 autoload run-help
 bindkey '\eOP' run-help
 bindkey '\e[M' run-help
+[[ -n "$(echoti kf1 2>/dev/null)" ]] && bindkey "$(echoti kf1)" run-help
 bindkey '\e[1;5D' backward-word
 bindkey '\eOd' backward-word
 bindkey '\e[1;5C' forward-word
