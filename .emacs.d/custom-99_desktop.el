@@ -1,6 +1,6 @@
 (require 'session)
-(require 'desktop)
 
-(setq desktop-globals-to-save 'desktop-missing-file-warning)
+(setq desktop-globals-to-save '(desktop-missing-file-warning))
 (desktop-save-mode 1)
-(add-hook 'after-init-hook session-initialize)
+
+(add-hook 'after-init-hook 'session-initialize)
