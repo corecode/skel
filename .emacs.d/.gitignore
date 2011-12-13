@@ -22,3 +22,7 @@ tramp
 \#*
 history
 ac-comphist.dat
+.session
+.emacs.desktop*
+*-nocommit.el
+semanticdb
