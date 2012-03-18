@@ -68,7 +68,7 @@
 		color-theme
                 color-theme-solarized
                 ;; ecb
-                elscreen
+                ;; elscreen
                 emacs-goodies-el
                 ess
                 haskell-mode
@@ -105,6 +105,7 @@
                 ;; smex
                 ;; sudo-save
                 tuareg-mode
+                ;; wanderlust
                 xcscope
                 yari
                 ;; yaml-mode
