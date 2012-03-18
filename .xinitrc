@@ -24,6 +24,14 @@ fi
 #setxkbmap -symbols 'us+pc(pc105)+ctrl(nocaps)+altwin(meta_win)+group(rwin_switch)'
 #setxkbmap -symbols 'us(intl)+us(pc104)+ctrl(nocaps)+altwin(meta_win)+group(rwin_switch)'
 
+gnome-keyring-daemon --start --components=pkcs11 &
+gnome-keyring-daemon --start --components=secrets &
+gnome-keyring-daemon --start --components=gpg &
+gnome-keyring-daemon --start --components=ssh &
+gsettings-data-convert &
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+start-pulseaudio-x11 &
+
 ./bin/init_keyboard.sh &
 
 # disable touchpad
