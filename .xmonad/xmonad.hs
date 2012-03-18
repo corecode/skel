@@ -91,8 +91,8 @@ myTerminal = "urxvt -ls"
 -- display
 -- replace the bright red border with a more stylish colour
 myBorderWidth = 2
-myNormalBorderColor = "#202030"
-myFocusedBorderColor = "#A0A0D0"
+myNormalBorderColor = "#505060"
+myFocusedBorderColor = "#FF3030"
 
 -- workspaces
 myWorkspaces = ["web", "editor", "terms"] ++ (miscs 5) ++ ["fullscreen", "im"]
