@@ -212,10 +212,12 @@ export PAGER=less
 export BLOCKSIZE=K
 export EMAIL=2@0x2c.org
 lesspipe=$(which lesspipe.sh 2>/dev/null) || \
-lesspipe=$(which lesspipe 2>/dev/null)
+	lesspipe=$(which lesspipe 2>/dev/null)
 if test -n "$lesspipe"; then
 	export LESSOPEN="|$lesspipe %s"
 fi
+
+export PYTHONSTARTUP=~/.pythonrc.py
 
 if which keychain >/dev/null 2>&1; then
 	[ -f ~/.ssh/id_rsa ] && keychain -q id_rsa --nogui
