@@ -39,7 +39,7 @@ URxvt*underlineColor:	yellow
 URxvt*loginShell:	true
 !URxvt*font:		-*-terminus-medium-*-*-*-14-*-*-*-*-*-iso10646-*
 !URxvt*boldFont:		-*-terminus-bold-*-*-*-14-*-*-*-*-*-iso10646-*
-URxvt*font:		xft:Terminus:regular
+URxvt*font:		xft:Terminus:regular:size=14
 URxvt*boldFont:		xft:Terminus:bold
 URxvt*italicFont:	xft:Bitstream Vera Sans Mono:italic:autohint=true
 URxvt*bolditalicFont:	xft:Bitstream Vera Sans Mono:bold:italic:autohint=true
@@ -50,6 +50,7 @@ URxvt*scrollTtyOutput:	false
 URxvt*scrollTtyKeypress:    true
 URxvt*shading:		15
 URxvt*transparent:	false
+URxvt*termName:		rxvt-unicode
 //URxvt*fading:		30
 //URxvt*keysym.Home:	\033[1~
 //URxvt*keysym.End:	\033[4~
