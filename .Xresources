@@ -39,7 +39,7 @@ URxvt*underlineColor:	yellow
 URxvt*loginShell:	true
 !URxvt*font:		-*-terminus-medium-*-*-*-14-*-*-*-*-*-iso10646-*
 !URxvt*boldFont:		-*-terminus-bold-*-*-*-14-*-*-*-*-*-iso10646-*
-URxvt*font:		xft:Terminus:regular:size=14
+URxvt*font:		xft:Terminus:regular:size=12
 URxvt*boldFont:		xft:Terminus:bold
 URxvt*italicFont:	xft:Bitstream Vera Sans Mono:italic:autohint=true
 URxvt*bolditalicFont:	xft:Bitstream Vera Sans Mono:bold:italic:autohint=true
