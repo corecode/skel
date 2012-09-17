@@ -24,10 +24,15 @@ fi
 #setxkbmap -symbols 'us+pc(pc105)+ctrl(nocaps)+altwin(meta_win)+group(rwin_switch)'
 #setxkbmap -symbols 'us(intl)+us(pc104)+ctrl(nocaps)+altwin(meta_win)+group(rwin_switch)'
 
-gnome-keyring-daemon --start --components=pkcs11 &
-gnome-keyring-daemon --start --components=secrets &
-gnome-keyring-daemon --start --components=gpg &
-gnome-keyring-daemon --start --components=ssh &
+for ring in pkcs11 secrets gpg ssh
+do
+	# start gnome-keyring-daemon for $ring and set the correct vars
+	v=$(gnome-keyring-daemon --start --daemonize --components=$ring)
+	# change the commands to export these vars as well
+        v=$(echo "$v"|sed -Ee 's/^([^=]*)(.*)/\1\2; export \1;/')
+	eval $v
+done
+
 gsettings-data-convert &
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 start-pulseaudio-x11 &
