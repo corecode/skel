@@ -1,5 +1,23 @@
 #!/bin/sh
 
+run_fallback() {
+	for cmd in vim vi emacs
+	do
+		if which $cmd >/dev/null 2>&1
+		then
+			exec $cmd "$@"
+			exit
+		fi
+	done
+	echo "could not find any editor" >&2
+	exit 1
+}
+
+if ! which emacsclient >/dev/null 2>&1
+then
+	run_fallback "$@"
+fi
+
 case "$1" in
 --force-x) force_x=yes; shift ;;
 esac
@@ -16,16 +34,7 @@ then
 	# a non-TRAMP fallback.
 	if [ "$(id -u $real_user)" = 0 ]
 	then
-		for cmd in vim vi emacs
-		do
-			if which $cmd >/dev/null 2>&1
-			then
-				$cmd "$@"
-				exit
-			fi
-		done
-		echo "could not find any editor" >&2
-		exit 1
+		run_fallback "$@"
 	fi
 
 	invoke="sudo -u $real_user"
@@ -55,7 +64,7 @@ then
 		set -- "$@" "$arg"
 	done
 fi
-		
+
 case "$DISPLAY" in
 :*) try_x=yes ;;
 esac
@@ -85,4 +94,4 @@ else
 	emacsopt=-nw
 fi
 
-$invoke emacsclient $emacsopt -a "" "$@"
+exec $invoke emacsclient $emacsopt -a "" "$@"
