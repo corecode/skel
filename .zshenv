@@ -14,3 +14,5 @@ if [[ -n "" && $TERM == eterm-color && -z "$TERMCAP" && -z "$TERMINFO" ]]; then
         # re-set TERM to force zsh to reload the info
         TERM=eterm-color
 fi
+
+PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
