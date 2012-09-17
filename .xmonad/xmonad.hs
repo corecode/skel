@@ -63,6 +63,7 @@ import XMonad
 import XMonad.Util.EZConfig
 import qualified XMonad.StackSet as S
 import XMonad.Actions.CycleWS
+import XMonad.Actions.FloatKeys
 import XMonad.Config.Gnome
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
@@ -76,6 +77,8 @@ import XMonad.Layout.PerWorkspace
 import XMonad.Layout.Reflect
 import XMonad.Layout.TwoPane
 import XMonad.Layout.WindowNavigation
+import XMonad.Layout.MultiToggle
+import XMonad.Layout.MultiToggle.Instances
 import XMonad.Util.WindowProperties
 import System.Exit
 import Control.Monad
@@ -84,7 +87,7 @@ import qualified Data.Map as M
 
 -- defaults on which we build
 -- use e.g. defaultConfig or gnomeConfig
-myBaseConfig = defaultConfig
+myBaseConfig = ewmh defaultConfig
 
 myTerminal = "urxvt -ls"
 
@@ -108,14 +111,14 @@ wideLayout = named "wide" $ avoidStruts $ Mirror basicLayout
 singleLayout = named "single" $ avoidStruts $ noBorders Full
 fullscreenLayout = named "fullscreen" $ noBorders Full
 imLayout = avoidStruts $ reflectHoriz $ withIMs ratio rosters chatLayout where
-    chatLayout      = Grid
+    chatLayout      = GridRatio 1.0
     ratio           = 1%6
     rosters         = [skypeRoster, pidginRoster]
     pidginRoster    = And (ClassName "Pidgin") (Role "buddy_list")
     skypeRoster     = (ClassName "Skype") `And` (Not (Title "Options")) `And` (Not (Role "Chats")) `And` (Not (Role "CallWindowForm"))
 
 myLayoutHook = smartBorders (fullscreen $ im $ normal) where
-    normal     = tallLayout ||| wideLayout ||| singleLayout
+    normal     = mkToggle (single NBFULL) (tallLayout ||| wideLayout)
     fullscreen = onWorkspace "fullscreen" fullscreenLayout
     im         = onWorkspace "im" imLayout
 
@@ -149,7 +152,9 @@ myKeys conf = M.fromList $
     , ((myModMask              , xK_Up    ), windows S.swapUp)
     , ((myModMask              , xK_Left  ), sendMessage Shrink)
     , ((myModMask              , xK_Right ), sendMessage Expand)
+    , ((myModMask              , xK_a     ), withFocused (keysMoveWindowTo (512,384) (1%2,1%2)))
     , ((myModMask              , xK_t     ), withFocused $ windows . S.sink)
+    , ((0                      , xK_F11   ), sendMessage $ Toggle NBFULL)
     , ((myModMask              , xK_b     ), sendMessage (IncMasterN 1))
     , ((myModMask              , xK_v     ), sendMessage (IncMasterN (-1)))
     , ((myModMask .|. controlMask, xK_q   ), broadcastMessage ReleaseResources >> restart "xmonad" True)
