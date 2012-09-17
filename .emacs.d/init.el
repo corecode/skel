@@ -53,6 +53,7 @@
         coffee-mode
         color-theme
         emacs-goodies-el
+        emacs-w3m
         ess
         ;; gist
         haskell-mode
@@ -70,19 +71,21 @@
         paredit
         php-mode
         popup-kill-ring
-        python-mode
         rinari
         ruby-compilation
         ruby-block
         ruby-end
         ruby-mode
         rvm
+        python-mode                     ; needs to be loaded after
+                                        ; ruby-*, or ruby-mode will break
         session
         slime
         smart-tab
         smex
         sudo-save
         tuareg-mode
+        wanderlust
         xcscope
         yari
         yaml-mode
@@ -307,6 +310,7 @@
 ;;    (frame-parameter (or frame (selected-frame)) 'outer-window-id)))
 
 (setq x-select-enable-primary t)
+(setq x-select-enable-clipboard t)
 
 
 (setq-default term-unbind-key-list
@@ -464,7 +468,10 @@
 (require 'shrink-whitespaces)
 ;; automatically indent
 (setq-default auto-indent-untabify-on-save-file nil
-              auto-indent-blank-lines-on-move nil)
+              auto-indent-blank-lines-on-move nil
+              auto-indent-kill-line-kill-region-when-active nil
+              auto-indent-next-pair nil
+              auto-indent-current-pairs nil)
 
 ;; make M-RET like RET, just without breaking the current line
 (setq-default auto-indent-key-for-end-of-line-then-newline "<M-return>")
@@ -841,7 +848,6 @@
       ido-handle-duplicate-virtual-buffers 2
       ido-max-prospects 10)
 
-(set-default 'indent-tabs-mode nil)
 (set-default 'indicate-empty-lines t)
 (set-default 'imenu-auto-rescan t)
 
@@ -884,9 +890,12 @@
                 (setq oddmuse-post (concat "uihnscuskc=1;" oddmuse-post))))))
 
 
+(require 'ess-knitr)
+
+
 (require 'desktop)
 (setq desktop-globals-to-save '(desktop-missing-file-warning))
-(desktop-save-mode 1)
+;; (desktop-save-mode 1)
 ;;; From <http://www.emacswiki.org/emacs/DeskTop>
 (defun my-desktop-autosave ()
   (interactive)
@@ -907,7 +916,7 @@
               shift-select-mode nil
               mouse-yank-at-point t
               uniquify-buffer-name-style 'forward
-              whitespace-style '(face trailing lines-tail space-before-tab indentation)
+              whitespace-style '(face trailing lines-tail space-before-tab)
               whitespace-line-column 100
               ediff-window-setup-function 'ediff-setup-windows-plain
               oddmuse-directory (concat dotfiles-dir "oddmuse")
