@@ -206,7 +206,7 @@ umask 22
 if [[ -x ~/bin/e ]]; then
 	export EDITOR=~/bin/e
 	export VISUAL=$EDITOR
-	alias vim=e
+	# alias vim=e
 fi
 export PAGER=less
 export BLOCKSIZE=K
@@ -219,7 +219,7 @@ fi
 
 export PYTHONSTARTUP=~/.pythonrc.py
 
-if which keychain >/dev/null 2>&1; then
+if [ ! -e "$SSH_AUTH_SOCK" ] && which keychain >/dev/null 2>&1; then
 	[ -f ~/.ssh/id_rsa ] && keychain -q id_rsa --nogui
 	[ -f ~/.ssh/id_dsa ] && keychain -q id_dsa --nogui
 	source ~/.keychain/$HOST-sh
