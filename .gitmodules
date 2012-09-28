@@ -82,12 +82,3 @@
 [submodule ".vim/bundle/delimitMate"]
 	path = .vim/bundle/delimitMate
 	url = git://github.com/Raimondi/delimitMate.git
-[submodule ".emacs.d/vendor/emacswiki.org"]
-	path = .emacs.d/vendor/emacswiki.org
-	url = git://github.com/emacsmirror/emacswiki.org.git
-[submodule ".emacs.d/vendor/auto-complete"]
-	path = .emacs.d/vendor/auto-complete
-	url = git://github.com/m2ym/auto-complete.git
-[submodule ".emacs.d/vendor/el-get"]
-	path = .emacs.d/vendor/el-get
-	url = git://github.com/dimitri/el-get.git
