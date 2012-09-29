@@ -57,6 +57,7 @@
         ess
         ;; gist
         haskell-mode
+        hyde
         idle-highlight-mode
         inf-ruby
         json
@@ -132,6 +133,10 @@
                :depends gh)
         (:name elisp-slime-nav
                :type elpa)
+        (:name hyde
+               :type github
+               :pkgname "nibrahim/Hyde"
+               :description "An Emacs mode to manage Jekyll blogs")
         ))
 
 (setq my:el-get-packages
@@ -524,22 +529,7 @@
 (add-hook 'emacs-lisp-mode-hook 'custom-emacs-lisp-hook)
 
 
-(require 'jekyll)
-
-(set-default 'jekyll-directory "~/Documents/hp/")
-(set-default 'jekyll-post-template
-             "---\nlayout: post\ntitle: %s\n---\n\n")
-
-(global-set-key (kbd "C-c b n") 'jekyll-draft-post)
-(global-set-key (kbd "C-c b P") 'jekyll-publish-post)
-(global-set-key (kbd "C-c b p") (lambda () 
-                                  (interactive)
-                                  (find-file
-                                   (format "%s/_posts/" jekyll-directory))))
-(global-set-key (kbd "C-c b d") (lambda () 
-                                  (interactive)
-                                  (find-file
-                                   (format "%s/_drafts/" jekyll-directory))))
+(setq hyde-home "~/Documents/hp/")
 
 
 (setq-default TeX-master 'dwim)
