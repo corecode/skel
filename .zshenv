@@ -2,6 +2,7 @@ typeset -U path
 path=(~/bin $path)
 
 : ${LC_CTYPE:=en-US.UTF-8}
+export LC_CTYPE
 
 export RUBYLIB=$HOME/lib/ruby
 
