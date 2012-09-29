@@ -1,6 +1,8 @@
 typeset -U path
 path=(~/bin $path)
 
+LC_CTYPE=en-US.UTF-8
+
 export RUBYLIB=$HOME/lib/ruby
 
 if [[ -r ~/.zshenv.local ]]; then
