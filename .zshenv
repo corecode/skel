@@ -15,4 +15,4 @@ if [[ -n "" && $TERM == eterm-color && -z "$TERMCAP" && -z "$TERMINFO" ]]; then
         TERM=eterm-color
 fi
 
-PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+[[ -s ~/.rvm/scripts/rvm ]] && source ~/.rvm/scripts/rvm
