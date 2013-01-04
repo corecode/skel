@@ -116,6 +116,7 @@
         ruby-end
         ruby-mode
         rvm
+        powerline
         python-mode                     ; needs to be loaded after
                                         ; ruby-*, or ruby-mode will break
         s
