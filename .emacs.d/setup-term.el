@@ -42,6 +42,14 @@
 ;; match my prompt
 (setq term-prompt-regexp "^\\([0-9]+ \\)[%#] ")
 
+;; term.el is silly and extracts defaults when no frame exists yet
+(defun term-setup-default-faces (&optional frame)
+  (setq
+   term-default-fg-color (face-foreground term-current-face)
+   term-default-bg-color (face-background term-current-face))
+  (remove-hook 'after-make-frame-functions 'term-setup-default-faces))
+(add-hook 'after-make-frame-functions 'term-setup-default-faces)
+
 ;; remove SHLVL.  For any shell, we're the top level
 (setenv "SHLVL" nil)
 
