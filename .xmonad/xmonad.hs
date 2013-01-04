@@ -71,6 +71,7 @@ import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.Combo
 import XMonad.Layout.Grid
 import XMonad.Layout.LayoutModifier
+import XMonad.Layout.LayoutHints
 import XMonad.Layout.Named
 import XMonad.Layout.NoBorders
 import XMonad.Layout.PerWorkspace
@@ -125,7 +126,8 @@ myLayoutHook = smartBorders (fullscreen $ im $ normal) where
 -- special treatment for specific windows:
 -- put the Pidgin and Skype windows in the im workspace
 myManageHook = fullscreenManageHooks <+> imManageHooks <+> manageHook myBaseConfig
-fullscreenManageHooks = composeAll [isFullscreen --> (doF S.focusDown <+> doFullFloat)]
+-- fullscreenManageHooks = composeAll [isFullscreen --> (doF S.focusDown <+> doFullFloat)]
+fullscreenManageHooks = composeOne [transience, isFullscreen -?> doFullFloat]
 imManageHooks = composeAll [isIM --> moveToIM] where
     isIM     = foldr1 (<||>) [isPidgin, isSkype]
     isPidgin = className =? "Pidgin"
