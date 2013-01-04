@@ -73,8 +73,8 @@
 (global-set-key (kbd "M-s M--") 'snakeify-current-word)
 
 ;; Killing text
-(global-set-key (kbd "C-S-k") 'kill-and-retry-line)
-(global-set-key (kbd "M-C-k") 'kill-whole-line)
+(global-set-key (kbd "M-C-k") 'kill-and-retry-line)
+(global-set-key (kbd "C-S-k") 'kill-whole-line)
 (global-set-key (kbd "C-w") 'kill-region-or-backward-word)
 (global-set-key (kbd "C-c C-w") 'kill-to-beginning-of-line)
 
