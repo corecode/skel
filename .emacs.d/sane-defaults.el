@@ -87,6 +87,10 @@
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
 
+;; text editing tools
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+(add-hook 'text-mode-hook 'turn-on-flyspell)
+
 ;; A saner ediff
 (setq ediff-diff-options "-w")
 (setq ediff-split-window-function 'split-window-horizontally)
