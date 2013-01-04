@@ -82,3 +82,12 @@
 [submodule ".vim/bundle/delimitMate"]
 	path = .vim/bundle/delimitMate
 	url = git://github.com/Raimondi/delimitMate.git
+[submodule ".emacs.d/site-lisp/Hyde"]
+	path = .emacs.d/site-lisp/Hyde
+	url = git://github.com/yoshizow/Hyde.git
+[submodule ".emacs.d/site-lisp/git-emacs"]
+	path = .emacs.d/site-lisp/git-emacs
+	url = git://github.com/tsgates/git-emacs.git
+[submodule ".emacs.d/themes/blackboard-theme"]
+	path = .emacs.d/themes/blackboard-theme
+	url = git://github.com/don9z/blackboard-theme.git
