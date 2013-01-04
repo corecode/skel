@@ -16,6 +16,7 @@ var/*
 .DS_Store
 .places
 .smex*
+*~
 image-dired/
 elim/
 session*
