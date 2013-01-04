@@ -1,5 +1,6 @@
 ;; Allow pasting selection outside of Emacs
 (setq x-select-enable-clipboard t)
+(setq x-select-enable-primary t)
 
 ;; Auto refresh buffers
 (global-auto-revert-mode 1)
