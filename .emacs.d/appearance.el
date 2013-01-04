@@ -9,19 +9,6 @@
 ;; modify modeline
 (face-spec-set 'mode-line '((t (:background "darkred" :foreground "white" :box (:line-width -1 :style released-button)))))
 
-(defun setup-frame-defaults (&optional frame)
-  ;; default font
-  ;; (set-frame-font "Anonymous Pro 11" t t)
-  ;; (set-frame-font "Inconsolata 13" t t)
-  ;; (set-frame-font "Droid Sans Mono-11" t t)
-  (set-default-font "Liberation Mono 11" t t)
-  (remove-hook 'after-make-frame-functions 'setup-frame-defaults))
-
-;; else tty - fix up background
-;;(face-spec-set 'default '((t (:background "black"))) (selected-frame))
-(add-hook 'after-make-frame-functions 'setup-frame-defaults)
-;; (add-hook 'after-init-hook 'setup-frame-defaults)
-
 (set-face-background 'region "#464740")
 
 ;; Highlight current line
@@ -34,6 +21,17 @@
 (set-face-background 'yas-field-highlight-face "#333399")
 
 (set-face-foreground 'font-lock-warning-face "#ff6666")
+
+;; use fancy mode-line
+(require 'powerline)
+(powerline-default)
+
+;; default font
+(add-to-list 'default-frame-alist '(font . "Liberation Mono-11:weight=normal"))
+;; "Anonymous Pro 11"
+;; "Inconsolata 13"
+;; "Droid Sans Mono-11"
+;; "Liberation Mono 11"
 
 ;; org-mode colors
 (setq org-todo-keyword-faces
