@@ -64,6 +64,7 @@ import XMonad.Util.EZConfig
 import qualified XMonad.StackSet as S
 import XMonad.Actions.CycleWS
 import XMonad.Actions.FloatKeys
+import XMonad.Actions.UpdatePointer
 import XMonad.Config.Gnome
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
@@ -178,7 +179,11 @@ myKeys conf = M.fromList $
     [((m .|. myModMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
     | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
     , (f, m) <- [(S.view, 0), (liftM2 (.) S.view S.shift, controlMask)]]
-    
+
+
+-- move mouse cursor when we switch focus by keyboard
+myLogHook = updatePointer (Relative 0.5 0.5)
+
 
 -- mouse bindings that mimic Gnome's
 myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
@@ -196,6 +201,7 @@ main = xmonad $ myBaseConfig
     , layoutHook = myLayoutHook
     , manageHook = myManageHook
     , handleEventHook = fullscreenEventHook
+    , logHook = myLogHook
     , borderWidth = myBorderWidth
     , normalBorderColor = myNormalBorderColor
     , focusedBorderColor = myFocusedBorderColor
@@ -247,4 +253,3 @@ applyIMs ratio props wksp rect = do
     let filteredStack = stack >>= S.filter (`notElem` rosters)
     (a,b) <- runLayout (wksp {S.stack = filteredStack}) chatsRect
     return (zip rosters rosterRects ++ a, b)
-    
