@@ -160,6 +160,8 @@
 (eval-after-load 'js2-mode '(require 'setup-js2-mode))
 (eval-after-load 'ruby-mode '(require 'setup-ruby-mode))
 (eval-after-load 'markdown-mode '(require 'setup-markdown-mode))
+(eval-after-load 'cc-mode '(require 'setup-cc-mode))
+(eval-after-load 'lisp-mode '(require 'setup-lisp-mode))
 
 ;; ;; Load slime-js when asked for
 ;; (autoload 'slime-js-jack-in-browser "setup-slime-js" nil t)
@@ -205,11 +207,6 @@
 ;; Misc
 (require 'appearance)
 (require 'my-misc)
-
-;; Elisp go-to-definition with M-. and back again with M-,
-(autoload 'elisp-slime-nav-mode "elisp-slime-nav")
-(add-hook 'emacs-lisp-mode-hook (lambda () (elisp-slime-nav-mode t)))
-(eval-after-load 'elisp-slime-nav '(diminish 'elisp-slime-nav-mode))
 
 (require 'setup-desktop)
 

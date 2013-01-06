@@ -23,8 +23,4 @@
 (eval-after-load "lisp-mode" '(setup-paredit-for-mode-map emacs-lisp-mode-map))
 (eval-after-load "clojure-mode" '(setup-paredit-for-mode-map clojure-mode-map))
 
-(add-hook 'lisp-mode-hook 'enable-paredit-mode)
-(add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
-(add-hook 'clojure-mode-hook 'enable-paredit-mode)
-
 (provide 'setup-paredit)

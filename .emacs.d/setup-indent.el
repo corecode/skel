@@ -4,7 +4,8 @@
       auto-indent-blank-lines-on-move nil
       auto-indent-kill-line-kill-region-when-active nil
       auto-indent-next-pair nil
-      auto-indent-current-pairs nil)
+      auto-indent-current-pairs nil
+      auto-indent-assign-indent-level-variables nil)
 
 ;; make M-RET like RET, just without breaking the current line
 ;; (setq-default auto-indent-key-for-end-of-line-then-newline "<M-return>")
