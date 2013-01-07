@@ -143,6 +143,9 @@
 ;; Lets start with a smattering of sanity
 (require 'sane-defaults)
 
+;; mode setups will need this later
+(require 'diminish)
+
 ;; Setup extensions
 (eval-after-load 'ido '(require 'setup-ido))
 (eval-after-load 'org '(require 'setup-org))
@@ -220,7 +223,7 @@
 (put 'narrow-to-region 'disabled nil)
 
 ;; Diminish modeline clutter
-(require 'diminish)
-(diminish 'yas-minor-mode)
-(diminish 'eldoc-mode)
 (diminish 'eproject-mode)
+(diminish 'global-whitespace-mode)
+(diminish 'abbrev-mode)
+;; (diminish 'auto-fill-mode)
