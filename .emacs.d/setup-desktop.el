@@ -3,7 +3,7 @@
 (add-to-list 'desktop-globals-to-save 'kill-ring)
 (add-to-list 'desktop-globals-to-save 'search-ring)
 (add-to-list 'desktop-globals-to-save 'regexp-search-ring)
-;; (desktop-save-mode 1)
+(desktop-save-mode 1)
 
 ;;; From <http://www.emacswiki.org/emacs/DeskTop>
 
