@@ -19,4 +19,8 @@
       indent-tabs-mode t
       backward-delete-char-untabify-method nil)
 
+;; make <tab> do the right thing
+(require 'smart-tab)
+(diminish 'smart-tab-mode)
+
 (provide 'setup-indent)
