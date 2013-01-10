@@ -7,6 +7,7 @@
 (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
 (add-hook 'clojure-mode-hook 'enable-paredit-mode)
 
+(require 'eldoc)
 (add-hook 'emacs-lisp-mode-hook (lambda () (eldoc-mode 1)))
 
 (provide 'setup-lisp-mode)
