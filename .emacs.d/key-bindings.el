@@ -296,4 +296,8 @@
 ;; preserve M-n in info mode
 (define-key Info-mode-map (kbd "M-n") nil)
 
+;; toggle selected window with C-x o, cycle with C-x w
+(global-set-key (kbd "C-x o") 'other-mru-window)
+(global-set-key (kbd "C-x w") 'other-window)
+
 (provide 'key-bindings)
