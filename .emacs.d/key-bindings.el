@@ -293,4 +293,7 @@
 (define-key occur-mode-map (kbd "n") 'next-line)
 (define-key occur-mode-map (kbd "p") 'previous-line)
 
+;; preserve M-n in info mode
+(define-key Info-mode-map (kbd "M-n") nil)
+
 (provide 'key-bindings)
