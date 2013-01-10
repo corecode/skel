@@ -9,5 +9,6 @@
 
 (require 'eldoc)
 (add-hook 'emacs-lisp-mode-hook (lambda () (eldoc-mode 1)))
+(diminish 'eldoc-mode)
 
 (provide 'setup-lisp-mode)
