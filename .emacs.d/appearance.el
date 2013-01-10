@@ -56,6 +56,9 @@
 (add-hook 'prog-mode-hook 'esk-pretty-lambdas)
 (add-hook 'prog-mode-hook 'esk-add-watchwords)
 
+;; dim parentheses
+(require 'parenface-plus)
+
 ;; Highlight matching parentheses when the point is on them.
 (show-paren-mode 1)
 
