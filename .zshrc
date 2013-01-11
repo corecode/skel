@@ -225,6 +225,8 @@ if [ ! -e "$SSH_AUTH_SOCK" ] && which keychain >/dev/null 2>&1; then
 	source ~/.keychain/$HOST-sh
 fi
 
+[[ -z "$rvm_version" && -s ~/.rvm/scripts/rvm ]] && source ~/.rvm/scripts/rvm
+
 bindkey -e
 bindkey "$(echoti khome)" beginning-of-line
 bindkey "$(echoti kend)" end-of-line

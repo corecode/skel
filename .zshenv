@@ -18,7 +18,4 @@ if [[ -n "" && $TERM == eterm-color && -z "$TERMCAP" && -z "$TERMINFO" ]]; then
         TERM=eterm-color
 fi
 
-# The default /etc/profile might overwrite our carefully set PATH.  At
-# the same time, rvm doesn't like to set PATH again if it thinks that
-# it has been loaded before.
-[[ -s ~/.rvm/scripts/rvm ]] && rvm_reload_flag=1 rvm_auto_reload_flag=2 source ~/.rvm/scripts/rvm
+[[ -f $HOME/.rvm/environments/default ]] && source $HOME/.rvm/environments/default
