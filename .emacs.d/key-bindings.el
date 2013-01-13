@@ -300,4 +300,11 @@
 (global-set-key (kbd "C-x o") 'other-mru-window)
 (global-set-key (kbd "C-x w") 'other-window)
 
+
+;; w3m M-n like M-p
+(eval-after-load 'w3m
+  '(progn
+    (define-key w3m-mode-map (kbd "M-n") 'forward-paragraph)
+    (define-key w3m-mode-map (kbd "M-N") 'w3m-copy-buffer)))
+
 (provide 'key-bindings)
