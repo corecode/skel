@@ -146,9 +146,9 @@
 (global-set-key [remap goto-line] 'goto-line-with-feedback)
 
 ;; (global-set-key (kbd "<prior>") 'beginning-of-buffer)
-(global-set-key (kbd "<home>") 'beginning-of-buffer)
+;; (global-set-key (kbd "<home>") 'beginning-of-buffer)
 ;; (global-set-key (kbd "<next>") 'end-of-buffer)
-(global-set-key (kbd "<end>") 'end-of-buffer)
+;; (global-set-key (kbd "<end>") 'end-of-buffer)
 (global-set-key (kbd "M-p") 'backward-paragraph)
 (global-set-key (kbd "M-n") 'forward-paragraph)
 
