@@ -25,13 +25,13 @@
 
 ;; w3m does not like smart-tab-mode
 ;; solution from <http://stackoverflow.com/questions/6837511/automatically-disable-a-global-minor-mode-for-a-specific-major-mode>
-(define-globalized-minor-mode global-smart-tab-mode
+(define-globalized-minor-mode my-global-smart-tab-mode
   smart-tab-mode
   (lambda ()
     (unless (eq major-mode 'w3m-mode))
     (smart-tab-mode-on))
   :group 'smart-tab)
 
-(global-smart-tab-mode 1)
+(my-global-smart-tab-mode 1)
 
 (provide 'setup-indent)
