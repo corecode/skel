@@ -125,7 +125,6 @@
         session
         slime
         smart-tab
-        smart-tabs-mode
         smart-forward
         smex
         smooth-scrolling
