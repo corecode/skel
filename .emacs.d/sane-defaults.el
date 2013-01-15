@@ -59,6 +59,8 @@
 
 ;; ;; Never insert tabs
 ;; (set-default 'indent-tabs-mode nil)
+(global-whitespace-mode 1)
+(diminish 'global-whitespace-mode)
 
 ;; Show me empty lines after buffer end
 (set-default 'indicate-empty-lines t)
@@ -86,6 +88,10 @@
 ;; Add parts of each file's directory to the buffer name if not unique
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
+
+;; Run at full power please
+(put 'downcase-region 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
 
 ;; text editing tools
 (add-hook 'text-mode-hook 'turn-on-auto-fill)

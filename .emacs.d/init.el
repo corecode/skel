@@ -219,13 +219,3 @@
 (require 'server)
 (unless (server-running-p)
   (server-start))
-
-;; Run at full power please
-(put 'downcase-region 'disabled nil)
-(put 'narrow-to-region 'disabled nil)
-
-;; Diminish modeline clutter
-(diminish 'eproject-mode)
-(diminish 'global-whitespace-mode)
-(diminish 'abbrev-mode)
-;; (diminish 'auto-fill-mode)

@@ -77,6 +77,13 @@
 ;; Ditch them scrollbars
 (scroll-bar-mode -1)
 
+;; Diminish modeline clutter
+(eval-after-load 'eproject
+  '(diminish 'eproject-mode))
+(eval-after-load 'abbrev
+  '(diminish 'abbrev-mode))
+;; (diminish 'auto-fill-mode)
+
 ;; ;; Make zooming affect frame instead of buffers
 ;; (require 'zoom-frm)
 
