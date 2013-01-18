@@ -30,6 +30,11 @@
 (require 'smart-tab)
 (diminish 'smart-tab-mode)
 
+;; please use default
+(setq smart-tab-using-hippie-expand t)
+(setq smart-tab-completion-functions-alist
+      (assq-delete-all 'emacs-lisp-mode smart-tab-completion-functions-alist))
+
 ;; w3m does not like smart-tab-mode
 ;; solution from <http://stackoverflow.com/questions/6837511/automatically-disable-a-global-minor-mode-for-a-specific-major-mode>
 (define-globalized-minor-mode my-global-smart-tab-mode
