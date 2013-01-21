@@ -211,6 +211,7 @@
 ;; Misc
 (require 'appearance)
 (require 'my-misc)
+(require 'setup-auth)
 
 (require 'setup-desktop)
 
