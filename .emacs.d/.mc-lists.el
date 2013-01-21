@@ -8,15 +8,17 @@
 	jump-char-process-char
 	jump-char-repeat-backward
 	kill-region-or-backward-word
-	other-mru-window
 	paredit-comment-dwim
 	paredit-forward-delete
+	paredit-forward-slurp-sexp
+	paredit-kill
+	paredit-open-round
 	paredit-splice-sexp
-	smart-tab
 	))
 
 (setq mc/cmds-to-run-once
       '(
-	ibuffer
-	ido-switch-buffer
+	ace-jump-mode
+	smex
+	universal-argument-minus
 	))
