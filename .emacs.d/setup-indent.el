@@ -17,10 +17,10 @@
 (global-set-key (kbd "RET") 'newline-and-indent)
 
 ;; default to indent 8, only use tabs in certain modes
-(setq standard-indent 8
-      tab-always-indent t
-      indent-tabs-mode nil
-      backward-delete-char-untabify-method nil)
+(setq-default standard-indent 8
+              tab-always-indent t
+              indent-tabs-mode nil
+              backward-delete-char-untabify-method nil)
 
 ;; guess tab/offset mode
 (require 'dtrt-indent)
