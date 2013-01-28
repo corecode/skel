@@ -9,11 +9,13 @@
 	jump-char-repeat-backward
 	kill-region-or-backward-word
 	paredit-comment-dwim
+	paredit-forward
 	paredit-forward-delete
 	paredit-forward-slurp-sexp
 	paredit-kill
 	paredit-open-round
 	paredit-splice-sexp
+	save-region-or-current-line
 	))
 
 (setq mc/cmds-to-run-once
