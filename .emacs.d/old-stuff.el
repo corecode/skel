@@ -468,10 +468,6 @@
 ;; (require 'yari)
 (global-set-key (kbd "C-h r") 'yari)
 
-;; hook up man
-(define-key help-map (kbd "C-m") 'man)
-(define-key help-map (kbd "M") 'man)
-
 (if (boundp 'smex)
     (global-set-key (kbd "M-x") 'smex)
   )
