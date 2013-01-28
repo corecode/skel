@@ -24,6 +24,8 @@
 
 ;; guess tab/offset mode
 (require 'dtrt-indent)
+(add-to-list 'dtrt-indent-hook-mapping-list
+             '(js2-mode c/c++/java    js2-basic-offset))
 (dtrt-indent-mode 1)
 
 ;; make <tab> do the right thing
