@@ -145,7 +145,7 @@ function emacs_tramp_generate {
 
 function title_generate {}
 
-if [[ $TERM == (xterm|screen)* ]]; then
+if [[ $TERM == (xterm|screen|rxvt)* ]]; then
 	function title_generate {
 		print -Pn "${title[start]}%n@%m:%~${title[end]}"
 	}
