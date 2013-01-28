@@ -27,7 +27,8 @@
 (powerline-default)
 
 ;; default font
-(add-to-list 'default-frame-alist '(font . "Liberation Mono-11:weight=normal"))
+(setq default-frame-alist (assq-delete-all 'font default-frame-alist))
+(add-to-list 'default-frame-alist '(font . "Liberation Mono-10.5:weight=normal"))
 ;; "Anonymous Pro 11"
 ;; "Inconsolata 13"
 ;; "Droid Sans Mono-11"
@@ -65,12 +66,16 @@
 ;; No menu bars
 (menu-bar-mode -1)
 
-(when window-system
-  (setq frame-title-format '(buffer-file-name "%f" ("%b")))
-  (turn-off-tool-bar)
-  (tooltip-mode -1)
-  (turn-off-tool-bar)
-  (blink-cursor-mode -1))
+;; (when window-system)
+(setq frame-title-format
+      '(:eval
+        (if (buffer-file-name)
+            (abbreviate-file-name (buffer-file-name))
+          "%b")))
+(turn-off-tool-bar)
+(tooltip-mode -1)
+(turn-off-tool-bar)
+(blink-cursor-mode -1)
 
 (add-hook 'before-make-frame-hook 'turn-off-tool-bar)
 
