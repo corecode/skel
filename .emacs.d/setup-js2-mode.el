@@ -59,7 +59,7 @@
 
 ;; Use lambda for anonymous functions
 (font-lock-add-keywords
- 'js2-mode `(("\\(function\\) *("
+ 'js2-mode `(("\\_<\\(function\\) *("
               (0 (progn (compose-region (match-beginning 1)
                                         (match-end 1) "\u0192")
                         nil)))))
