@@ -3,7 +3,6 @@
 (add-to-list 'desktop-globals-to-save 'kill-ring)
 (add-to-list 'desktop-globals-to-save 'search-ring)
 (add-to-list 'desktop-globals-to-save 'regexp-search-ring)
-(desktop-save-mode 1)
 
 ;;; From <http://www.emacswiki.org/emacs/DeskTop>
 
@@ -31,6 +30,8 @@ Also returns nil if pid is nil."
       (desktop-save desktop-dirname)))
 (add-hook 'auto-save-hook 'my-desktop-autosave)
 
+;; all hooks done, now start.
+(desktop-save-mode 1)
 (savehist-mode 1)
 
 (provide 'setup-desktop)
