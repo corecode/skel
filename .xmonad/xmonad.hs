@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, TypeSynonymInstances, FlexibleContexts, NoMonomorphismRestriction #-}
 
 -- derived from XMonad configuration file by Thomas ten Cate <ttencate@gmail.com>
--- 
+--
 -- Works on xmonad-0.8, NOT on 0.7 or below; and of course
 -- xmonad-contrib needs to be installed as well
 --
@@ -66,6 +66,7 @@ import XMonad.Actions.CycleWS
 import XMonad.Actions.FloatKeys
 import XMonad.Actions.UpdatePointer
 import XMonad.Config.Gnome
+import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
@@ -82,6 +83,7 @@ import XMonad.Layout.WindowNavigation
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Util.WindowProperties
+import XMonad.Util.Run(spawnPipe)
 import System.Exit
 import Control.Monad
 import Data.Ratio
@@ -100,8 +102,10 @@ myNormalBorderColor = "#505060"
 myFocusedBorderColor = "#FF3030"
 
 -- workspaces
-myWorkspaces = ["web", "editor", "terms"] ++ (miscs 5) ++ ["fullscreen", "im"]
-    where miscs = map (("misc" ++) . show) . (flip take) [1..]
+-- myWorkspaces = ["dev", "work", "web", "mail"] ++ (miscs 4) ++ ["fs", "im"]
+--     where miscs = map (show) . (flip take) [1..]
+myWorkspaces = (count 10)
+    where count = map (show) . (flip take) [1..]
 
 -- layouts
 basicLayout = Tall nmaster delta ratio where
@@ -121,19 +125,19 @@ imLayout = avoidStruts $ reflectHoriz $ withIMs ratio rosters chatLayout where
 
 myLayoutHook = smartBorders (fullscreen $ im $ normal) where
     normal     = mkToggle (single NBFULL) (tallLayout ||| wideLayout)
-    fullscreen = onWorkspace "fullscreen" fullscreenLayout
-    im         = onWorkspace "im" imLayout
+    fullscreen = onWorkspace "9" fullscreenLayout
+    im         = onWorkspace "10" imLayout
 
 -- special treatment for specific windows:
 -- put the Pidgin and Skype windows in the im workspace
-myManageHook = fullscreenManageHooks <+> imManageHooks <+> manageHook myBaseConfig
+myManageHook = manageDocks <+> fullscreenManageHooks <+> imManageHooks <+> manageHook myBaseConfig
 -- fullscreenManageHooks = composeAll [isFullscreen --> (doF S.focusDown <+> doFullFloat)]
 fullscreenManageHooks = composeOne [transience, isFullscreen -?> doFullFloat]
 imManageHooks = composeAll [isIM --> moveToIM] where
     isIM     = foldr1 (<||>) [isPidgin, isSkype]
     isPidgin = className =? "Pidgin"
     isSkype  = className =? "Skype"
-    moveToIM = doF $ S.shift "im"
+    moveToIM = doF $ S.shift "10"
 
 -- Mod4 is the Super / Windows key
 myModMask = mod4Mask
@@ -157,7 +161,7 @@ myKeys conf = M.fromList $
     , ((myModMask              , xK_Right ), sendMessage Expand)
     , ((myModMask              , xK_a     ), withFocused (keysMoveWindowTo (512,384) (1%2,1%2)))
     , ((myModMask              , xK_t     ), withFocused $ windows . S.sink)
-    , ((0                      , xK_F11   ), sendMessage $ Toggle NBFULL)
+    , ((myModMask              , xK_F11   ), sendMessage $ Toggle NBFULL)
     , ((myModMask              , xK_b     ), sendMessage (IncMasterN 1))
     , ((myModMask              , xK_v     ), sendMessage (IncMasterN (-1)))
     , ((myModMask .|. controlMask, xK_q   ), broadcastMessage ReleaseResources >> restart "xmonad" True)
@@ -184,6 +188,13 @@ myKeys conf = M.fromList $
 -- move mouse cursor when we switch focus by keyboard
 myLogHook = updatePointer (Relative 0.5 0.5)
 
+-- xmobar
+myPP = xmobarPP
+               { ppTitle = xmobarColor "#d33682" ""
+               , ppCurrent = xmobarColor "#4040ff" ""
+               , ppLayout = const ""
+               }
+toggleMobarKey XConfig {XMonad.modMask = modMask} = (modMask, xK_F12)
 
 -- mouse bindings that mimic Gnome's
 myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
@@ -195,7 +206,7 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
     ]
 
 -- put it all together
-main = xmonad $ myBaseConfig
+main = xmonad =<< statusBar "xmobar" myPP toggleMobarKey myBaseConfig
     { modMask = myModMask
     , workspaces = myWorkspaces
     , layoutHook = myLayoutHook
