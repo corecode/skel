@@ -63,6 +63,9 @@ xcompmgr &
 # drop cursor if not needed
 unclutter -noevents &
 
+# sync selection and clipboard
+autocutsel -selection PRIMARY -buttonup -fork &
+
 # xscreensaver does blanking and locking
 xscreensaver -nosplash &
 
