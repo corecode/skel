@@ -7,6 +7,10 @@
 (global-set-key (kbd "M-/") 'hippie-expand-no-case-fold)
 (global-set-key (kbd "M-?") 'hippie-expand-lines)
 
+;; hook up man
+(define-key help-map (kbd "C-m") 'man)
+(define-key help-map (kbd "M") 'man)
+
 ;; Smart M-x
 (global-set-key (kbd "M-x") 'smex)
 (global-set-key (kbd "M-X") 'smex-major-mode-commands)
