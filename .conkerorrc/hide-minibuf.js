@@ -37,6 +37,18 @@ minibuffer.prototype.hide = function () {
     hide_minibuffer(this.window);
 };
 
+minibuffer.prototype.maybe_hide = function () {
+    if (!this.active) {
+        this.hide();
+    } else {
+        var self = this;
+        if (minibuffer_autohide_timer)
+            timer_cancel(minibuffer_autohide_timer);
+        minibuffer_autohide_timer = call_after_timeout(
+            function (I) {self.maybe_hide();}, minibuffer_autohide_message_timeout);
+    }
+};
+
 minibuffer.prototype.show = function (str, force, hide_after_timeout) {
     var w = this.window;
     var self = this;
@@ -46,7 +58,7 @@ minibuffer.prototype.show = function (str, force, hide_after_timeout) {
         timer_cancel(minibuffer_autohide_timer);
     if (hide_after_timeout || hide_after_timeout == null) {
         minibuffer_autohide_timer = call_after_timeout(
-            function (I) {self.hide();}, minibuffer_autohide_message_timeout);
+            function (I) {self.maybe_hide();}, minibuffer_autohide_message_timeout);
     }
 };
 
