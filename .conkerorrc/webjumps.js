@@ -11,6 +11,9 @@ function possibly_valid_url (str) {
         && /[:\.]/.test(str);
 }
 
+// 2c webjumps
+define_webjump("o", "http://octopart.com/search?q=%s");
+
 // Webjump oneliners
 define_webjump("leo", "http://dict.leo.org/?lp=ende&lang=de&searchLoc=0&cmpType=relaxed&relink=on&sectHdr=off&spellToler=std&search=%s");
 define_webjump("wolframalpha", "http://www.wolframalpha.com/input/?i=%s");
