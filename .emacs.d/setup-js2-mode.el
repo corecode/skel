@@ -66,7 +66,7 @@
 
 ;; Use right arrow for return in one-line functions
 (font-lock-add-keywords
- 'js2-mode `(("function *([^)]*) *{ *\\(return\\) "
+ 'js2-mode `(("\\(?:function\\|get +\\(?:\\sw\\|\\s_\\)+\\) *([^)]*) *{ *\\(return\\) "
               (0 (progn (compose-region (match-beginning 1)
                                         (match-end 1) "\u2190")
                         nil)))))
