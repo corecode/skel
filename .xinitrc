@@ -65,6 +65,7 @@ unclutter -noevents &
 
 # sync selection and clipboard
 autocutsel -selection PRIMARY -buttonup -fork &
+autocutsel -selection CLIPBOARD -fork &
 
 # xscreensaver does blanking and locking
 xscreensaver -nosplash &
