@@ -8,4 +8,4 @@ require("block-content-focus-change.js");
 
 require("dom-inspector.js");
 
-set_user_agent("Mozilla/6.0 (X11; U; Linux x86_64; en-US; rv:16.0.1) Gecko/20121011 Firefox/16.0.1");
+set_user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:18.0) Gecko/20100101 Firefox/18.0");
