@@ -27,6 +27,7 @@
 (add-to-list 'dtrt-indent-hook-mapping-list
              '(js2-mode c/c++/java    js2-basic-offset))
 (dtrt-indent-mode 1)
+(setq global-mode-string (delq 'dtrt-indent-mode-line-info global-mode-string))
 
 ;; make <tab> do the right thing
 (require 'smart-tab)
