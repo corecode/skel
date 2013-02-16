@@ -11,4 +11,6 @@
 (add-hook 'emacs-lisp-mode-hook (lambda () (eldoc-mode 1)))
 (diminish 'eldoc-mode)
 
+(require 'quack)
+
 (provide 'setup-lisp-mode)
