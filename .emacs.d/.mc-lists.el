@@ -3,24 +3,30 @@
 
 (setq mc/cmds-to-run-for-all
       '(
-	js2-end-of-line
-	jump-char-forward
-	jump-char-process-char
-	jump-char-repeat-backward
-	kill-region-or-backward-word
-	paredit-comment-dwim
-	paredit-forward
-	paredit-forward-delete
-	paredit-forward-slurp-sexp
-	paredit-kill
-	paredit-open-round
-	paredit-splice-sexp
-	save-region-or-current-line
-	))
+        indent-pp-sexp
+        js2-end-of-line
+        jump-char-forward
+        jump-char-process-char
+        jump-char-repeat-backward
+        kill-region-or-backward-word
+        paredit-backward-kill-word
+        paredit-comment-dwim
+        paredit-forward
+        paredit-forward-delete
+        paredit-forward-kill-word
+        paredit-forward-slurp-sexp
+        paredit-kill
+        paredit-open-round
+        paredit-splice-sexp
+        quack-insert-closing-paren
+        quack-insert-opening-paren
+        save-region-or-current-line
+        ))
 
 (setq mc/cmds-to-run-once
       '(
-	ace-jump-mode
-	smex
-	universal-argument-minus
-	))
+        ace-jump-mode
+        paredit-doublequote
+        smex
+        universal-argument-minus
+        ))
