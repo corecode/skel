@@ -92,6 +92,7 @@
         highlight-indentation
         ;; idle-highlight-mode
         ido-ubiquitous
+        iedit
         inf-ruby
         json
         js2-mode
