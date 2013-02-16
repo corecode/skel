@@ -92,6 +92,7 @@
 ;; Run at full power please
 (put 'downcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
+(put 'erase-buffer 'disabled nil)
 
 ;; text editing tools
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
