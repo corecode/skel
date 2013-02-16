@@ -7,3 +7,9 @@
 [submodule ".emacs.d/themes/blackboard-theme"]
 	path = .emacs.d/themes/blackboard-theme
 	url = git://github.com/don9z/blackboard-theme.git
+[submodule ".emacs.d/site-lisp/dtrt-indent"]
+	path = .emacs.d/site-lisp/dtrt-indent
+	url = git://git.sv.gnu.org/dtrt-indent.git
+[submodule ".emacs.d/site-lisp/helm-etags-plus"]
+	path = .emacs.d/site-lisp/helm-etags-plus
+	url = git://github.com/jixiuf/helm-etags-plus.git
