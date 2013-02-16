@@ -91,7 +91,7 @@
 
 ;; Make shell more convenient, and suspend-frame less
 (global-set-key (kbd "C-t") 'multi-term)
-(global-set-key (kbd "C-z") 'shell)
+;(global-set-key (kbd "C-z") 'shell)
 (global-set-key (kbd "C-x M-z") 'suspend-frame)
 
 ;; Zap to char
