@@ -28,7 +28,8 @@
 
 ;; default font
 (setq default-frame-alist (assq-delete-all 'font default-frame-alist))
-(add-to-list 'default-frame-alist '(font . "Liberation Mono-10.5:weight=normal"))
+(setq default-frame-alist (delq (assoc 'font default-frame-alist) default-frame-alist))
+(add-to-list 'default-frame-alist '(font . "Liberation Mono-10:weight=normal"))
 ;; "Anonymous Pro 11"
 ;; "Inconsolata 13"
 ;; "Droid Sans Mono-11"
