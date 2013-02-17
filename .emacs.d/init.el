@@ -122,6 +122,7 @@
         powerline
         python-mode                     ; needs to be loaded after
                                         ; ruby-*, or ruby-mode will break
+        quack
         s
         session
         slime

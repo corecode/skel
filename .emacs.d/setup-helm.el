@@ -5,3 +5,5 @@
 (global-set-key (kbd "M-*") 'helm-etags+-history)
 (global-set-key (kbd "M-,") 'helm-etags+-history-go-back)
 (global-set-key (kbd "M-/") 'helm-etags+-history-go-forward)
+
+(provide 'setup-helm)
