@@ -6,11 +6,25 @@
 (add-hook 'lisp-mode-hook 'enable-paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
 (add-hook 'clojure-mode-hook 'enable-paredit-mode)
+(add-hook 'nrepl-mode-hook 'enable-paredit-mode)
 
 (require 'eldoc)
 (add-hook 'emacs-lisp-mode-hook (lambda () (eldoc-mode 1)))
+(add-hook 'nrepl-interaction-mode-hook 'nrepl-turn-on-eldoc-mode)
 (diminish 'eldoc-mode)
 
-(require 'quack)
+;; dim + colored parens
+(dolist (mode '(clojure-mode-hook
+                emacs-lisp-mode-hook
+                ielm-mode-hook
+                inferior-jess-mode-hook
+                jess-mode-hook
+                lisp-interaction-mode-hook
+                lisp-mode-hook
+                nrepl-mode-hook
+                scheme-mode-hook
+                slime-repl-mode-hook))
+  (add-hook mode 'rainbow-delimiters-mode-enable))
+
 
 (provide 'setup-lisp-mode)

@@ -65,6 +65,8 @@
         ;; csharp-mode
         ;; coffee-mode
         change-inner
+        clojure-mode
+        clojure-project-mode
         color-moccur
         dash
         diminish
@@ -109,6 +111,7 @@
         multi-term
         multifiles
         multiple-cursors
+        nrepl
         ;; oddmuse
         paredit
         ;; php-mode
