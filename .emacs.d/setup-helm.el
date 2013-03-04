@@ -6,4 +6,6 @@
 (global-set-key (kbd "M-,") 'helm-etags+-history-go-back)
 (global-set-key (kbd "M-/") 'helm-etags+-history-go-forward)
 
+(setq helm-etags+-markers (make-ring 100))
+
 (provide 'setup-helm)
