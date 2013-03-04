@@ -162,6 +162,7 @@
 (require 'setup-indent)
 (require 'setup-term)
 (require 'setup-helm)
+(require 'setup-tex)
 
 ;; Language specific setup files
 (eval-after-load 'js2-mode '(require 'setup-js2-mode))
