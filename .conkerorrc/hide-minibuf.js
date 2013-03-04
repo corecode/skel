@@ -72,4 +72,9 @@ minibuffer.prototype.clear = function () {
     old_minibuffer_clear.call(this);
 };
 
+// make minibuffer and mode-line the same height so that switching
+// between them won't trigger rendering.
+register_user_stylesheet(make_css_data_uri(
+    ["#minibuffer, hbox.mode-line { height: 1.5em !important; "]));
+
 add_hook("window_initialize_hook", function (I) {I.window.minibuffer.hide();});
