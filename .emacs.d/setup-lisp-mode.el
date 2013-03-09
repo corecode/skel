@@ -3,10 +3,14 @@
 (add-hook 'emacs-lisp-mode-hook (lambda () (elisp-slime-nav-mode t)))
 (eval-after-load 'elisp-slime-nav '(diminish 'elisp-slime-nav-mode))
 
+(require 'nrepl)
+
 (add-hook 'lisp-mode-hook 'enable-paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
 (add-hook 'clojure-mode-hook 'enable-paredit-mode)
 (add-hook 'nrepl-mode-hook 'enable-paredit-mode)
+
+(define-key nrepl-interaction-mode-map (kbd "C-c v") 'nrepl-eval-buffer)
 
 (require 'eldoc)
 (add-hook 'emacs-lisp-mode-hook (lambda () (eldoc-mode 1)))
