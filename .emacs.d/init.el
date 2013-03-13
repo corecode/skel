@@ -116,12 +116,12 @@
         paredit
         ;; php-mode
         ;; rinari
+        rainbow-delimiters
         ruby-compilation
         ruby-block
         ruby-end
         ruby-mode
         rvm
-        parenface-plus
         powerline
         python-mode                     ; needs to be loaded after
                                         ; ruby-*, or ruby-mode will break
