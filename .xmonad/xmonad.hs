@@ -145,6 +145,7 @@ altMask = mod1Mask
 
 myKeys conf = M.fromList $
     [ ((myModMask              , xK_Return), spawn $ XMonad.terminal conf)
+    , ((myModMask .|. controlMask, xK_space), windows $ withOtherWorkspace S.greedyView)
     , ((myModMask .|. shiftMask, xK_e     ), spawn "e -c")
     , ((altMask .|. controlMask, xK_l     ), spawn "xscreensaver-command -lock")
     , ((myModMask,               xK_p     ), spawn "dmenu-launch") -- %! Launch dmenu
@@ -184,6 +185,10 @@ myKeys conf = M.fromList $
     | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
     , (f, m) <- [(S.view, 0), (liftM2 (.) S.view S.shift, controlMask)]]
 
+
+withOtherWorkspace f ws = f (otherWorkspace ws) ws
+  where
+    otherWorkspace = S.tag . S.workspace . head . S.visible
 
 -- move mouse cursor when we switch focus by keyboard
 myLogHook = updatePointer (Relative 0.5 0.5)
