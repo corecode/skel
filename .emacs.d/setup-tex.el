@@ -1,7 +1,8 @@
 (setq-default TeX-master 'dwim)
 (setq-default TeX-auto-save t
               TeX-parse-self t
-              reftex-plug-into-AUCTeX t)
+              reftex-plug-into-AUCTeX t
+              TeX-newline-function 'reindent-then-newline-and-indent)
 
 (add-hook 'LaTeX-mode-hook (lambda ()
                              (visual-line-mode t)
