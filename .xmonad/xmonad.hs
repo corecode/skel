@@ -145,13 +145,14 @@ altMask = mod1Mask
 
 myKeys conf = M.fromList $
     [ ((myModMask              , xK_Return), spawn $ XMonad.terminal conf)
+    , ((myModMask              , xK_space), windows $ withOtherWorkspace S.view)
     , ((myModMask .|. controlMask, xK_space), windows $ withOtherWorkspace S.greedyView)
     , ((myModMask .|. shiftMask, xK_e     ), spawn "e -c")
     , ((altMask .|. controlMask, xK_l     ), spawn "xscreensaver-command -lock")
     , ((myModMask,               xK_p     ), spawn "dmenu-launch") -- %! Launch dmenu
     , ((myModMask .|. shiftMask, xK_p     ), spawn "gmrun") -- %! Launch gmrun
     , ((myModMask              , xK_c     ), kill)
-    , ((myModMask              , xK_space ), sendMessage NextLayout)
+    , ((myModMask .|. shiftMask, xK_space ), sendMessage NextLayout)
     , ((myModMask              , xK_n     ), refresh)
     , ((myModMask              , xK_m     ), windows S.swapMaster)
     , ((altMask                , xK_Tab   ), windows S.focusDown)
