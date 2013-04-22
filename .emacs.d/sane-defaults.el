@@ -59,6 +59,8 @@
 
 ;; ;; Never insert tabs
 ;; (set-default 'indent-tabs-mode nil)
+(setq-default whitespace-style
+              '(face trailing empty space-before-tab))
 (global-whitespace-mode 1)
 (diminish 'global-whitespace-mode)
 
