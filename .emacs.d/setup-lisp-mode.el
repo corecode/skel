@@ -5,12 +5,16 @@
 
 (require 'nrepl)
 
-(add-hook 'lisp-mode-hook 'enable-paredit-mode)
-(add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
-(add-hook 'clojure-mode-hook 'enable-paredit-mode)
-(add-hook 'nrepl-mode-hook 'enable-paredit-mode)
+(dolist (mode '(lisp-mode-hook
+                emacs-lisp-mode-hook
+                clojure-mode-hook
+                nrepl-mode-hook
+                scheme-mode-hook
+                inferior-scheme-mode-hook))
+  (add-hook mode 'enable-paredit-mode))
 
 (define-key nrepl-interaction-mode-map (kbd "C-c v") 'nrepl-eval-buffer)
+(define-key nrepl-interaction-mode-map (kbd "TAB") 'nrepl-tab)
 
 (require 'eldoc)
 (add-hook 'emacs-lisp-mode-hook (lambda () (eldoc-mode 1)))
@@ -27,6 +31,7 @@
                 lisp-mode-hook
                 nrepl-mode-hook
                 scheme-mode-hook
+                inferior-scheme-mode-hook
                 slime-repl-mode-hook))
   (add-hook mode 'rainbow-delimiters-mode-enable))
 

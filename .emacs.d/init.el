@@ -57,8 +57,9 @@
 (setq my:packages
       '(
         auctex
-        ac-slime
+        ac-nrepl
         ace-jump-mode
+        popup
         auto-complete
         auto-indent-mode
         browse-kill-ring
@@ -159,7 +160,7 @@
 (eval-after-load 'magit '(require 'setup-magit))
 (eval-after-load 'grep '(require 'setup-rgrep))
 (require 'setup-hippie)
-(require 'setup-yasnippet)
+;; (require 'setup-yasnippet)
 (require 'setup-ffip)
 (require 'setup-paredit)
 (require 'setup-indent)
@@ -173,6 +174,7 @@
 (eval-after-load 'markdown-mode '(require 'setup-markdown-mode))
 (eval-after-load 'cc-mode '(require 'setup-cc-mode))
 (eval-after-load 'lisp-mode '(require 'setup-lisp-mode))
+(eval-after-load 'systemtap-mode '(require 'setup-systemtap-mode))
 
 ;; ;; Load slime-js when asked for
 ;; (autoload 'slime-js-jack-in-browser "setup-slime-js" nil t)

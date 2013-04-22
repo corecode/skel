@@ -38,12 +38,16 @@
 (setq smart-tab-completion-functions-alist
       (assq-delete-all 'emacs-lisp-mode smart-tab-completion-functions-alist))
 
+;; nrepl works better than smart-tab
+(add-hook 'nrepl-interaction-mode-hook 'smart-tab-mode-off)
+
 ;; w3m does not like smart-tab-mode
 ;; solution from <http://stackoverflow.com/questions/6837511/automatically-disable-a-global-minor-mode-for-a-specific-major-mode>
 (define-globalized-minor-mode global-smart-tab-mode
   smart-tab-mode
   (lambda ()
-    (unless (eq major-mode 'w3m-mode)
+    (unless (or (eq major-mode 'w3m-mode)
+                (and (boundp 'nrepl-interaction-mode) nrepl-interaction-mode))
       (smart-tab-mode-on)))
   :group 'smart-tab)
 
