@@ -194,6 +194,7 @@
 (require 'multiple-cursors)
 (require 'delsel)
 (require 'jump-char)
+(require 'iedit)
 (require 'eproject)
 (require 'wgrep)
 (require 'smart-forward)
