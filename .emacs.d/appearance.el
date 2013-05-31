@@ -18,7 +18,7 @@
 (set-face-background 'hl-line "#222222")
 
 ;; Highlight in yasnippet
-(set-face-background 'yas-field-highlight-face "#333399")
+;;(set-face-background 'yas-field-highlight-face "#333399")
 
 (set-face-foreground 'font-lock-warning-face "#ff6666")
 
