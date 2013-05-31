@@ -20,6 +20,14 @@
       (ruby--jump-to-lib)
     (ruby--jump-to-test)))
 
+(defun insert-hashrocket ()
+  "Inserts a hashrocket at point."
+  (interactive)
+  (unless (or (looking-at "\\s*=>\\s*") (looking-back "\\s*=>\\s*"))
+    (delete-horizontal-space)
+    (insert " => ")))
+
+(define-key ruby-mode-map (kbd "M-l") 'insert-hashrocket)
 (define-key ruby-mode-map (kbd "C-c t") 'ruby-jump-to-other)
 
 (provide 'setup-ruby-mode)
