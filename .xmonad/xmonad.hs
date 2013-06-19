@@ -83,7 +83,7 @@ import XMonad.Layout.WindowNavigation
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Util.WindowProperties
-import XMonad.Util.Run(spawnPipe)
+-- import XMonad.Util.Run(spawnPipe)
 import System.Exit
 import Control.Monad
 import Data.Ratio
@@ -167,9 +167,10 @@ myKeys conf = M.fromList $
     , ((myModMask              , xK_b     ), sendMessage (IncMasterN 1))
     , ((myModMask              , xK_v     ), sendMessage (IncMasterN (-1)))
     , ((myModMask .|. controlMask, xK_q   ), broadcastMessage ReleaseResources >> restart "xmonad" True)
+    , ((myModMask .|. controlMask, xK_backslash   ), broadcastMessage ReleaseResources >> restart "stumpwm" True)
     , ((myModMask .|. shiftMask .|. controlMask, xK_q     ), io (exitWith ExitSuccess)) -- %! Quit xmonad
-    , ((altMask .|. shiftMask  , xK_Left  ), prevWS)
-    , ((altMask .|. shiftMask  , xK_Right ), nextWS)
+    , ((myModMask .|. shiftMask  , xK_Left  ), prevWS)
+    , ((myModMask .|. shiftMask  , xK_Right ), nextWS)
     ] ++
     -- Alt/Win+F1..F10 switches to workspace
     -- (Alt is in a nicer location for the thumb than the Windows key,
