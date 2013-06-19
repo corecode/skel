@@ -10,4 +10,6 @@
 (defadvice kill-whole-line (after fix-cookies activate)
   (myorg-update-parent-cookie))
 
+(setq org-default-notes-file "~/.org/notes.org")
+
 (provide 'setup-org)

@@ -72,9 +72,11 @@
         dash
         diminish
         dired-details
+        edit-server
         elisp-slime-nav
         ;; emacs-goodies-el
         eproject
+        erc-hl-nicks
         ess
         expand-region
         fill-column-indicator
@@ -167,6 +169,8 @@
 (require 'setup-term)
 (require 'setup-helm)
 (require 'setup-tex)
+(require 'setup-jabber)
+(require 'setup-erc)
 
 ;; Language specific setup files
 (eval-after-load 'js2-mode '(require 'setup-js2-mode))
@@ -224,6 +228,9 @@
 (require 'setup-auth)
 
 (require 'setup-desktop)
+
+(require 'edit-server)
+(edit-server-start)
 
 ;; Emacs server
 (require 'server)

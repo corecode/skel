@@ -204,7 +204,13 @@
 (global-set-key (kbd "C-c v") 'eval-buffer)
 
 ;; Create scratch buffer
-(global-set-key (kbd "C-c b") 'create-scratch-buffer)
+(global-set-key (kbd "C-c C-b") 'create-scratch-buffer)
+
+;; Org-mode globals
+(global-set-key (kbd "C-c l") 'org-store-link)
+(global-set-key (kbd "C-c c") 'org-capture)
+(global-set-key (kbd "C-c a") 'org-agenda)
+(global-set-key (kbd "C-c b") 'org-iswitchb)
 
 ;; Move windows, even in org-mode
 (global-set-key (kbd "<s-right>") 'windmove-right)

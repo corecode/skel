@@ -2,6 +2,7 @@
 
 (setq term-unbind-key-list
       '("M-x"
+        "C-c"
         "C-x"
         "C-t"
         "S-<left>"
@@ -11,7 +12,7 @@
 ;; from multi-term.el, just use C-s and C-p with prefix.
 (setq term-bind-key-alist
       '(
-        ("C-c" . term-interrupt-subjob)
+        ("C-c C-c" . term-interrupt-subjob)
         ("C-p" . previous-line)
         ("C-n" . next-line)
         ("M-C-s" . isearch-forward)
