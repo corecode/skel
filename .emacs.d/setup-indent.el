@@ -46,7 +46,9 @@
 (define-globalized-minor-mode global-smart-tab-mode
   smart-tab-mode
   (lambda ()
-    (unless (or (eq major-mode 'w3m-mode)
+    (unless (or (memq major-mode '(w3m-mode
+                                   jabber-chat-mode
+                                   erc-mode))
                 (and (boundp 'nrepl-interaction-mode) nrepl-interaction-mode))
       (smart-tab-mode-on)))
   :group 'smart-tab)

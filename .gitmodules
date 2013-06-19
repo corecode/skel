@@ -13,3 +13,6 @@
 [submodule ".emacs.d/site-lisp/helm-etags-plus"]
 	path = .emacs.d/site-lisp/helm-etags-plus
 	url = git://github.com/jixiuf/helm-etags-plus.git
+[submodule ".emacs.d/site-lisp/ZNC.el"]
+	path = .emacs.d/site-lisp/ZNC.el
+	url = git://github.com/sshirokov/ZNC.el.git
