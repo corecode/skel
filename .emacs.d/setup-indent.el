@@ -14,7 +14,7 @@
 ;; (auto-indent-global-mode 1)
 
 ;; RET = prepare indentation
-(global-set-key (kbd "RET") 'newline-and-indent)
+(global-set-key (kbd "RET") 'reindent-then-newline-and-indent)
 
 ;; default to indent 8, only use tabs in certain modes
 (setq-default standard-indent 8
