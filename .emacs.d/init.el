@@ -171,6 +171,8 @@
 (require 'setup-tex)
 (require 'setup-jabber)
 (require 'setup-erc)
+(require 'setup-browser)
+(require 'setup-autocommit)
 
 ;; Language specific setup files
 (eval-after-load 'js2-mode '(require 'setup-js2-mode))
