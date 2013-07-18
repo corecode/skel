@@ -14,9 +14,6 @@
                               "http://www.urbandictionary.com/define.php?term="
                               ""])))
 
-;; use w3m by default
-(setq browse-url-browser-function 'w3m-browse-url)
-
 ;; Various superfluous white-space. Just say no.
 (add-hook 'before-save-hook 'cleanup-buffer-safe)
 
