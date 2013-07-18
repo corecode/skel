@@ -85,7 +85,11 @@
   '(diminish 'eproject-mode))
 (eval-after-load 'abbrev
   '(diminish 'abbrev-mode))
-;; (diminish 'auto-fill-mode)
+(diminish 'auto-fill-function)          ; auto-fill-mode
+(eval-after-load 'helm-mode
+  '(diminish 'helm-mode))
+(eval-after-load 'flyspell
+  '(diminish 'flyspell-mode))
 
 ;; ;; Make zooming affect frame instead of buffers
 ;; (require 'zoom-frm)
