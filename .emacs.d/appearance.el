@@ -52,7 +52,7 @@
 
 (defun esk-add-watchwords ()
   (font-lock-add-keywords
-   nil '(("\\<\\(XXX\\|FIXME\\|TODO\\|FIX\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
+   nil '(("\\<\\(XXX\\|FIXME\\|TODO\\|FIX\\|HACK\\|REFACTOR\\|NOCOMMIT\\)\\>"
           1 font-lock-warning-face t))))
 
 (add-hook 'prog-mode-hook 'esk-pretty-lambdas)
