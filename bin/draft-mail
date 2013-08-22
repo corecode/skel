@@ -2,7 +2,7 @@
 
 if [ "$#" -eq 0 ]
 then
-	exec sendmail -oi corecode+drafts@fs.ei.tum.de
+	exec sendmail -oi 2+drafts@0x2c.org
 else
 	cnt=1
 	for f
