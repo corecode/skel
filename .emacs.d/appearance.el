@@ -24,7 +24,7 @@
 
 ;; use fancy mode-line
 (require 'powerline)
-(powerline-default)
+(powerline-default-theme)
 
 ;; default font
 (setq default-frame-alist (assq-delete-all 'font default-frame-alist))
