@@ -6,6 +6,7 @@
  ;; If there is more than one, they won't work right.
  '(auto-indent-next-pair-timer-geo-mean (quote ((default 0.0005 0))))
  '(auto-indent-next-pair-timer-interval (quote ((default 0.0005))))
+ '(custom-safe-themes (quote ("f641bdb1b534a06baa5e05ffdb5039fb265fde2764fbfd9a90b0d23b75f3936b" default)))
  '(erc-modules (quote (completion move-to-prompt stamp spelling truncate hl-nicks netsplit fill button match track readonly networks ring autojoin noncommands irccontrols move-to-prompt menu list scroll-conservatively)))
  '(org-agenda-files (quote ("~/.org/notes.org" "~/.org/todo.org")))
  '(org-log-into-drawer t)
