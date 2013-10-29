@@ -8,13 +8,19 @@
 (dolist (mode '(lisp-mode-hook
                 emacs-lisp-mode-hook
                 clojure-mode-hook
-                nrepl-mode-hook
+                nrepl-repl-mode-hook
                 scheme-mode-hook
                 inferior-scheme-mode-hook))
   (add-hook mode 'enable-paredit-mode))
 
 (define-key nrepl-interaction-mode-map (kbd "C-c v") 'nrepl-eval-buffer)
 (define-key nrepl-interaction-mode-map (kbd "TAB") 'nrepl-tab)
+
+(defun nrepl-goto-prompt ()
+  (interactive)
+  (goto-char nrepl-input-start-mark))
+(define-key nrepl-repl-mode-map (kbd "C-a") 'nrepl-goto-prompt)
+(define-key nrepl-repl-mode-map (kbd "C-S-k") 'nrepl-delete-current-input)
 
 (require 'eldoc)
 (add-hook 'emacs-lisp-mode-hook (lambda () (eldoc-mode 1)))
@@ -29,7 +35,7 @@
                 jess-mode-hook
                 lisp-interaction-mode-hook
                 lisp-mode-hook
-                nrepl-mode-hook
+                nrepl-repl-mode-hook
                 scheme-mode-hook
                 inferior-scheme-mode-hook
                 slime-repl-mode-hook))

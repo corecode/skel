@@ -3,12 +3,14 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        delete-horizontal-space
         indent-pp-sexp
         js2-end-of-line
         jump-char-forward
         jump-char-process-char
         jump-char-repeat-backward
         kill-region-or-backward-word
+        org-self-insert-command
         paredit-backward-kill-word
         paredit-comment-dwim
         paredit-forward
@@ -21,11 +23,13 @@
         quack-insert-closing-paren
         quack-insert-opening-paren
         save-region-or-current-line
+        smart-tab
         ))
 
 (setq mc/cmds-to-run-once
       '(
         ace-jump-mode
+        org-cycle
         paredit-doublequote
         smex
         universal-argument-minus

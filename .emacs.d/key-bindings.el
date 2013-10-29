@@ -311,6 +311,9 @@
 (global-set-key (kbd "C-x o") 'other-mru-window)
 (global-set-key (kbd "C-x w") 'other-window)
 
+;; downcase-/upcase-region is evil
+(global-set-key (kbd "C-x C-l") nil)
+(global-set-key (kbd "C-x C-u") nil)
 
 ;; w3m M-n like M-p
 (eval-after-load 'w3m
