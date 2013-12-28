@@ -130,7 +130,7 @@ myLayoutHook = smartBorders (fullscreen $ im $ normal) where
 
 -- special treatment for specific windows:
 -- put the Pidgin and Skype windows in the im workspace
-myManageHook = manageDocks <+> fullscreenManageHooks <+> imManageHooks <+> manageHook myBaseConfig
+myManageHook = manageDocks <+> fullscreenManageHooks <+> imManageHooks <+> floatManageHooks <+> manageHook myBaseConfig
 -- fullscreenManageHooks = composeAll [isFullscreen --> (doF S.focusDown <+> doFullFloat)]
 fullscreenManageHooks = composeOne [transience, isFullscreen -?> doFullFloat]
 imManageHooks = composeAll [isIM --> moveToIM] where
@@ -138,6 +138,9 @@ imManageHooks = composeAll [isIM --> moveToIM] where
     isPidgin = className =? "Pidgin"
     isSkype  = className =? "Skype"
     moveToIM = doF $ S.shift "10"
+
+floatManageHooks = composeAll [shouldFloat --> doFloat] where
+    shouldFloat = stringProperty "WM_NAME" =? "Crack Attack!"
 
 -- Mod4 is the Super / Windows key
 myModMask = mod4Mask
@@ -151,6 +154,7 @@ myKeys conf = M.fromList $
     , ((altMask .|. controlMask, xK_l     ), spawn "xscreensaver-command -lock")
     , ((myModMask,               xK_p     ), spawn "dmenu-launch") -- %! Launch dmenu
     , ((myModMask .|. shiftMask, xK_p     ), spawn "gmrun") -- %! Launch gmrun
+    , ((myModMask              , xK_i     ), spawn "xcalib -a -i")
     , ((myModMask              , xK_c     ), kill)
     , ((myModMask .|. shiftMask, xK_space ), sendMessage NextLayout)
     , ((myModMask              , xK_n     ), refresh)
