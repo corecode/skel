@@ -23,7 +23,9 @@
       jabber-roster-show-bindings nil
       jabber-roster-line-format " %c %-25n %u %-8s  %S"
                                         ; no avatars
-      jabber-roster-show-separators nil)
+      jabber-roster-show-separators nil
+      jabber-show-offline-contacts nil
+      jabber-show-resources nil)
 
 (set-face-attribute 'jabber-title-large nil :height 1.2)
 (set-face-attribute 'jabber-title-medium nil :height 1.0)
