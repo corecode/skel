@@ -17,4 +17,6 @@
       '(("t" "Task" entry (file+headline "" "Tasks") "* TODO %?\n  %u\n  %a")
         ("n" "Note" entry (file+headline "~/.org/notes.org" "Notes") "* %?\n  %u\n  %a")))
 
+(define-key org-mode-map (kbd "C-'") nil)
+
 (provide 'setup-org)
