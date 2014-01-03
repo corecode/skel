@@ -16,7 +16,16 @@
 
 ;; colour
 (setq jabber-muc-colorize-foreign t
-      jabber-muc-colorize-local t)
+      jabber-muc-colorize-local t
+      jabber-muc-participant-colors '(("paper_machine" . "#00006EEEFFFF")
+                                      ("MadCow" . "#0000FFFF3FFF")
+                                      ("UlliBre" . "#CCCBFFFF0000")
+                                      ("libe" . "#D5540000FFFF")
+                                      ("MentalFloss" . "#62210000FFFF")
+                                      ("daho" . "#00008888FFFF")
+                                      ("chaoflow" . "#1999FFFF0000")
+                                      ("corecode" . "magenta")
+                                      ("tobias" . "#AEEE0000FFFF")))
 
 ;; roster
 (setq jabber-roster-show-title nil
