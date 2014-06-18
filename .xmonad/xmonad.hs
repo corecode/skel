@@ -130,7 +130,7 @@ myLayoutHook = smartBorders (fullscreen $ im $ normal) where
 
 -- special treatment for specific windows:
 -- put the Pidgin and Skype windows in the im workspace
-myManageHook = manageDocks <+> fullscreenManageHooks <+> imManageHooks <+> floatManageHooks <+> manageHook myBaseConfig
+myManageHook = manageDocks <+> fullscreenManageHooks <+> imManageHooks <+> floatManageHooks
 -- fullscreenManageHooks = composeAll [isFullscreen --> (doF S.focusDown <+> doFullFloat)]
 fullscreenManageHooks = composeOne [transience, isFullscreen -?> doFullFloat]
 imManageHooks = composeAll [isIM --> moveToIM] where
@@ -139,8 +139,12 @@ imManageHooks = composeAll [isIM --> moveToIM] where
     isSkype  = className =? "Skype"
     moveToIM = doF $ S.shift "10"
 
-floatManageHooks = composeAll [shouldFloat --> doFloat] where
-    shouldFloat = stringProperty "WM_NAME" =? "Crack Attack!"
+floatManageHooks = composeAll
+                   [ stringProperty "WM_NAME" =? "Crack Attack!" --> doFloat
+                   , className =? "Gimp"           --> doFloat
+                   , className =? "emulator-arm"   --> doFloat
+                   , className =? "emulator64-arm" --> doFloat
+                   ]
 
 -- Mod4 is the Super / Windows key
 myModMask = mod4Mask
