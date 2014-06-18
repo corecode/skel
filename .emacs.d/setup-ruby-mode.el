@@ -31,4 +31,6 @@
 (define-key ruby-mode-map (kbd "C-c t") 'ruby-jump-to-other)
 (define-key ruby-mode-map (kbd "C-h r") 'yari-helm)
 
+(add-hook 'ruby-mode-hook 'ruby-end-mode)
+
 (provide 'setup-ruby-mode)

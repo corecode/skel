@@ -29,4 +29,6 @@
   (make-local-variable 'scroll-conservatively)
   (setq scroll-conservatively 5))
 
+(setq-default erc-ignore-list '("ttmrichter!" "nox!" "evilbetty"))
+
 (provide 'setup-erc)

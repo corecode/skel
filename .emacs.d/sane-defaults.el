@@ -120,4 +120,10 @@
     (dotimes (i 10)
       (when (= p (point)) ad-do-it))))
 
+(eval-after-load 'mailcap
+  '(mailcap-add "application/pdf" "evince %s"))
+
+;; fix faces
+(defface popup-mouse-face nil nil)
+
 (provide 'sane-defaults)

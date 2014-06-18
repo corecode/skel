@@ -4,6 +4,8 @@
 (setq mc/cmds-to-run-for-all
       '(
         delete-horizontal-space
+        electric-verilog-semi
+        iedit-mode
         indent-pp-sexp
         js2-end-of-line
         jump-char-forward

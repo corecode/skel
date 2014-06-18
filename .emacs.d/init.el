@@ -56,11 +56,12 @@
 
 (setq my:packages
       '(
+        android-mode
         auctex
         ac-nrepl
         ace-jump-mode
         popup
-        auto-complete
+        ;; auto-complete
         auto-indent-mode
         browse-kill-ring
         ;; csharp-mode
@@ -107,6 +108,7 @@
         magit
         magit-gh-pulls
         magit-push-remote
+        mailcap
         mark-multiple
         markdown-mode
         mediawiki
@@ -115,6 +117,7 @@
         multifiles
         multiple-cursors
         nrepl
+        org
         ;; oddmuse
         paredit
         ;; php-mode
@@ -174,6 +177,8 @@
 (require 'setup-browser)
 (require 'setup-autocommit)
 (require 'setup-verilog)
+(require 'setup-opengrok)
+(require 'setup-android)
 
 ;; Language specific setup files
 (eval-after-load 'js2-mode '(require 'setup-js2-mode))
