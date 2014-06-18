@@ -151,7 +151,7 @@ myKeys conf = M.fromList $
     , ((myModMask              , xK_space), windows $ withOtherWorkspace S.view)
     , ((myModMask .|. controlMask, xK_space), windows $ withOtherWorkspace S.greedyView)
     , ((myModMask .|. shiftMask, xK_e     ), spawn "e -c")
-    , ((altMask .|. controlMask, xK_l     ), spawn "xscreensaver-command -lock")
+    , ((altMask .|. controlMask, xK_l     ), spawn "sxlock -f fixed")
     , ((myModMask,               xK_p     ), spawn "dmenu-launch") -- %! Launch dmenu
     , ((myModMask .|. shiftMask, xK_p     ), spawn "gmrun") -- %! Launch gmrun
     , ((myModMask              , xK_i     ), spawn "xcalib -a -i")
