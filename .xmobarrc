@@ -5,12 +5,12 @@ Config { font = "xft:Terminus:pixelsize=10"
        , commands = [ Run MultiCpu ["-L", "5", "-H", "50", "--normal", "#b58900", "--high", "#dc322f"] 100
                     , Run Memory ["-t", "Mem: <usedratio>%"] 100
                     , Run Date "%a %b %_d %H:%M" "date" 600
-                    , Run Weather "LSGG" ["-t", "<tempC>C", "-L", "10", "-H", "25", "--low", "#268bd2", "--normal", "#859900", "--high", "#dc322f"] 18000
+                    , Run Weather "EDDT" ["-t", "<tempC>C", "-L", "10", "-H", "25", "--low", "#268bd2", "--normal", "#859900", "--high", "#dc322f"] 18000
                     , Run StdinReader
                     , Run Battery ["-L", "30", "-H", "70", "--high", "#859900", "--normal", "#b58900", "--low", "#dc322f"] 600
                     ]
         , sepChar = "%"
         , alignSep = "}{"
         , lowerOnStart = True
-        , template = "%StdinReader% }{ %multicpu% | %memory% | %battery% | %date% | GVA %LSGG% "
+        , template = "%StdinReader% }{ %multicpu% | %memory% | %battery% | %date% | %EDDT% "
 }
