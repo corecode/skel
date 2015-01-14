@@ -67,6 +67,12 @@ unclutter -noevents &
 autocutsel -selection PRIMARY -buttonup -fork &
 autocutsel -selection CLIPBOARD -fork &
 
+# xsettings to make java use antialias
+xsettingsd &
+
+# makes gtk happy and pick the right fonts?
+export GNOME_DESKTOP_SESSION_ID=foo
+
 # xscreensaver does blanking and locking
 xscreensaver -nosplash &
 
