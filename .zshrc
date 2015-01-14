@@ -7,6 +7,7 @@ setopt HIST_EXPIRE_DUPS_FIRST
 #setopt HIST_FIND_NO_DUPS
 setopt HIST_REDUCE_BLANKS
 setopt PUSHD_IGNORE_DUPS
+setopt NO_NOMATCH
 
 autoload -U colors; colors
 
