@@ -65,3 +65,10 @@ URxvt*url-select.button:		1
 URxvt*keysym.M-u:		perl:url-select:select_next
 URxvt*geometry:		80x25
 URxvt*urgentOnBell:	true
+
+Xft.autohint: 0
+Xft.lcdfilter:  lcddefault
+Xft.hintstyle:  hintfull
+Xft.hinting: 1
+Xft.antialias: 1
+Xft.rgba: rgb
