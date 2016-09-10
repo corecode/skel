@@ -1,7 +1,7 @@
 ;;; term.el --- general command interpreter in a window stuff
 
-;; Copyright (C) 1988, 1990, 1992, 1994, 1995, 2001, 2002, 2003,
-;;   2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+;; Copyright (C) 1988, 1990, 1992, 1994-1995, 2001-2015 Free Software
+;; Foundation, Inc.
 
 ;; Author: Per Bothner <per@bothner.com>
 ;; Maintainer: Dan Nicolaescu <dann@ics.uci.edu>, Per Bothner <per@bothner.com>
@@ -23,319 +23,314 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-;;; Marck 13 2001
-;;; Fixes for CJK support by Yong Lu <lyongu@yahoo.com>.
+;; Marck 13 2001
+;; Fixes for CJK support by Yong Lu <lyongu@yahoo.com>.
 
-;;; Dir/Hostname tracking and ANSI colorization by
-;;; Marco Melgazzi <marco@techie.com>.
+;; Dir/Hostname tracking and ANSI colorization by
+;; Marco Melgazzi <marco@techie.com>.
 
-;;; To see what I've modified and where it came from search for '-mm'
+;; To see what I've modified and where it came from search for '-mm'
 
 ;;; Commentary:
 
-;;; Speed considerations and a few caveats
-;;; --------------------------------------
-;;;
-;;; While the message passing and the colorization surely introduce some
-;;; overhead this has became so small that IMHO is surely outweighted by
-;;; the benefits you get but, as usual, YMMV
-;;;
-;;; Important caveat, when deciding the cursor/'grey keys' keycodes I had to
-;;; make a choice: on my Linux box this choice allows me to run all the
-;;; ncurses applications without problems but make these keys
-;;; uncomprehensible to all the cursesX programs.  Your mileage may vary so
-;;; you may consider changing the default 'emulation'.  Just search for this
-;;; piece of code and modify it as you like:
-;;;
-;;; ;; Which would be better:  "\e[A" or "\eOA"? readline accepts either.
-;;; ;; For my configuration it's definitely better \eOA but YMMV.  -mm
-;;; ;; For example: vi works with \eOA while elm wants \e[A ...
-;;; (defun term-send-up    () (interactive) (term-send-raw-string "\eOA"))
-;;; (defun term-send-down  () (interactive) (term-send-raw-string "\eOB"))
-;;; (defun term-send-right () (interactive) (term-send-raw-string "\eOC"))
-;;; (defun term-send-left  () (interactive) (term-send-raw-string "\eOD"))
-;;;
-;;;
-;;; IMPORTANT: additions & changes
-;;; ------------------------------
-;;;
-;;;  With this enhanced ansi-term.el you will get a reliable mechanism of
-;;; directory/username/host tracking: the only drawback is that you will
-;;; have to modify your shell start-up script.  It's worth it, believe me :).
-;;;
-;;; When you rlogin/su/telnet and the account you access has a modified
-;;; startup script, you will be able to access the remote files as usual
-;;; with C-x C-f, if it's needed you will have to enter a password,
-;;; otherwise the file should get loaded straight away.
-;;;
-;;; This is useful even if you work only on one host: it often happens that,
-;;; for maintenance reasons, you have to edit files 'as root': before
-;;; patching term.el, I su-ed in a term.el buffer and used vi :), now I
-;;; simply do a C-x C-f and, via ange-ftp, the file is automatically loaded
-;;; 'as-root'.  ( If you don't want to enter the root password every time you
-;;; can put it in your .netrc: note that this is -not- advisable if you're
-;;; connected to the internet or if somebody else works on your workstation!)
-;;;
-;;; If you use wu-ftpd you can use some of its features to avoid root ftp
-;;; access to the rest of the world: just put in /etc/ftphosts something like
-;;;
-;;; # Local access
-;;; allow	root		127.0.0.1
-;;;
-;;; # By default nobody can't do anything
-;;; deny	root		*
-;;;
-;;;
-;;;             ----------------------------------------
-;;;
-;;;  If, instead of 'term', you call 'ansi-term', you get multiple term
-;;; buffers, after every new call ansi-term opens a new *ansi-term*<xx> window,
-;;; where <xx> is, as usual, a number...
-;;;
-;;;             ----------------------------------------
-;;;
-;;;  With the term-buffer-maximum-size you can finally decide how many
-;;; scrollback lines to keep: its default is 2048 but you can change it as
-;;; usual.
-;;;
-;;;             ----------------------------------------
-;;;
-;;;
-;;;  ANSI colorization should work well, I've decided to limit the interpreter
-;;; to five outstanding commands (like ESC [ 01;04;32;41;07m.
-;;;  You shouldn't need more, if you do, tell me and I'll increase it.  It's
-;;; so easy you could do it yourself...
-;;;
-;;;  Blink, is not supported.  Currently it's mapped as bold.
-;;;
-;;; Important caveat:
-;;; -----------------
-;;;   if you want custom colors in term.el redefine term-default-fg-color
-;;;  and term-default-bg-color BEFORE loading it.
-;;;
-;;;             ----------------------------------------
-;;;
-;;;  If you'd like to check out my complete configuration, you can download
-;;; it from http://www.polito.it/~s64912/things.html, it's ~500k in size and
-;;; contains my .cshrc, .emacs and my whole site-lisp subdirectory.  (notice
-;;; that this term.el may be newer/older than the one in there, please
-;;; check!)
-;;;
-;;;  This complete configuration contains, among other things, a complete
-;;; rectangular marking solution (based on rect-mark.el and
-;;; pc-bindings.el) and should be a good example of how extensively Emacs
-;;; can be configured on a ppp-connected ws.
-;;;
-;;;             ----------------------------------------
-;;;
-;;;  TODO:
-;;;
-;;;  - Add hooks to allow raw-mode keys to be configurable
-;;;  - Which keys are better ? \eOA or \e[A ?
-;;;
-;;;
-;;;  Changes:
-;;;
-;;; V4.0 January 1997
-;;;
-;;;   - Huge reworking of the faces code: now we only have roughly 20-30
-;;;     faces for everything so we're even faster than the old md-term.el !
-;;;   - Finished removing all the J-Shell code.
-;;;
-;;;  V3.0 January 1997
-;;;
-;;;  - Now all the supportable ANSI commands work well.
-;;;  - Reworked a little the code: much less jsh-inspired stuff
-;;;
-;;;  V2.3 November
-;;;
-;;;  - Now all the faces are accessed through an array: much cleaner code.
-;;;
-;;;  V2.2 November 4 1996
-;;;
-;;;  - Implemented ANSI output colorization ( a bit rough but enough for
-;;;    color_ls )
-;;;
-;;;  - Implemented a maximum limit for the scroll buffer (stolen from
-;;;    comint.el)
-;;;
-;;;  v2.1 October 28 1996, first public release
-;;;
-;;;  - Some new keybindings for term-char mode ( notably home/end/...)
-;;;  - Directory, hostname and username tracking via ange-ftp
-;;;  - Multi-term capability via the ansi-term call
-;;;
-;;;  ----------------------------------------------------------------
-;;;  You should/could have something like this in your .emacs to take
-;;;  full advantage of this package
-;;;
-;;;  (add-hook 'term-mode-hook
-;;;  		  (function
-;;;  		   (lambda ()
-;;;  			 (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
-;;;  			 (make-local-variable 'mouse-yank-at-point)
-;;;  			 (make-local-variable 'transient-mark-mode)
-;;;  			 (setq mouse-yank-at-point t)
-;;;  			 (setq transient-mark-mode nil)
-;;;  			 (auto-fill-mode -1)
-;;;  			 (setq tab-width 8 ))))
-;;;
-;;;
-;;;             ----------------------------------------
-;;;
-;;;  If you want to use color ls the best setup is to have a different file
-;;; when you use eterm ( see above, mine is named .emacs_dircolors ).  This
-;;; is necessary because some terminals, rxvt for example, need non-ansi
-;;; hacks to work ( for example on my rxvt white is wired to fg, and to
-;;; obtain normal white I have to do bold-white :)
-;;;
-;;;             ----------------------------------------
-;;;
-;;;
-;;;  # Configuration file for the color ls utility
-;;;  # This file goes in the /etc directory, and must be world readable.
-;;;  # You can copy this file to .dir_colors in your $HOME directory to
-;;;  # override the system defaults.
-;;;
-;;;  # COLOR needs one of these arguments: 'tty' colorizes output to ttys, but
-;;;  # not pipes.  'all' adds color characters to all output.  'none' shuts
-;;;  # colorization off.
-;;;  COLOR tty
-;;;  OPTIONS -F
-;;;
-;;;  # Below, there should be one TERM entry for each termtype that is
-;;;  # colorizable
-;;;  TERM eterm
-;;;
-;;;  # EIGHTBIT, followed by '1' for on, '0' for off.  (8-bit output)
-;;;  EIGHTBIT 1
-;;;
-;;;  # Below are the color init strings for the basic file types.  A color init
-;;;  # string consists of one or more of the following numeric codes:
-;;;  # Attribute codes:
-;;;  # 00=none 01=bold 04=underscore 05=blink 07=reverse 08=concealed
-;;;  # Text color codes:
-;;;  # 30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
-;;;  # Background color codes:
-;;;  # 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
-;;;  NORMAL 00	# global default, although everything should be something.
-;;;  FILE 00 		# normal file
-;;;  DIR 00;37 	# directory
-;;;  LINK 00;36 	# symbolic link
-;;;  FIFO 00;37	# pipe
-;;;  SOCK 40;35	# socket
-;;;  BLK 33;01	# block device driver
-;;;  CHR 33;01 	# character device driver
-;;;
-;;;  # This is for files with execute permission:
-;;;  EXEC 00;32
-;;;
-;;;  # List any file extensions like '.gz' or '.tar' that you would like ls
-;;;  # to colorize below.  Put the extension, a space, and the color init
-;;;  # string.  (and any comments you want to add after a '#')
-;;;  .tar 01;33 # archives or compressed
-;;;  .tgz 01;33
-;;;  .arj 01;33
-;;;  .taz 01;33
-;;;  .lzh 01;33
-;;;  .zip 01;33
-;;;  .z   01;33
-;;;  .Z   01;33
-;;;  .gz  01;33
-;;;  .jpg 01;35 # image formats
-;;;  .gif 01;35
-;;;  .bmp 01;35
-;;;  .xbm 01;35
-;;;  .xpm 01;35
-;;;
-;;;
-;;;             ----------------------------------------
-;;;
-;;;  Notice: for directory/host/user tracking you need to have something
-;;; like this in your shell startup script ( this is for tcsh but should
-;;; be quite easy to port to other shells )
-;;;
-;;;             ----------------------------------------
-;;;
-;;;
-;;;  	 set os = `uname`
-;;;  	 set host = `hostname`
-;;;  	 set date = `date`
-;;;
-;;;  # su does not change this but I'd like it to
-;;;
-;;;  	 set user = `whoami`
-;;;
-;;;  # ...
-;;;
-;;;  	 if ( eterm =~ $TERM ) then
-;;;
-;;;  		echo --------------------------------------------------------------
-;;;  		echo Hello $user
-;;;  		echo Today is $date
-;;;  		echo We are on $host running $os under Emacs term mode
-;;;  		echo --------------------------------------------------------------
-;;;
-;;;  		setenv EDITOR emacsclient
-;;;
-;;;   # Notice: $host and $user have been set before to 'hostname' and 'whoami'
-;;;   # this is necessary because, f.e., certain versions of 'su' do not change
-;;;   # $user, YMMV: if you don't want to fiddle with them define a couple
-;;;   # of new variables and use these instead.
-;;;   # NOTICE that there is a space between "AnSiT?" and $whatever NOTICE
-;;;
-;;;   # These are because we want the real cwd in the messages, not the login
-;;;   # time one !
-;;;
-;;; 		set cwd_hack='$cwd'
-;;; 		set host_hack='$host'
-;;; 		set user_hack='$user'
-;;;
-;;;   # Notice that the ^[ character is an ESC, not two chars.  You can
-;;;   # get it in various ways, for example by typing
-;;;   # echo -e '\033' > escape.file
-;;;   # or by using your favourite editor
-;;;
-;;; 		foreach temp (cd pushd)
-;;; 			alias $temp "$temp \!* ; echo 'AnSiTc' $cwd_hack"
-;;; 		end
-;;;   		alias popd 'popd ;echo "AnSiTc" $cwd'
-;;;
-;;;   # Every command that can modify the user/host/directory should be aliased
-;;;   # as follows for the tracking mechanism to work.
-;;;
-;;; 		foreach temp ( rlogin telnet rsh sh ksh csh tcsh zsh bash tcl su )
-;;; 			alias $temp "$temp \!* ; echo 'AnSiTh' $host_hack ; \
-;;; 					echo 'AnSiTu' $user_hack ;echo 'AnSiTc' $cwd_hack"
-;;; 		end
-;;;
-;;;   # Start up & use color ls
-;;;
-;;; 		echo "AnSiTh" $host
-;;; 		echo "AnSiTu" $user
-;;; 		echo "AnSiTc" $cwd
-;;;
-;;;   # some housekeeping
-;;;
-;;; 		unset cwd_hack
-;;; 		unset host_hack
-;;; 		unset user_hack
-;;; 		unset temp
-;;;
-;;; 		eval `/bin/dircolors /home/marco/.emacs_dircolors`
-;;;    endif
-;;;
-;;;  # ...
-;;;
-;;;  # Let's not clutter user space
-;;;
-;;;  	 unset os
-;;;  	 unset date
-;;;
-;;;
+;; Speed considerations and a few caveats
+;; --------------------------------------
+;;
+;; While the message passing and the colorization surely introduce some
+;; overhead this has became so small that IMHO it is surely outweighed by
+;; the benefits you get but, as usual, YMMV.
+;;
+;; Important caveat, when deciding the cursor/'gray keys' keycodes I had to
+;; make a choice: on my Linux box this choice allows me to run all the
+;; ncurses applications without problems but make these keys
+;; incomprehensible to all the cursesX programs.  Your mileage may vary so
+;; you may consider changing the default 'emulation'.  Just search for this
+;; piece of code and modify it as you like:
+;;
+;; ;; Which would be better:  "\e[A" or "\eOA"? readline accepts either.
+;; ;; For my configuration it's definitely better \eOA but YMMV.  -mm
+;; ;; For example: vi works with \eOA while elm wants \e[A ...
+;; (defun term-send-up    () (interactive) (term-send-raw-string "\eOA"))
+;; (defun term-send-down  () (interactive) (term-send-raw-string "\eOB"))
+;; (defun term-send-right () (interactive) (term-send-raw-string "\eOC"))
+;; (defun term-send-left  () (interactive) (term-send-raw-string "\eOD"))
+;;
+;;
+;; IMPORTANT: additions & changes
+;; ------------------------------
+;;
+;;  With this enhanced ansi-term.el you will get a reliable mechanism of
+;; directory/username/host tracking: the only drawback is that you will
+;; have to modify your shell start-up script.  It's worth it, believe me :).
+;;
+;; When you rlogin/su/telnet and the account you access has a modified
+;; startup script, you will be able to access the remote files as usual
+;; with C-x C-f, if it's needed you will have to enter a password,
+;; otherwise the file should get loaded straight away.
+;;
+;; This is useful even if you work only on one host: it often happens that,
+;; for maintenance reasons, you have to edit files 'as root': before
+;; patching term.el, I su-ed in a term.el buffer and used vi :), now I
+;; simply do a C-x C-f and, via ange-ftp, the file is automatically loaded
+;; 'as-root'.  ( If you don't want to enter the root password every time you
+;; can put it in your .netrc: note that this is -not- advisable if you're
+;; connected to the internet or if somebody else works on your workstation!)
+;;
+;; If you use wu-ftpd you can use some of its features to avoid root ftp
+;; access to the rest of the world: just put in /etc/ftphosts something like
+;;
+;; # Local access
+;; allow	root		127.0.0.1
+;;
+;; # By default nobody can't do anything
+;; deny	root		*
+;;
+;;
+;;             ----------------------------------------
+;;
+;;  If, instead of 'term', you call 'ansi-term', you get multiple term
+;; buffers, after every new call ansi-term opens a new *ansi-term*<xx> window,
+;; where <xx> is, as usual, a number...
+;;
+;;             ----------------------------------------
+;;
+;;  With the term-buffer-maximum-size you can finally decide how many
+;; scrollback lines to keep: its default is 2048 but you can change it as
+;; usual.
+;;
+;;             ----------------------------------------
+;;
+;;
+;;  ANSI colorization should work well, I've decided to limit the interpreter
+;; to five outstanding commands (like ESC [ 01;04;32;41;07m.
+;;  You shouldn't need more, if you do, tell me and I'll increase it.  It's
+;; so easy you could do it yourself...
+;;
+;;  Blink, is not supported.  Currently it's mapped as bold.
+;;
+;;             ----------------------------------------
+;;
+;;  If you'd like to check out my complete configuration, you can download
+;; it from http://www.polito.it/~s64912/things.html, it's ~500k in size and
+;; contains my .cshrc, .emacs and my whole site-lisp subdirectory.  (notice
+;; that this term.el may be newer/older than the one in there, please
+;; check!)
+;;
+;;  This complete configuration contains, among other things, a complete
+;; rectangular marking solution (based on rect-mark.el and
+;; pc-bindings.el) and should be a good example of how extensively Emacs
+;; can be configured on a ppp-connected ws.
+;;
+;;             ----------------------------------------
+;;
+;;  TODO:
+;;
+;;  - Add hooks to allow raw-mode keys to be configurable
+;;  - Which keys are better ? \eOA or \e[A ?
+;;
+;;
+;;  Changes:
+;;
+;; V4.0 January 1997
+;;
+;;   - Huge reworking of the faces code: now we only have roughly 20-30
+;;     faces for everything so we're even faster than the old md-term.el !
+;;   - Finished removing all the J-Shell code.
+;;
+;;  V3.0 January 1997
+;;
+;;  - Now all the supportable ANSI commands work well.
+;;  - Reworked a little the code: much less jsh-inspired stuff
+;;
+;;  V2.3 November
+;;
+;;  - Now all the faces are accessed through an array: much cleaner code.
+;;
+;;  V2.2 November 4 1996
+;;
+;;  - Implemented ANSI output colorization ( a bit rough but enough for
+;;    color_ls )
+;;
+;;  - Implemented a maximum limit for the scroll buffer (stolen from
+;;    comint.el)
+;;
+;;  v2.1 October 28 1996, first public release
+;;
+;;  - Some new keybindings for term-char mode ( notably home/end/...)
+;;  - Directory, hostname and username tracking via ange-ftp
+;;  - Multi-term capability via the ansi-term call
+;;
+;;  ----------------------------------------------------------------
+;;  You should/could have something like this in your .emacs to take
+;;  full advantage of this package
+;;
+;;  (add-hook 'term-mode-hook
+;;  		  (function
+;;  		   (lambda ()
+;;  			 (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
+;;  			 (make-local-variable 'mouse-yank-at-point)
+;;  			 (make-local-variable 'transient-mark-mode)
+;;  			 (setq mouse-yank-at-point t)
+;;  			 (setq transient-mark-mode nil)
+;;  			 (auto-fill-mode -1)
+;;  			 (setq tab-width 8 ))))
+;;
+;;
+;;             ----------------------------------------
+;;
+;;  If you want to use color ls the best setup is to have a different file
+;; when you use eterm ( see above, mine is named .emacs_dircolors ).  This
+;; is necessary because some terminals, rxvt for example, need non-ansi
+;; hacks to work ( for example on my rxvt white is wired to fg, and to
+;; obtain normal white I have to do bold-white :)
+;;
+;;             ----------------------------------------
+;;
+;;
+;;  # Configuration file for the color ls utility
+;;  # This file goes in the /etc directory, and must be world readable.
+;;  # You can copy this file to .dir_colors in your $HOME directory to
+;;  # override the system defaults.
+;;
+;;  # COLOR needs one of these arguments: 'tty' colorizes output to ttys, but
+;;  # not pipes.  'all' adds color characters to all output.  'none' shuts
+;;  # colorization off.
+;;  COLOR tty
+;;  OPTIONS -F
+;;
+;;  # Below, there should be one TERM entry for each termtype that is
+;;  # colorizable
+;;  TERM eterm
+;;
+;;  # EIGHTBIT, followed by '1' for on, '0' for off.  (8-bit output)
+;;  EIGHTBIT 1
+;;
+;;  # Below are the color init strings for the basic file types.  A color init
+;;  # string consists of one or more of the following numeric codes:
+;;  # Attribute codes:
+;;  # 00=none 01=bold 04=underscore 05=blink 07=reverse 08=concealed
+;;  # Text color codes:
+;;  # 30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
+;;  # Background color codes:
+;;  # 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
+;;  NORMAL 00	# global default, although everything should be something.
+;;  FILE 00 		# normal file
+;;  DIR 00;37 	# directory
+;;  LINK 00;36 	# symbolic link
+;;  FIFO 00;37	# pipe
+;;  SOCK 40;35	# socket
+;;  BLK 33;01	# block device driver
+;;  CHR 33;01 	# character device driver
+;;
+;;  # This is for files with execute permission:
+;;  EXEC 00;32
+;;
+;;  # List any file extensions like '.gz' or '.tar' that you would like ls
+;;  # to colorize below.  Put the extension, a space, and the color init
+;;  # string.  (and any comments you want to add after a '#')
+;;  .tar 01;33 # archives or compressed
+;;  .tgz 01;33
+;;  .arj 01;33
+;;  .taz 01;33
+;;  .lzh 01;33
+;;  .zip 01;33
+;;  .z   01;33
+;;  .Z   01;33
+;;  .gz  01;33
+;;  .jpg 01;35 # image formats
+;;  .gif 01;35
+;;  .bmp 01;35
+;;  .xbm 01;35
+;;  .xpm 01;35
+;;
+;;
+;;             ----------------------------------------
+;;
+;;  Notice: for directory/host/user tracking you need to have something
+;; like this in your shell startup script ( this is for tcsh but should
+;; be quite easy to port to other shells )
+;;
+;;             ----------------------------------------
+;;
+;;
+;;  	 set os = `uname`
+;;  	 set host = `hostname`
+;;  	 set date = `date`
+;;
+;;  # su does not change this but I'd like it to
+;;
+;;  	 set user = `whoami`
+;;
+;;  # ...
+;;
+;;  	 if ( eterm =~ $TERM ) then
+;;
+;;  		echo --------------------------------------------------------------
+;;  		echo Hello $user
+;;  		echo Today is $date
+;;  		echo We are on $host running $os under Emacs term mode
+;;  		echo --------------------------------------------------------------
+;;
+;;  		setenv EDITOR emacsclient
+;;
+;;   # Notice: $host and $user have been set before to 'hostname' and 'whoami'
+;;   # this is necessary because, f.e., certain versions of 'su' do not change
+;;   # $user, YMMV: if you don't want to fiddle with them define a couple
+;;   # of new variables and use these instead.
+;;   # NOTICE that there is a space between "AnSiT?" and $whatever NOTICE
+;;
+;;   # These are because we want the real cwd in the messages, not the login
+;;   # time one !
+;;
+;; 		set cwd_hack='$cwd'
+;; 		set host_hack='$host'
+;; 		set user_hack='$user'
+;;
+;;   # Notice that the ^[ character is an ESC, not two chars.  You can
+;;   # get it in various ways, for example by typing
+;;   # echo -e '\033' > escape.file
+;;   # or by using your favorite editor
+;;
+;; 		foreach temp (cd pushd)
+;; 			alias $temp "$temp \!* ; echo 'AnSiTc' $cwd_hack"
+;; 		end
+;;   		alias popd 'popd ;echo "AnSiTc" $cwd'
+;;
+;;   # Every command that can modify the user/host/directory should be aliased
+;;   # as follows for the tracking mechanism to work.
+;;
+;; 		foreach temp ( rlogin telnet rsh sh ksh csh tcsh zsh bash tcl su )
+;; 			alias $temp "$temp \!* ; echo 'AnSiTh' $host_hack ; \
+;; 					echo 'AnSiTu' $user_hack ;echo 'AnSiTc' $cwd_hack"
+;; 		end
+;;
+;;   # Start up & use color ls
+;;
+;; 		echo "AnSiTh" $host
+;; 		echo "AnSiTu" $user
+;; 		echo "AnSiTc" $cwd
+;;
+;;   # some housekeeping
+;;
+;; 		unset cwd_hack
+;; 		unset host_hack
+;; 		unset user_hack
+;; 		unset temp
+;;
+;; 		eval `/bin/dircolors /home/marco/.emacs_dircolors`
+;;    endif
+;;
+;;  # ...
+;;
+;;  # Let's not clutter user space
+;;
+;;  	 unset os
+;;  	 unset date
+;;
+;;
 
 ;;; Original Commentary:
-;;; --------------------
+;; ---------------------
 
 ;; The changelog is at the end of this file.
 
@@ -398,10 +393,15 @@
 ;; so it is important to increase it if there are protocol-relevant changes.
 (defconst term-protocol-version "0.96")
 
-(eval-when-compile
-  (require 'ange-ftp))
+(eval-when-compile (require 'ange-ftp))
 (require 'ring)
 (require 'ehelp)
+
+(declare-function ring-empty-p "ring" (ring))
+(declare-function ring-ref "ring" (ring index))
+(declare-function ring-insert-at-beginning "ring" (ring item))
+(declare-function ring-length "ring" (ring))
+(declare-function ring-insert "ring" (ring item))
 
 (defgroup term nil
   "General command interpreter in a window."
@@ -409,73 +409,75 @@
 
 
 ;;; Buffer Local Variables:
-;;;============================================================================
-;;; Term mode buffer local variables:
-;;;     term-prompt-regexp    - string       term-bol uses to match prompt.
-;;;     term-delimiter-argument-list - list  For delimiters and arguments
-;;;     term-last-input-start - marker       Handy if inferior always echoes
-;;;     term-last-input-end   - marker       For term-kill-output command
+;;============================================================================
+;; Term mode buffer local variables:
+;;     term-prompt-regexp    - string       term-bol uses to match prompt.
+;;     term-delimiter-argument-list - list  For delimiters and arguments
+;;     term-last-input-start - marker       Handy if inferior always echoes
+;;     term-last-input-end   - marker       For term-kill-output command
 ;; For the input history mechanism:
 (defvar term-input-ring-size 32 "Size of input history ring.")
-;;;     term-input-ring-size  - integer
-;;;     term-input-ring       - ring
-;;;     term-input-ring-index - number           ...
-;;;     term-input-autoexpand - symbol           ...
-;;;     term-input-ignoredups - boolean          ...
-;;;     term-last-input-match - string           ...
-;;;     term-dynamic-complete-functions - hook   For the completion mechanism
-;;;     term-completion-fignore - list           ...
-;;;     term-get-old-input    - function     Hooks for specific
-;;;     term-input-filter-functions - hook     process-in-a-buffer
-;;;     term-input-filter     - function         modes.
-;;;     term-input-send	- function
-;;;     term-scroll-to-bottom-on-output - symbol ...
-;;;     term-scroll-show-maximum-output - boolean...
-(defvar term-height) ;; Number of lines in window.
-(defvar term-width) ;; Number of columns in window.
-(defvar term-home-marker) ;; Marks the "home" position for cursor addressing.
-(defvar term-saved-home-marker nil) ;; When using alternate sub-buffer,
-;;		contains saved term-home-marker from original sub-buffer .
-(defvar term-start-line-column 0) ;; (current-column) at start of screen line,
-;;		or nil if unknown.
-(defvar term-current-column 0) ;; If non-nil, is cache for (current-column).
-(defvar term-current-row 0) ;; Current vertical row (relative to home-marker)
-;;		or nil if unknown.
+;;     term-input-ring-size  - integer
+;;     term-input-ring       - ring
+;;     term-input-ring-index - number           ...
+;;     term-input-autoexpand - symbol           ...
+;;     term-input-ignoredups - boolean          ...
+;;     term-last-input-match - string           ...
+;;     term-dynamic-complete-functions - hook   For the completion mechanism
+;;     term-completion-fignore - list           ...
+;;     term-get-old-input    - function     Hooks for specific
+;;     term-input-filter-functions - hook     process-in-a-buffer
+;;     term-input-filter     - function         modes.
+;;     term-input-send	- function
+;;     term-scroll-to-bottom-on-output - symbol ...
+;;     term-scroll-show-maximum-output - boolean...
+(defvar term-height)                    ; Number of lines in window.
+(defvar term-width)                     ; Number of columns in window.
+(defvar term-home-marker) ; Marks the "home" position for cursor addressing.
+(defvar term-saved-home-marker nil
+  "When using alternate sub-buffer,
+contains saved term-home-marker from original sub-buffer.")
+(defvar term-start-line-column 0
+  "(current-column) at start of screen line, or nil if unknown.")
+(defvar term-current-column 0 "If non-nil, is cache for (current-column).")
+(defvar term-current-row 0
+  "Current vertical row (relative to home-marker) or nil if unknown.")
 (defvar term-insert-mode nil)
 (defvar term-vertical-motion)
-(defvar term-terminal-state 0) ;; State of the terminal emulator:
-;;		state 0: Normal state
-;;		state 1: Last character was a graphic in the last column.
-;;		If next char is graphic, first move one column right
-;;		(and line warp) before displaying it.
-;;		This emulates (more or less) the behavior of xterm.
-;;		state 2: seen ESC
-;;		state 3: seen ESC [ (or ESC [ ?)
-;;		state 4: term-terminal-parameter contains pending output.
-(defvar term-kill-echo-list nil) ;; A queue of strings whose echo
-;;		we want suppressed.
+(defvar term-terminal-state 0
+  "State of the terminal emulator:
+state 0: Normal state
+state 1: Last character was a graphic in the last column.
+If next char is graphic, first move one column right
+\(and line warp) before displaying it.
+This emulates (more or less) the behavior of xterm.
+state 2: seen ESC
+state 3: seen ESC [ (or ESC [ ?)
+state 4: term-terminal-parameter contains pending output.")
+(defvar term-kill-echo-list nil
+  "A queue of strings whose echo we want suppressed.")
 (defvar term-terminal-parameter)
 (defvar term-terminal-previous-parameter)
-(defvar term-current-face 'default)
-(defvar term-scroll-start 0) ;; Top-most line (inclusive) of scrolling region.
-(defvar term-scroll-end) ;; Number of line (zero-based) after scrolling region.
-(defvar term-pager-count nil) ;; If nil, paging is disabled.
-;;		Otherwise, number of lines before we need to page.
+(defvar term-current-face 'term)
+(defvar term-scroll-start 0 "Top-most line (inclusive) of scrolling region.")
+(defvar term-scroll-end) ; Number of line (zero-based) after scrolling region.
+(defvar term-pager-count nil
+  "Number of lines before we need to page; if nil, paging is disabled.")
 (defvar term-saved-cursor nil)
 (defvar term-command-hook)
 (defvar term-log-buffer nil)
-(defvar term-scroll-with-delete nil) ;; term-scroll-with-delete is t if
-;;		forward scrolling should be implemented by delete to
-;;		top-most line(s); and nil if scrolling should be implemented
-;;		by moving term-home-marker.  It is set to t if there is a
-;;		(non-default) scroll-region OR the alternate buffer is used.
-(defvar term-pending-delete-marker) ;; New user input in line mode needs to
-;;		be deleted, because it gets echoed by the inferior.
-;;		To reduce flicker, we defer the delete until the next output.
-(defvar term-old-mode-map nil) ;; Saves the old keymap when in char mode.
-(defvar term-old-mode-line-format) ;; Saves old mode-line-format while paging.
-(defvar term-pager-old-local-map nil) ;; Saves old keymap while paging.
-(defvar term-pager-old-filter) ;; Saved process-filter while paging.
+(defvar term-scroll-with-delete nil
+  "If t, forward scrolling should be implemented by delete to
+top-most line(s); and if nil, scrolling should be implemented
+by moving term-home-marker.  It is set to t if there is a
+\(non-default) scroll-region OR the alternate buffer is used.")
+(defvar term-pending-delete-marker) ; New user input in line mode
+       ; needs to be deleted, because it gets echoed by the inferior.
+       ; To reduce flicker, we defer the delete until the next output.
+(defvar term-old-mode-map nil "Saves the old keymap when in char mode.")
+(defvar term-old-mode-line-format) ; Saves old mode-line-format while paging.
+(defvar term-pager-old-local-map nil "Saves old keymap while paging.")
+(defvar term-pager-old-filter) ; Saved process-filter while paging.
 
 (defcustom explicit-shell-file-name nil
   "If non-nil, is file name to use for explicitly requested inferior shell."
@@ -499,8 +501,8 @@ This is a good thing to set in mode hooks.")
 (defvar term-delimiter-argument-list ()
   "List of characters to recognize as separate arguments in input.
 Strings comprising a character in this list will separate the arguments
-surrounding them, and also be regarded as arguments in their own right (unlike
-whitespace).  See `term-arguments'.
+surrounding them, and also be regarded as arguments in their own right
+\(unlike whitespace).  See `term-arguments'.
 Defaults to the empty list.
 
 For shells, a good value is (?\\| ?& ?< ?> ?\\( ?\\) ?\\;).
@@ -555,6 +557,13 @@ If non-nil, then show the maximum output when the window is scrolled.
 
 See variable `term-scroll-to-bottom-on-output'.
 This variable is buffer-local."
+  :type 'boolean
+  :group 'term)
+
+(defcustom term-suppress-hard-newline nil
+  "Non-nil means interpreter should not break long lines with newlines.
+This means text can automatically reflow if the window is resized."
+  :version "24.4"
   :type 'boolean
   :group 'term)
 
@@ -649,31 +658,61 @@ executed once when the buffer is created."
     (define-key map "\C-c\C-k" 'term-char-mode)
     (define-key map "\C-c\C-j" 'term-line-mode)
     (define-key map "\C-c\C-q" 'term-pager-toggle)
+    ;; completion: (line mode only)
+    (easy-menu-define nil map "Complete menu for Term mode."
+      '("Complete"
+        ["Complete Before Point" term-dynamic-complete t]
+        ["Complete File Name" term-dynamic-complete-filename t]
+        ["File Completion Listing" term-dynamic-list-filename-completions t]
+        ["Expand File Name" term-replace-by-expanded-filename t]))
+    ;; Input history: (line mode only)
+    (easy-menu-define nil map "In/Out menu for Term mode."
+      '("In/Out"
+        ["Expand History Before Point" term-replace-by-expanded-history
+         term-input-autoexpand]
+        ["List Input History" term-dynamic-list-input-ring t]
+        ["Previous Input" term-previous-input t]
+        ["Next Input" term-next-input t]
+        ["Previous Matching Current Input"
+          term-previous-matching-input-from-input t]
+        ["Next Matching Current Input" term-next-matching-input-from-input t]
+        ["Previous Matching Input..." term-previous-matching-input t]
+        ["Next Matching Input..." term-next-matching-input t]
+        ["Backward Matching Input..." term-backward-matching-input t]
+        ["Forward Matching Input..." term-forward-matching-input t]
+        ["Copy Old Input" term-copy-old-input t]
+        ["Kill Current Input" term-kill-input t]
+        ["Show Current Output Group" term-show-output t]
+        ["Show Maximum Output" term-show-maximum-output t]
+        ["Backward Output Group" term-previous-prompt t]
+        ["Forward Output Group" term-next-prompt t]
+        ["Kill Current Output Group" term-kill-output t]))
+    map)
+  "Keymap for Term mode.")
 
-    ;;  ;; completion:
-    ;;  (define-key map [menu-bar completion]
-    ;;    (cons "Complete" (make-sparse-keymap "Complete")))
-    ;;  (define-key map [menu-bar completion complete-expand]
-    ;;    '("Expand File Name" . term-replace-by-expanded-filename))
-    ;;  (define-key map [menu-bar completion complete-listing]
-    ;;    '("File Completion Listing" . term-dynamic-list-filename-completions))
-    ;;  (define-key map [menu-bar completion complete-file]
-    ;;    '("Complete File Name" . term-dynamic-complete-filename))
-    ;;  (define-key map [menu-bar completion complete]
-    ;;    '("Complete Before Point" . term-dynamic-complete))
-    ;;  ;; Put them in the menu bar:
-    ;;  (setq menu-bar-final-items (append '(terminal completion inout signals)
-    ;;				     menu-bar-final-items))
-    map))
-
-(defvar term-raw-map nil
-  "Keyboard map for sending characters directly to the inferior process.")
 (defvar term-escape-char nil
   "Escape character for char sub-mode of term mode.
 Do not change it directly; use `term-set-escape-char' instead.")
-(defvar term-raw-escape-map nil)
 
-(defvar term-pager-break-map nil)
+(defvar term-pager-break-map
+  (let ((map (make-keymap)))
+    ;; (dotimes (i 128)
+    ;;   (define-key map (make-string 1 i) 'term-send-raw))
+    (define-key map "\e" (lookup-key (current-global-map) "\e"))
+    (define-key map "\C-x" (lookup-key (current-global-map) "\C-x"))
+    (define-key map "\C-u" (lookup-key (current-global-map) "\C-u"))
+    (define-key map " " 'term-pager-page)
+    (define-key map "\r" 'term-pager-line)
+    (define-key map "?" 'term-pager-help)
+    (define-key map "h" 'term-pager-help)
+    (define-key map "b" 'term-pager-back-page)
+    (define-key map "\177" 'term-pager-back-line)
+    (define-key map "q" 'term-pager-discard)
+    (define-key map "D" 'term-pager-disable)
+    (define-key map "<" 'term-pager-bob)
+    (define-key map ">" 'term-pager-eob)
+    map)
+  "Keymap used in Term pager mode.")
 
 (defvar term-ptyp t
   "True if communications via pty; false if by pipe.  Buffer local.
@@ -694,7 +733,6 @@ Buffer local variable.")
 ; assuming this is Emacs 19.20 or newer.
 (defvar term-pager-filter t)
 
-(put 'term-replace-by-expanded-history 'menu-enable 'term-input-autoexpand)
 (put 'term-input-ring 'permanent-local t)
 (put 'term-input-ring-index 'permanent-local t)
 (put 'term-input-autoexpand 'permanent-local t)
@@ -710,10 +748,7 @@ Buffer local variable.")
 (defmacro term-handling-pager () 'term-pager-old-local-map)
 (defmacro term-using-alternate-sub-buffer () 'term-saved-home-marker)
 
-(defvar term-signals-menu)
-(defvar term-terminal-menu)
-
-;;; Let's silence the byte-compiler -mm
+;; Let's silence the byte-compiler -mm
 (defvar term-ansi-at-host nil)
 (defvar term-ansi-at-dir nil)
 (defvar term-ansi-at-user nil)
@@ -729,285 +764,228 @@ Buffer local variable.")
 (defvar term-ansi-current-reverse nil)
 (defvar term-ansi-current-invisible nil)
 
-;;; Four should be enough, if you want more, just add. -mm
+;; Four should be enough, if you want more, just add. -mm
 (defvar term-terminal-more-parameters 0)
 (defvar term-terminal-previous-parameter-2 -1)
 (defvar term-terminal-previous-parameter-3 -1)
 (defvar term-terminal-previous-parameter-4 -1)
-;;;
 
-;;; faces -mm
+;;; Faces
+(defvar ansi-term-color-vector
+  [term
+   term-color-black
+   term-color-red
+   term-color-green
+   term-color-yellow
+   term-color-blue
+   term-color-magenta
+   term-color-cyan
+   term-color-white])
 
 (defcustom term-default-fg-color nil
-  "Default color for foreground in `term'."
+  "If non-nil, default color for foreground in Term mode."
   :group 'term
-  :type 'string)
+  :type '(choice (const nil) (string :tag "color")))
+(make-obsolete-variable 'term-default-fg-color "use the face `term' instead."
+                        "24.3")
 
 (defcustom term-default-bg-color nil
-  "Default color for background in `term'."
+  "If non-nil, default color for foreground in Term mode."
   :group 'term
-  :type 'string)
+  :type '(choice (const nil) (string :tag "color")))
+(make-obsolete-variable 'term-default-bg-color "use the face `term' instead."
+                        "24.3")
 
-;;; Use the same colors that xterm uses, see `xterm-standard-colors'.
-(defvar ansi-term-color-vector
-  [unspecified "black" "red3" "green3" "yellow3" "blue2"
-   "magenta3" "cyan3" "white"])
+(defface term
+  `((t
+     :foreground ,term-default-fg-color
+     :background ,term-default-bg-color
+     :inherit default))
+  "Default face to use in Term mode."
+  :group 'term)
 
-;;; Inspiration came from comint.el -mm
-(defvar term-buffer-maximum-size 2048
-  "*The maximum size in lines for term buffers.
+(defface term-bold
+  '((t :bold t))
+  "Default face to use for bold text."
+  :group 'term)
+
+(defface term-underline
+  '((t :underline t))
+  "Default face to use for underlined text."
+  :group 'term)
+
+(defface term-color-black
+  '((t :foreground "black" :background "black"))
+  "Face used to render black color code."
+  :group 'term)
+
+(defface term-color-red
+  '((t :foreground "red3" :background "red3"))
+  "Face used to render red color code."
+  :group 'term)
+
+(defface term-color-green
+  '((t :foreground "green3" :background "green3"))
+  "Face used to render green color code."
+  :group 'term)
+
+(defface term-color-yellow
+  '((t :foreground "yellow3" :background "yellow3"))
+  "Face used to render yellow color code."
+  :group 'term)
+
+(defface term-color-blue
+  '((t :foreground "blue2" :background "blue2"))
+  "Face used to render blue color code."
+  :group 'term)
+
+(defface term-color-magenta
+  '((t :foreground "magenta3" :background "magenta3"))
+  "Face used to render magenta color code."
+  :group 'term)
+
+(defface term-color-cyan
+  '((t :foreground "cyan3" :background "cyan3"))
+  "Face used to render cyan color code."
+  :group 'term)
+
+(defface term-color-white
+  '((t :foreground "white" :background "white"))
+  "Face used to render white color code."
+  :group 'term)
+
+;; Inspiration came from comint.el -mm
+(defcustom term-buffer-maximum-size 2048
+  "The maximum size in lines for term buffers.
 Term buffers are truncated from the top to be no greater than this number.
 Notice that a setting of 0 means \"don't truncate anything\".  This variable
-is buffer-local.")
-;;;
-
-(when (featurep 'xemacs)
-  (defvar term-terminal-menu
-    '("Terminal"
-      [ "Character mode" term-char-mode (term-in-line-mode)]
-      [ "Line mode" term-line-mode (term-in-char-mode)]
-      [ "Enable paging" term-pager-toggle (not term-pager-count)]
-      [ "Disable paging" term-pager-toggle term-pager-count])))
-
-;; Menu bars:
-(unless (featurep 'xemacs)
-  ;; terminal:
-  (let (newmap)
-    (setq newmap (make-sparse-keymap "Terminal"))
-    (define-key newmap [terminal-pager-enable]
-      '(menu-item "Enable paging" term-fake-pager-enable
-		  :help "Enable paging feature"))
-    (define-key newmap [terminal-pager-disable]
-      '(menu-item "Disable paging" term-fake-pager-disable
-		  :help "Disable paging feature"))
-    (define-key newmap [terminal-char-mode]
-      '(menu-item "Character mode" term-char-mode
-		  :help "Switch to char (raw) sub-mode of term mode"))
-    (define-key newmap [terminal-line-mode]
-      '(menu-item "Line mode" term-line-mode
-		  :help "Switch to line (cooked) sub-mode of term mode"))
-    (setq term-terminal-menu (cons "Terminal" newmap))
-
-    ;; completion:  (line mode only)
-    (defvar term-completion-menu (make-sparse-keymap "Complete"))
-    (define-key term-mode-map [menu-bar completion]
-      (cons "Complete" term-completion-menu))
-    (define-key term-completion-menu [complete-expand]
-      '("Expand File Name" . term-replace-by-expanded-filename))
-    (define-key term-completion-menu [complete-listing]
-      '("File Completion Listing" . term-dynamic-list-filename-completions))
-    (define-key term-completion-menu [menu-bar completion complete-file]
-      '("Complete File Name" . term-dynamic-complete-filename))
-    (define-key term-completion-menu [menu-bar completion complete]
-      '("Complete Before Point" . term-dynamic-complete))
-
-    ;; Input history: (line mode only)
-    (defvar term-inout-menu (make-sparse-keymap "In/Out"))
-    (define-key term-mode-map [menu-bar inout]
-      (cons "In/Out" term-inout-menu))
-    (define-key term-inout-menu [kill-output]
-      '("Kill Current Output Group" . term-kill-output))
-    (define-key term-inout-menu [next-prompt]
-      '("Forward Output Group" . term-next-prompt))
-    (define-key term-inout-menu [previous-prompt]
-      '("Backward Output Group" . term-previous-prompt))
-    (define-key term-inout-menu [show-maximum-output]
-      '("Show Maximum Output" . term-show-maximum-output))
-    (define-key term-inout-menu [show-output]
-      '("Show Current Output Group" . term-show-output))
-    (define-key term-inout-menu [kill-input]
-      '("Kill Current Input" . term-kill-input))
-    (define-key term-inout-menu [copy-input]
-      '("Copy Old Input" . term-copy-old-input))
-    (define-key term-inout-menu [forward-matching-history]
-      '("Forward Matching Input..." . term-forward-matching-input))
-    (define-key term-inout-menu [backward-matching-history]
-      '("Backward Matching Input..." . term-backward-matching-input))
-    (define-key term-inout-menu [next-matching-history]
-      '("Next Matching Input..." . term-next-matching-input))
-    (define-key term-inout-menu [previous-matching-history]
-      '("Previous Matching Input..." . term-previous-matching-input))
-    (define-key term-inout-menu [next-matching-history-from-input]
-      '("Next Matching Current Input" . term-next-matching-input-from-input))
-    (define-key term-inout-menu [previous-matching-history-from-input]
-      '("Previous Matching Current Input" .
-		term-previous-matching-input-from-input))
-    (define-key term-inout-menu [next-history]
-      '("Next Input" . term-next-input))
-    (define-key term-inout-menu [previous-history]
-      '("Previous Input" . term-previous-input))
-    (define-key term-inout-menu [list-history]
-      '("List Input History" . term-dynamic-list-input-ring))
-    (define-key term-inout-menu [expand-history]
-      '("Expand History Before Point" . term-replace-by-expanded-history))
-
-    ;; Signals
-    (setq newmap (make-sparse-keymap "Signals"))
-    (define-key term-mode-map [menu-bar signals]
-      (setq term-signals-menu (cons "Signals" newmap)))
-    (define-key newmap [eof]
-      '(menu-item "EOF" term-send-eof
-		  :help "Send an EOF to the current buffer's process"))
-    (define-key newmap [kill]
-      '(menu-item "KILL" term-kill-subjob
-		  :help "Send kill signal to the current subjob"))
-    (define-key newmap [quit]
-      '(menu-item "QUIT" term-quit-subjob
-		  :help "Send quit signal to the current subjob."))
-    (define-key newmap [cont]
-      '(menu-item "CONT" term-continue-subjob
-		  :help "Send CONT signal to process buffer's process group"))
-    (define-key newmap [stop]
-      '(menu-item "STOP" term-stop-subjob
-		  :help "Stop the current subjob"))
-    (define-key newmap [brk]
-      '(menu-item "BREAK" term-interrupt-subjob
-		  :help "Interrupt the current subjob"))
-    ))
+is buffer-local."
+  :group 'term
+  :type 'integer)
 
 ;; Set up term-raw-map, etc.
 
-(defun term-set-escape-char (c)
+(defvar term-raw-map
+  (let* ((map (make-keymap))
+         (esc-map (make-keymap))
+         (i 0))
+    (while (< i 128)
+      (define-key map (make-string 1 i) 'term-send-raw)
+      ;; Avoid O and [. They are used in escape sequences for various keys.
+      (unless (or (eq i ?O) (eq i 91))
+        (define-key esc-map (make-string 1 i) 'term-send-raw-meta))
+      (setq i (1+ i)))
+    (define-key map [remap self-insert-command] 'term-send-raw)
+    (define-key map "\e" esc-map)
+
+    ;; Added nearly all the 'gray keys' -mm
+
+    (if (featurep 'xemacs)
+        (define-key map [button2] 'term-mouse-paste)
+      (define-key map [mouse-2] 'term-mouse-paste))
+    (define-key map [up] 'term-send-up)
+    (define-key map [down] 'term-send-down)
+    (define-key map [right] 'term-send-right)
+    (define-key map [left] 'term-send-left)
+    (define-key map [delete] 'term-send-del)
+    (define-key map [deletechar] 'term-send-del)
+    (define-key map [backspace] 'term-send-backspace)
+    (define-key map [home] 'term-send-home)
+    (define-key map [end] 'term-send-end)
+    (define-key map [insert] 'term-send-insert)
+    (define-key map [S-prior] 'scroll-down)
+    (define-key map [S-next] 'scroll-up)
+    (define-key map [S-insert] 'term-paste)
+    (define-key map [prior] 'term-send-prior)
+    (define-key map [next] 'term-send-next)
+    map)
+  "Keyboard map for sending characters directly to the inferior process.")
+
+(easy-menu-define term-terminal-menu
+  (list term-mode-map term-raw-map term-pager-break-map)
+  "Terminal menu for Term mode."
+  '("Terminal"
+    ["Line mode" term-line-mode :active (term-in-char-mode)
+     :help "Switch to line (cooked) sub-mode of term mode"]
+    ["Character mode" term-char-mode :active (term-in-line-mode)
+     :help "Switch to char (raw) sub-mode of term mode"]
+    ["Paging" term-pager-toggle :style toggle :selected term-pager-count
+     :help "Toggle paging feature"]))
+
+(easy-menu-define term-signals-menu
+  (list term-mode-map term-raw-map term-pager-break-map)
+  "Signals menu for Term mode."
+  '("Signals"
+    ["BREAK" term-interrupt-subjob :active t
+     :help "Interrupt the current subjob"]
+    ["STOP" term-stop-subjob :active t :help "Stop the current subjob"]
+    ["CONT" term-continue-subjob :active t
+     :help "Send CONT signal to process buffer's process group"]
+    ["QUIT" term-quit-subjob :active t
+     :help "Send quit signal to the current subjob"]
+    ["KILL" term-kill-subjob :active t
+     :help "Send kill signal to the current subjob"]
+    ["EOF" term-send-eof :active t
+     :help "Send an EOF to the current buffer's process"]))
+
+(easy-menu-define term-pager-menu term-pager-break-map
+  "Menu for Term pager mode."
+  '("More pages?"
+    ["1 page forwards" term-pager-page t]
+    ["1 page backwards" term-pager-back-page t]
+    ["1 line backwards" term-pager-back-line t]
+    ["1 line forwards" term-pager-line t]
+    ["Goto to beginning" term-pager-bob t]
+    ["Goto to end" term-pager-eob t]
+    ["Discard remaining output" term-pager-discard t]
+    ["Disable paging" term-pager-toggle t]
+    ["Help" term-pager-help t]))
+
+(defvar term-raw-escape-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map 'Control-X-prefix)
+    ;; Define standard bindings in term-raw-escape-map.
+    (define-key map "\C-v" (lookup-key (current-global-map) "\C-v"))
+    (define-key map "\C-u" (lookup-key (current-global-map) "\C-u"))
+    (define-key map "\C-q" 'term-pager-toggle)
+    ;; The keybinding for term-char-mode is needed by the menubar code.
+    (define-key map "\C-k" 'term-char-mode)
+    (define-key map "\C-j" 'term-line-mode)
+    ;; It's convenient to have execute-extended-command here.
+    (define-key map [?\M-x] 'execute-extended-command)
+    map))
+
+(defun term-set-escape-char (key)
   "Change `term-escape-char' and keymaps that depend on it."
   (when term-escape-char
+    ;; Undo previous term-set-escape-char.
     (define-key term-raw-map term-escape-char 'term-send-raw))
-  (setq c (make-string 1 c))
-  (define-key term-raw-map c term-raw-escape-map)
-  ;; Define standard bindings in term-raw-escape-map
-  (define-key term-raw-escape-map "\C-v"
-    (lookup-key (current-global-map) "\C-v"))
-  (define-key term-raw-escape-map "\C-u"
-    (lookup-key (current-global-map) "\C-u"))
-  (define-key term-raw-escape-map c 'term-send-raw)
-  (define-key term-raw-escape-map "\C-q" 'term-pager-toggle)
-  ;; The keybinding for term-char-mode is needed by the menubar code.
-  (define-key term-raw-escape-map "\C-k" 'term-char-mode)
-  (define-key term-raw-escape-map "\C-j" 'term-line-mode)
-  ;; It's convenient to have execute-extended-command here.
-  (define-key term-raw-escape-map [?\M-x] 'execute-extended-command))
-
-;; Helper to send special keys (with a modifier).
-;; from ncurses' terminfo.src:
-;; From ctlseqs.ms:
-;;    Code     Modifiers
-;;  ---------------------------------
-;;     2       Shift
-;;     3       Alt
-;;     4       Shift + Alt
-;;     5       Control
-;;     6       Shift + Control
-;;     7       Alt + Control
-;;     8       Shift + Alt + Control
-;;  ---------------------------------
-;;
-;; For now we only support 2 (Shift), 3 (Alt), 5 (Control) in the terminfo.
+  (setq term-escape-char (if (vectorp key) key (vector key)))
+  (define-key term-raw-map term-escape-char term-raw-escape-map)
+  ;; FIXME: If we later call term-set-escape-char again with another key,
+  ;; we should undo this binding.
+  (define-key term-raw-escape-map term-escape-char 'term-send-raw))
 
-;; Which would be better:  "\e[A" or "\eOA"? readline accepts either.
-;; For my configuration it's definitely better \eOA but YMMV. -mm
-;; For example: vi works with \eOA while elm wants \e[A ...
-;;; (terminfo: kcuu1, kcud1, kcuf1, kcub1, khome, kend, kpp, knp, kdch1, kbs)
-(defun term-send-raw-string-mod (str mod)
-  (term-send-raw-string (format str mod)))
-
-(defun term-send-up        ()    (interactive) (term-send-raw-string     "\eOA"))
-(defun term-send-up-mod    (mod) (interactive) (term-send-raw-string-mod "\e[1;%dA" mod))
-(defun term-send-down      ()    (interactive) (term-send-raw-string     "\eOB"))
-(defun term-send-down-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%dB" mod))
-(defun term-send-right     ()    (interactive) (term-send-raw-string     "\eOC"))
-(defun term-send-right-mod (mod) (interactive) (term-send-raw-string-mod "\e[1;%dC" mod))
-(defun term-send-left      ()    (interactive) (term-send-raw-string     "\eOD"))
-(defun term-send-left-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%dD" mod))
-(defun term-send-home      ()    (interactive) (term-send-raw-string     "\e[1~"))
-(defun term-send-home-mod  (mod) (interactive) (term-send-raw-string-mod "\e[1;%d~" mod))
-(defun term-send-insert    ()    (interactive) (term-send-raw-string     "\e[2~"))
-(defun term-send-end       ()    (interactive) (term-send-raw-string     "\e[4~"))
-(defun term-send-end-mod   (mod) (interactive) (term-send-raw-string-mod "\e[4;%d~" mod))
-(defun term-send-prior     ()    (interactive) (term-send-raw-string     "\e[5~"))
-(defun term-send-prior-mod (mod) (interactive) (term-send-raw-string-mod "\e[5;%d~" mod))
-(defun term-send-next      ()    (interactive) (term-send-raw-string     "\e[6~"))
-(defun term-send-next-mod  (mod) (interactive) (term-send-raw-string-mod "\e[6;%d~" mod))
-(defun term-send-del       ()    (interactive) (term-send-raw-string     "\e[3~"))
-(defun term-send-backspace ()    (interactive) (term-send-raw-string     "\C-?"))
-(defun term-send-backspace-mod (mod)
-  (interactive)
-  ;; map any of control or alt to esc, then send backspace as usual
-  (when (>= mod 3)
-    (term-send-raw-string   "\e"))
-  (term-send-backspace))
-
-(defun term-set-special-key (key fun)
-  "Define special key in term-raw-map, including modifiers."
-  (dolist (modkey '(("" . nil)
-                    ("S-" . 2)
-                    ("M-" . 3)
-                    ("C-" . 5)))
-    (let* ((prefix (car modkey))
-           (mode (cdr modkey))
-           (modfun (if mode
-                       (let* ((uncurried (intern-soft (format "%s-mod" (symbol-name fun))))
-                              (curried (eval `(lambda ()
-                                                (interactive)
-                                                (,uncurried ,mode)))))
-                         (and uncurried curried))
-                     fun)))
-      (when modfun
-        (define-key term-raw-map (read-kbd-macro (format "%s<%s>" prefix key)) modfun)))))
-
-(let* ((map (make-keymap))
-       (esc-map (make-keymap))
-       (i 0))
-  (while (< i 128)
-    (define-key map (make-string 1 i) 'term-send-raw)
-    ;; Avoid O and [. They are used in escape sequences for various keys.
-    (unless (or (eq i ?O) (eq i 91))
-		(define-key esc-map (make-string 1 i) 'term-send-raw-meta))
-    (setq i (1+ i)))
-  (define-key map [remap self-insert-command] 'term-send-raw)
-  (define-key map "\e" esc-map)
-  (setq term-raw-map map)
-  (setq term-raw-escape-map
-	(copy-keymap (lookup-key (current-global-map) "\C-x")))
-
-;;; Added nearly all the 'grey keys' -mm
-
-  (if (featurep 'xemacs)
-      (define-key term-raw-map [button2] 'term-mouse-paste)
-    (define-key term-raw-map [mouse-2] 'term-mouse-paste)
-    (define-key term-raw-map [menu-bar terminal] term-terminal-menu)
-    (define-key term-raw-map [menu-bar signals] term-signals-menu))
-  (term-set-special-key "up" 'term-send-up)
-  (term-set-special-key "down" 'term-send-down)
-  (term-set-special-key "right" 'term-send-right)
-  (term-set-special-key "left" 'term-send-left)
-  (term-set-special-key "delete" 'term-send-del)
-  (term-set-special-key "deletechar" 'term-send-del)
-  (term-set-special-key "backspace" 'term-send-backspace)
-  (term-set-special-key "home" 'term-send-home)
-  (term-set-special-key "end" 'term-send-end)
-  (term-set-special-key "insert" 'term-send-insert)
-  (term-set-special-key "prior" 'term-send-prior)
-  (term-set-special-key "next" 'term-send-next)
-  ;; special functions
-  (define-key term-raw-map [S-prior] 'scroll-down)
-  (define-key term-raw-map [S-next] 'scroll-up)
-  (define-key term-raw-map [S-insert] 'term-paste))
-
-(term-set-escape-char ?\C-c)
+(term-set-escape-char (or term-escape-char ?\C-c))
 
 (defvar overflow-newline-into-fringe)
 
 (defun term-window-width ()
-  (if (featurep 'xemacs)
-      (1- (window-width))
-    (if (and window-system overflow-newline-into-fringe)
-	(window-width)
-      (1- (window-width)))))
+  (if (and (not (featurep 'xemacs))
+	   (display-graphic-p)
+	   overflow-newline-into-fringe
+	   ;; Subtract 1 from the width when any fringe has zero width,
+	   ;; not just the right fringe.  Bug#18601.
+	   (/= (frame-parameter nil 'left-fringe) 0)
+	   (/= (frame-parameter nil 'right-fringe) 0))
+      (window-body-width)
+    (1- (window-body-width))))
 
 
 (put 'term-mode 'mode-class 'special)
 
 
-;;; Use this variable as a display table for `term-mode'.
+;; Use this variable as a display table for `term-mode'.
 (defvar term-display-table
   (let ((dt (or (copy-sequence standard-display-table)
 		(make-display-table)))
@@ -1027,7 +1005,20 @@ is buffer-local.")
       (setq i (1+ i)))
     dt))
 
-(defun term-mode ()
+(defun term-ansi-reset ()
+  (setq term-current-face 'term)
+  (setq term-ansi-current-underline nil)
+  (setq term-ansi-current-bold nil)
+  (setq term-ansi-current-reverse nil)
+  (setq term-ansi-current-color 0)
+  (setq term-ansi-current-invisible nil)
+  ;; Stefan thought this should be t, but could not remember why.
+  ;; Setting it to t seems to cause bug#11785.  Setting it to nil
+  ;; again to see if there are other consequences...
+  (setq term-ansi-face-already-done nil)
+  (setq term-ansi-current-bg-color 0))
+
+(define-derived-mode term-mode fundamental-mode "Term"
   "Major mode for interacting with an inferior interpreter.
 The interpreter name is same as buffer name, sans the asterisks.
 
@@ -1071,66 +1062,48 @@ Commands in line mode:
 \\{term-mode-map}
 
 Entry to this mode runs the hooks on `term-mode-hook'."
-  (interactive)
-  ;; Do not remove this.  All major modes must do this.
-  (kill-all-local-variables)
-  (setq major-mode 'term-mode)
-  (setq mode-name "Term")
-  (use-local-map term-mode-map)
   ;; we do not want indent to sneak in any tabs
   (setq indent-tabs-mode nil)
   (setq buffer-display-table term-display-table)
-  (make-local-variable 'term-home-marker)
-  (setq term-home-marker (copy-marker 0))
+  (set (make-local-variable 'term-home-marker) (copy-marker 0))
+  (set (make-local-variable 'term-height) (1- (window-height)))
+  (set (make-local-variable 'term-width) (term-window-width))
+  (set (make-local-variable 'term-last-input-start) (make-marker))
+  (set (make-local-variable 'term-last-input-end) (make-marker))
+  (set (make-local-variable 'term-last-input-match) "")
+  (set (make-local-variable 'term-command-hook)
+       (symbol-function 'term-command-hook))
+
+  ;; These local variables are set to their local values:
   (make-local-variable 'term-saved-home-marker)
-  (make-local-variable 'term-height)
-  (make-local-variable 'term-width)
-  (setq term-width (term-window-width))
-  (setq term-height (1- (window-height)))
   (make-local-variable 'term-terminal-parameter)
   (make-local-variable 'term-saved-cursor)
-  (make-local-variable 'term-last-input-start)
-  (setq term-last-input-start (make-marker))
-  (make-local-variable 'term-last-input-end)
-  (setq term-last-input-end (make-marker))
-  (make-local-variable 'term-last-input-match)
-  (setq term-last-input-match "")
-  (make-local-variable 'term-prompt-regexp) ; Don't set; default
-  (make-local-variable 'term-input-ring-size) ; ...to global val.
+  (make-local-variable 'term-prompt-regexp)
+  (make-local-variable 'term-input-ring-size)
   (make-local-variable 'term-input-ring)
   (make-local-variable 'term-input-ring-file-name)
-  (or (and (boundp 'term-input-ring) term-input-ring)
-      (setq term-input-ring (make-ring term-input-ring-size)))
   (make-local-variable 'term-input-ring-index)
-  (or (and (boundp 'term-input-ring-index) term-input-ring-index)
-      (setq term-input-ring-index nil))
+  (unless term-input-ring
+    (setq term-input-ring (make-ring term-input-ring-size)))
 
-  (make-local-variable 'term-command-hook)
-  (setq term-command-hook (symbol-function 'term-command-hook))
+  ;; I'm not sure these saves are necessary but, since I
+  ;; haven't tested the whole thing on a net connected machine with
+  ;; a properly configured ange-ftp, I've decided to be conservative
+  ;; and put them in. -mm
 
-;;; I'm not sure these saves are necessary but, since I
-;;; haven't tested the whole thing on a net connected machine with
-;;; a properly configured ange-ftp, I've decided to be conservative
-;;; and put them in. -mm
+  (set (make-local-variable 'term-ansi-at-host) (system-name))
+  (set (make-local-variable 'term-ansi-at-dir) default-directory)
+  (set (make-local-variable 'term-ansi-at-message) nil)
 
-  (make-local-variable 'term-ansi-at-host)
-  (setq term-ansi-at-host (system-name))
-
-  (make-local-variable 'term-ansi-at-dir)
-  (setq term-ansi-at-dir default-directory)
-
-  (make-local-variable 'term-ansi-at-message)
-  (setq term-ansi-at-message nil)
-
-;;; For user tracking purposes -mm
+  ;; For user tracking purposes -mm
   (make-local-variable 'ange-ftp-default-user)
   (make-local-variable 'ange-ftp-default-password)
   (make-local-variable 'ange-ftp-generate-anonymous-password)
 
-;;; You may want to have different scroll-back sizes -mm
+  ;; You may want to have different scroll-back sizes -mm
   (make-local-variable 'term-buffer-maximum-size)
 
-;;; Of course these have to be buffer-local -mm
+  ;; Of course these have to be buffer-local -mm
   (make-local-variable 'term-ansi-current-bold)
   (make-local-variable 'term-ansi-current-color)
   (make-local-variable 'term-ansi-face-already-done)
@@ -1153,8 +1126,7 @@ Entry to this mode runs the hooks on `term-mode-hook'."
   (make-local-variable 'term-current-row)
   (make-local-variable 'term-log-buffer)
   (make-local-variable 'term-scroll-start)
-  (make-local-variable 'term-scroll-end)
-  (setq term-scroll-end term-height)
+  (set (make-local-variable 'term-scroll-end) term-height)
   (make-local-variable 'term-scroll-with-delete)
   (make-local-variable 'term-pager-count)
   (make-local-variable 'term-pager-old-local-map)
@@ -1176,18 +1148,17 @@ Entry to this mode runs the hooks on `term-mode-hook'."
   (make-local-variable 'term-ptyp)
   (make-local-variable 'term-exec-hook)
   (make-local-variable 'term-vertical-motion)
-  (make-local-variable 'term-pending-delete-marker)
-  (setq term-pending-delete-marker (make-marker))
+  (set (make-local-variable 'term-pending-delete-marker) (make-marker))
   (make-local-variable 'term-current-face)
-  (setq term-current-face nil)
-  (make-local-variable 'term-pending-frame)
-  (setq term-pending-frame nil)
+  (term-ansi-reset)
+  (set (make-local-variable 'term-pending-frame) nil)
   ;; Cua-mode's keybindings interfere with the term keybindings, disable it.
   (set (make-local-variable 'cua-mode) nil)
-  (run-mode-hooks 'term-mode-hook)
-  (when (featurep 'xemacs)
-    (set-buffer-menubar
-     (append current-menubar (list term-terminal-menu))))
+
+  (set (make-local-variable 'font-lock-defaults) '(nil t))
+
+  (easy-menu-add term-terminal-menu)
+  (easy-menu-add term-signals-menu)
   (or term-input-ring
       (setq term-input-ring (make-ring term-input-ring-size)))
   (term-update-mode-line))
@@ -1217,7 +1188,7 @@ Entry to this mode runs the hooks on `term-mode-hook'."
 	    (let* ((str (car cur)) (len (length str)) (start (- (point) len)))
 	      (if (and (>= start (point-min))
 		       (string= str (buffer-substring start (point))))
-		  (progn (delete-backward-char len)
+		  (progn (delete-char (- len))
 			 (setq term-kill-echo-list (cdr cur))
 			 (setq term-current-column nil)
 			 (setq term-current-row nil)
@@ -1229,9 +1200,9 @@ Entry to this mode runs the hooks on `term-mode-hook'."
     found))
 
 (defun term-check-size (process)
-  (when (or (/= term-height (1- (window-height)))
+  (when (or (/= term-height (window-text-height))
 	    (/= term-width (term-window-width)))
-    (term-reset-size (1- (window-height)) (term-window-width))
+    (term-reset-size (window-text-height) (term-window-width))
     (set-process-window-size process term-height term-width)))
 
 (defun term-send-raw-string (chars)
@@ -1250,52 +1221,70 @@ Entry to this mode runs the hooks on `term-mode-hook'."
   "Send the last character typed through the terminal-emulator
 without any interpretation."
   (interactive)
-  ;; Convert `return' to C-m, etc.
-  (when (and (symbolp last-input-event)
-	     (get last-input-event 'ascii-character))
-    (setq last-input-event (get last-input-event 'ascii-character)))
-  (term-send-raw-string (make-string 1 last-input-event)))
+  (let ((keys (this-command-keys)))
+    (term-send-raw-string (string (aref keys (1- (length keys)))))))
 
 (defun term-send-raw-meta ()
   (interactive)
   (let ((char last-input-event))
-    (when (symbolp last-input-event)
+    (when (symbolp char)
       ;; Convert `return' to C-m, etc.
       (let ((tmp (get char 'event-symbol-elements)))
-	(when tmp
-	  (setq char (car tmp)))
-	(when (symbolp char)
-	  (setq tmp (get char 'ascii-character))
-	  (when tmp
-	    (setq char tmp)))))
-    (setq char (event-basic-type char))
-    (term-send-raw-string (if (and (numberp char)
-				   (> char 127)
-				   (< char 256))
-			      (make-string 1 char)
-			    (format "\e%c" char)))))
+	(if tmp (setq char (car tmp)))
+	(and (symbolp char)
+	     (setq tmp (get char 'ascii-character))
+	     (setq char tmp))))
+    (when (numberp char)
+      (let ((base (event-basic-type char))
+	    (mods (delq 'meta (event-modifiers char))))
+	(if (memq 'control mods)
+	    (setq mods (delq 'shift mods)))
+	(term-send-raw-string
+	 (format "\e%c"
+		 (event-convert-list (append mods (list base)))))))))
 
-(defun term-mouse-paste (click arg)
-  "Insert the last stretch of killed text at the position clicked on."
-  (interactive "e\nP")
+(defun term-mouse-paste (click)
+  "Insert the primary selection at the position clicked on."
+  (interactive "e")
   (if (featurep 'xemacs)
       (term-send-raw-string
        (or (condition-case () (x-get-selection) (error ()))
-	   (x-get-cutbuffer)
-	   (error "No selection or cut buffer available")))
+	   (error "No selection available")))
     ;; Give temporary modes such as isearch a chance to turn off.
     (run-hooks 'mouse-leave-buffer-hook)
     (setq this-command 'yank)
     (mouse-set-point click)
-    (term-send-raw-string (current-kill (cond
-					 ((listp arg) 0)
-					 ((eq arg '-) -1)
-					 (t (1- arg)))))))
+    (term-send-raw-string
+     ;; From `mouse-yank-primary':
+     (or (if (fboundp 'x-get-selection-value)
+             (if (eq system-type 'windows-nt)
+                 (or (x-get-selection 'PRIMARY)
+                     (x-get-selection-value))
+               (or (x-get-selection-value)
+                   (x-get-selection 'PRIMARY)))
+	   (x-get-selection 'PRIMARY))
+	 (error "No selection is available")))))
 
 (defun term-paste ()
   "Insert the last stretch of killed text at point."
   (interactive)
    (term-send-raw-string (current-kill 0)))
+
+;; Which would be better:  "\e[A" or "\eOA"? readline accepts either.
+;; For my configuration it's definitely better \eOA but YMMV. -mm
+;; For example: vi works with \eOA while elm wants \e[A ...
+;; (terminfo: kcuu1, kcud1, kcuf1, kcub1, khome, kend, kpp, knp, kdch1, kbs)
+(defun term-send-up    () (interactive) (term-send-raw-string "\eOA"))
+(defun term-send-down  () (interactive) (term-send-raw-string "\eOB"))
+(defun term-send-right () (interactive) (term-send-raw-string "\eOC"))
+(defun term-send-left  () (interactive) (term-send-raw-string "\eOD"))
+(defun term-send-home  () (interactive) (term-send-raw-string "\e[1~"))
+(defun term-send-insert() (interactive) (term-send-raw-string "\e[2~"))
+(defun term-send-end   () (interactive) (term-send-raw-string "\e[4~"))
+(defun term-send-prior () (interactive) (term-send-raw-string "\e[5~"))
+(defun term-send-next  () (interactive) (term-send-raw-string "\e[6~"))
+(defun term-send-del   () (interactive) (term-send-raw-string "\e[3~"))
+(defun term-send-backspace  () (interactive) (term-send-raw-string "\C-?"))
 
 (defun term-char-mode ()
   "Switch to char (\"raw\") sub-mode of term mode.
@@ -1306,6 +1295,8 @@ intervention from Emacs, except for the escape character (usually C-c)."
   (when (term-in-line-mode)
     (setq term-old-mode-map (current-local-map))
     (use-local-map term-raw-map)
+    (easy-menu-add term-terminal-menu)
+    (easy-menu-add term-signals-menu)
 
     ;; Send existing partial line to inferior (without newline).
     (let ((pmark (process-mark (get-buffer-process (current-buffer))))
@@ -1330,11 +1321,33 @@ you type \\[term-send-input] which sends the current line to the inferior."
     (term-update-mode-line)))
 
 (defun term-update-mode-line ()
-  (let ((term-mode (if (term-in-char-mode) "char" "line"))
-        (term-page (when (term-pager-enabled) " page"))
+  (let ((term-mode
+         (if (term-in-char-mode)
+             (propertize "char"
+                         'help-echo "mouse-1: Switch to line mode"
+                         'mouse-face 'mode-line-highlight
+                         'local-map
+                         '(keymap
+                           (mode-line keymap (down-mouse-1 . term-line-mode))))
+           (propertize "line"
+                       'help-echo "mouse-1: Switch to char mode"
+                       'mouse-face 'mode-line-highlight
+                       'local-map
+                       '(keymap
+                         (mode-line keymap (down-mouse-1 . term-char-mode))))))
+        (term-page
+         (when (term-pager-enabled)
+           (concat " "
+                   (propertize
+                    "page"
+                    'help-echo "mouse-1: Disable paging"
+                    'mouse-face 'mode-line-highlight
+                    'local-map
+                    '(keymap
+                      (mode-line keymap (down-mouse-1 .
+                                                      term-pager-toggle)))))))
         (serial-item-speed)
         (serial-item-config)
-        (temp)
         (proc (get-buffer-process (current-buffer))))
     (when (and (term-check-proc (current-buffer))
                (equal (process-type nil) 'serial))
@@ -1378,8 +1391,7 @@ the process.  Any more args are arguments to PROGRAM."
     ;; If no process, or nuked process, crank up a new one and put buffer in
     ;; term mode.  Otherwise, leave buffer and existing process alone.
     (cond ((not (term-check-proc buffer))
-	   (save-excursion
-	     (set-buffer buffer)
+	   (with-current-buffer buffer
 	     (term-mode)) ; Install local vars, mode, keymap, ...
 	   (term-exec buffer name program startfile switches)))
     buffer))
@@ -1406,9 +1418,8 @@ commands to use in that buffer.
 Blasts any old process running in the buffer.  Doesn't set the buffer mode.
 You can use this to cheaply run a series of processes in the same term
 buffer.  The hook `term-exec-hook' is run after each exec."
-  (save-excursion
-    (set-buffer buffer)
-    (let ((proc (get-buffer-process buffer)))	; Blast any old process.
+  (with-current-buffer buffer
+    (let ((proc (get-buffer-process buffer))) ; Blast any old process.
       (when proc (delete-process proc)))
     ;; Crank up a new process
     (let ((proc (term-exec-1 name buffer command switches)))
@@ -1420,20 +1431,19 @@ buffer.  The hook `term-exec-hook' is run after each exec."
       (set-process-filter proc 'term-emulate-terminal)
       (set-process-sentinel proc 'term-sentinel)
       ;; Feed it the startfile.
-      (cond (startfile
-	     ;;This is guaranteed to wait long enough
-	     ;;but has bad results if the term does not prompt at all
-	     ;;	     (while (= size (buffer-size))
-	     ;;	       (sleep-for 1))
-	     ;;I hope 1 second is enough!
-	     (sleep-for 1)
-	     (goto-char (point-max))
-	     (insert-file-contents startfile)
-	     (setq startfile (buffer-substring (point) (point-max)))
-	     (delete-region (point) (point-max))
-	     (term-send-string proc startfile)))
+      (when startfile
+        ;;This is guaranteed to wait long enough
+        ;;but has bad results if the term does not prompt at all
+        ;;	     (while (= size (buffer-size))
+        ;;	       (sleep-for 1))
+        ;;I hope 1 second is enough!
+        (sleep-for 1)
+        (goto-char (point-max))
+        (insert-file-contents startfile)
+	(term-send-string
+	 proc (delete-and-extract-region (point) (point-max)))))
     (run-hooks 'term-exec-hook)
-    buffer)))
+    buffer))
 
 (defun term-sentinel (proc msg)
   "Sentinel for term buffers.
@@ -1443,24 +1453,16 @@ The main purpose is to get rid of the local keymap."
       (if (null (buffer-name buffer))
 	  ;; buffer killed
 	  (set-process-buffer proc nil)
-	(let ((obuf (current-buffer)))
-	  ;; save-excursion isn't the right thing if
-	  ;; process-buffer is current-buffer
-	  (unwind-protect
-	      (progn
-		;; Write something in the compilation buffer
-		;; and hack its mode line.
-		(set-buffer buffer)
-		;; Get rid of local keymap.
-		(use-local-map nil)
-		(term-handle-exit (process-name proc)
-				  msg)
-		;; Since the buffer and mode line will show that the
-		;; process is dead, we can delete it now.  Otherwise it
-		;; will stay around until M-x list-processes.
-		(delete-process proc))
-	    (set-buffer obuf)))
-	))))
+	(with-current-buffer buffer
+          ;; Write something in the compilation buffer
+          ;; and hack its mode line.
+          ;; Get rid of local keymap.
+          (use-local-map nil)
+          (term-handle-exit (process-name proc) msg)
+          ;; Since the buffer and mode line will show that the
+          ;; process is dead, we can delete it now.  Otherwise it
+          ;; will stay around until M-x list-processes.
+          (delete-process proc))))))
 
 (defun term-handle-exit (process-name msg)
   "Write process exit (or other change) message MSG in the current buffer."
@@ -1477,31 +1479,28 @@ The main purpose is to get rid of the local keymap."
       (goto-char opoint))))
 
 
-;;; Name to use for TERM.
-;;; Using "emacs" loses, because bash disables editing if TERM == emacs.
-(defvar term-term-name "eterm-color")
-; Format string, usage:
-; (format term-termcap-string "TERMCAP=" emacs-term-name 80 24)
+(defvar term-term-name "eterm-color"
+  "Name to use for TERM.
+Using \"emacs\" loses, because bash disables editing if $TERM == emacs.")
+;; Format string, usage:
+;; (format term-termcap-string emacs-term-name "TERMCAP=" 24 80)
 (defvar term-termcap-format
-  "%s%s:am:mi:xn:\
-:Co#8:co#%d:li#%d:pa#64:\
-:#2=\\E[1;2~:#4=\\E[1;2D:%%c=\\E[6;2~:%%e=\\E[5;2~:%%i=\\E[1;2C:\
-:*7=\\E[4;2~:@7=\\E[4~:AB=\\E[%%+(m:AF=\\E[%%+^^m:AL=\\E[%%dL:\
-:DC=\\E[%%dP:DL=\\E[%%dM:DO=\\E[%%dB:IC=\\E[%%d@:LE=\\E[%%dD:\
-:RI=\\E[%%dC:UP=\\E[%%dA:al=\\E[L:bl=^G:cb=\\E[1K:cd=\\E[J:\
-:ce=\\E[K:cl=\\E[H\\E[J:cm=\\E[%%i%%d;%%dH:cr=^M:cs=\\E[%%i%%d;%%dr:\
-:dc=\\E[P:dl=\\E[M:do=^J:ei=\\E[4l:ho=\\E[H:im=\\E[4h:kD=\\E[3~:\
-:kI=\\E[2~:kN=\\E[6~:kP=\\E[5~:kb=\\177:kd=\\EOB:kh=\\E[1~:\
-:kl=\\EOD:kr=\\EOC:ku=\\EOA:le=^H:md=\\E[1m:me=\\E[m:mk=\\E[8m:\
-:mr=\\E[7m:nd=\\E[C:op=\\E[39;49m:r1=\\Ec:rc=\\E8:sc=\\E7:\
-:se=\\E[27m:sf=^J:so=\\E[7m:sr=\\EM:ta=^I:ue=\\E[24m:up=\\E[A:\
-:us=\\E[4m:"
-;;; : -undefine ic
-;;; don't define :te=\\E[2J\\E[?47l\\E8:ti=\\E7\\E[?47h\
+  "%s%s:li#%d:co#%d:cl=\\E[H\\E[J:cd=\\E[J:bs:am:xn:cm=\\E[%%i%%d;%%dH\
+:nd=\\E[C:up=\\E[A:ce=\\E[K:ho=\\E[H:pt\
+:al=\\E[L:dl=\\E[M:DL=\\E[%%dM:AL=\\E[%%dL:cs=\\E[%%i%%d;%%dr:sf=^J\
+:dc=\\E[P:DC=\\E[%%dP:IC=\\E[%%d@:im=\\E[4h:ei=\\E[4l:mi:\
+:so=\\E[7m:se=\\E[m:us=\\E[4m:ue=\\E[m:md=\\E[1m:mr=\\E[7m:me=\\E[m\
+:UP=\\E[%%dA:DO=\\E[%%dB:LE=\\E[%%dD:RI=\\E[%%dC\
+:kl=\\EOD:kd=\\EOB:kr=\\EOC:ku=\\EOA:kN=\\E[6~:kP=\\E[5~:@7=\\E[4~:kh=\\E[1~\
+:mk=\\E[8m:cb=\\E[1K:op=\\E[39;49m:Co#8:pa#64:AB=\\E[4%%dm:AF=\\E[3%%dm:cr=^M\
+:bl=^G:do=^J:le=^H:ta=^I:se=\\E[27m:ue=\\E24m\
+:kb=^?:kD=^[[3~:sc=\\E7:rc=\\E8:r1=\\Ec:"
+  ;; : -undefine ic
+  ;; don't define :te=\\E[2J\\E[?47l\\E8:ti=\\E7\\E[?47h\
   "Termcap capabilities supported.")
 
-;;; This auxiliary function cranks up the process for term-exec in
-;;; the appropriate environment.
+;; This auxiliary function cranks up the process for term-exec in
+;; the appropriate environment.
 
 (defun term-exec-1 (name buffer command switches)
   ;; We need to do an extra (fork-less) exec to run stty.
@@ -1515,7 +1514,7 @@ The main purpose is to get rid of the local keymap."
 	   (format "TERM=%s" term-term-name)
 	   (format "TERMINFO=%s" data-directory)
 	   (format term-termcap-format "TERMCAP="
-		   term-term-name term-width term-height)
+		   term-term-name term-height term-width)
 	   ;; We are going to get rid of the binding for EMACS,
 	   ;; probably in Emacs 23, because it breaks
 	   ;; `./configure' of some packages that expect it to
@@ -1542,30 +1541,30 @@ if [ $1 = .. ]; then shift; fi; exec \"$@\""
 
 
 ;;; Input history processing in a buffer
-;;; ===========================================================================
-;;; Useful input history functions, courtesy of the Ergo group.
+;; ===========================================================================
+;; Useful input history functions, courtesy of the Ergo group.
 
-;;; Eleven commands:
-;;; term-dynamic-list-input-ring	List history in help buffer.
-;;; term-previous-input		Previous input...
-;;; term-previous-matching-input	...matching a string.
-;;; term-previous-matching-input-from-input ... matching the current input.
-;;; term-next-input			Next input...
-;;; term-next-matching-input		...matching a string.
-;;; term-next-matching-input-from-input     ... matching the current input.
-;;; term-backward-matching-input      Backwards input...
-;;; term-forward-matching-input       ...matching a string.
-;;; term-replace-by-expanded-history	Expand history at point;
-;;;					replace with expanded history.
-;;; term-magic-space			Expand history and insert space.
-;;;
-;;; Three functions:
-;;; term-read-input-ring              Read into term-input-ring...
-;;; term-write-input-ring             Write to term-input-ring-file-name.
-;;; term-replace-by-expanded-history-before-point Workhorse function.
+;; Eleven commands:
+;; term-dynamic-list-input-ring	List history in help buffer.
+;; term-previous-input			Previous input...
+;; term-previous-matching-input		...matching a string.
+;; term-previous-matching-input-from-input ... matching the current input.
+;; term-next-input			Next input...
+;; term-next-matching-input		...matching a string.
+;; term-next-matching-input-from-input     ... matching the current input.
+;; term-backward-matching-input		Backwards input...
+;; term-forward-matching-input       ...matching a string.
+;; term-replace-by-expanded-history	Expand history at point;
+;;					replace with expanded history.
+;; term-magic-space			Expand history and insert space.
+;;
+;; Three functions:
+;; term-read-input-ring              Read into term-input-ring...
+;; term-write-input-ring             Write to term-input-ring-file-name.
+;; term-replace-by-expanded-history-before-point Workhorse function.
 
 (defun term-read-input-ring (&optional silent)
-  "Sets the buffer's `term-input-ring' from a history file.
+  "Set the buffer's `term-input-ring' from a history file.
 The name of the file is given by the variable `term-input-ring-file-name'.
 The history ring is of size `term-input-ring-size', regardless of file size.
 If `term-input-ring-file-name' is nil this function does nothing.
@@ -1586,35 +1585,29 @@ See also `term-input-ignoredups' and `term-write-input-ring'."
 	     (message "Cannot read history file %s"
 		      term-input-ring-file-name)))
 	(t
-	 (let ((history-buf (get-buffer-create " *temp*"))
-	       (file term-input-ring-file-name)
+	 (let ((file term-input-ring-file-name)
 	       (count 0)
 	       (ring (make-ring term-input-ring-size)))
-	   (unwind-protect
-	       (save-excursion
-		 (set-buffer history-buf)
-		 (widen)
-		 (erase-buffer)
-		 (insert-file-contents file)
-		 ;; Save restriction in case file is already visited...
-		 ;; Watch for those date stamps in history files!
-		 (goto-char (point-max))
-		 (while (and (< count term-input-ring-size)
-			     (re-search-backward "^[ \t]*\\([^#\n].*\\)[ \t]*$"
-						 nil t))
-		   (let ((history (buffer-substring (match-beginning 1)
-						    (match-end 1))))
-		     (when (or (null term-input-ignoredups)
-			       (ring-empty-p ring)
-			       (not (string-equal (ring-ref ring 0) history)))
-			 (ring-insert-at-beginning ring history)))
-		   (setq count (1+ count))))
-	     (kill-buffer history-buf))
+           (with-temp-buffer
+             (insert-file-contents file)
+             ;; Save restriction in case file is already visited...
+             ;; Watch for those date stamps in history files!
+             (goto-char (point-max))
+             (while (and (< count term-input-ring-size)
+                         (re-search-backward "^[ \t]*\\([^#\n].*\\)[ \t]*$"
+                                             nil t))
+               (let ((history (buffer-substring (match-beginning 1)
+                                                (match-end 1))))
+                 (when (or (null term-input-ignoredups)
+                           (ring-empty-p ring)
+                           (not (string-equal (ring-ref ring 0) history)))
+                   (ring-insert-at-beginning ring history)))
+               (setq count (1+ count))))
 	   (setq term-input-ring ring
 		 term-input-ring-index nil)))))
 
 (defun term-write-input-ring ()
-  "Writes the buffer's `term-input-ring' to a history file.
+  "Write the buffer's `term-input-ring' to a history file.
 The name of the file is given by the variable `term-input-ring-file-name'.
 The original contents of the file are lost if `term-input-ring' is not empty.
 If `term-input-ring-file-name' is nil this function does nothing.
@@ -1635,8 +1628,7 @@ See also `term-read-input-ring'."
 		(index (ring-length ring)))
 	   ;; Write it all out into a buffer first.  Much faster, but messier,
 	   ;; than writing it one line at a time.
-	   (save-excursion
-	     (set-buffer history-buf)
+	   (with-current-buffer history-buf
 	     (erase-buffer)
 	     (while (> index 0)
 	       (setq index (1- index))
@@ -1850,15 +1842,11 @@ Returns t if successful."
   "Expand directory stack reference before point.
 See `term-replace-by-expanded-history'.  Returns t if successful."
   (save-excursion
-    (let ((toend (- (save-excursion (end-of-line nil) (point)) (point)))
+    (let ((toend (- (line-end-position) (point)))
 	  (start (progn (term-bol nil) (point))))
       (while (progn
-	       (skip-chars-forward "^!^"
-				   (save-excursion
-				     (end-of-line nil) (- (point) toend)))
-	       (< (point)
-		  (save-excursion
-		    (end-of-line nil) (- (point) toend))))
+	       (skip-chars-forward "^!^" (- (line-end-position) toend))
+	       (< (point) (- (line-end-position) toend)))
 	;; This seems a bit complex.  We look for references such as !!, !-num,
 	;; !foo, !?foo, !{bar}, !?{bar}, ^oh, ^my^, ^god^it, ^never^ends^.
 	;; If that wasn't enough, the plings can be suffixed with argument
@@ -2047,12 +2035,12 @@ Argument 0 is the command name."
   "Send input to process.
 After the process output mark, sends all text from the process mark to
 point as input to the process.  Before the process output mark, calls value
-of variable term-get-old-input to retrieve old input, copies it to the
+of variable `term-get-old-input' to retrieve old input, copies it to the
 process mark, and sends it.  A terminal newline is also inserted into the
 buffer and sent to the process.  The list of function names contained in the
 value of `term-input-filter-functions' is called on the input before sending
 it.  The input is entered into the input history ring, if the value of variable
-term-input-filter returns non-nil when called on the input.
+`term-input-filter' returns non-nil when called on the input.
 
 Any history reference may be expanded depending on the value of the variable
 `term-input-autoexpand'.  The list of function names contained in the value
@@ -2164,7 +2152,7 @@ Calls `term-get-old-input' to get old input."
 (defun term-skip-prompt ()
   "Skip past the text matching regexp `term-prompt-regexp'.
 If this takes us past the end of the current line, don't skip at all."
-  (let ((eol (save-excursion (end-of-line) (point))))
+  (let ((eol (line-end-position)))
     (when (and (looking-at term-prompt-regexp)
 	       (<= (match-end 0) eol))
       (goto-char (match-end 0)))))
@@ -2174,7 +2162,7 @@ If this takes us past the end of the current line, don't skip at all."
   "Is point after the process output marker?"
   ;; Since output could come into the buffer after we looked at the point
   ;; but before we looked at the process marker's value, we explicitly
-  ;; serialise.  This is just because I don't know whether or not Emacs
+  ;; serialize.  This is just because I don't know whether or not Emacs
   ;; services input during execution of lisp commands.
   (let ((proc-pos (marker-position
 		   (process-mark (get-buffer-process (current-buffer))))))
@@ -2188,7 +2176,7 @@ set the hook `term-input-sender'."
   (term-send-string proc "\n"))
 
 (defun term-bol (arg)
-  "Goes to the beginning of line, then skips past the prompt, if any.
+  "Go to the beginning of line, then skip past the prompt, if any.
 If a prefix argument is given (\\[universal-argument]), then no prompt skip
 -- go straight to column 0.
 
@@ -2198,9 +2186,9 @@ The prompt skip is done by skipping text matching the regular expression
   (beginning-of-line)
   (when (null arg) (term-skip-prompt)))
 
-;;; These two functions are for entering text you don't want echoed or
-;;; saved -- typically passwords to ftp, telnet, or somesuch.
-;;; Just enter m-x term-send-invisible and type in your line.
+;; These two functions are for entering text you don't want echoed or
+;; saved -- typically passwords to ftp, telnet, or somesuch.
+;; Just enter m-x term-send-invisible and type in your line.
 
 (defun term-read-noecho (prompt &optional stars)
   "Read a single line of text from user without echoing, and return it.
@@ -2270,9 +2258,11 @@ Security bug: your string can still be temporarily recovered with
 
 ;;; Low-level process communication
 
-(defvar term-input-chunk-size 512
-  "*Long inputs send to term processes are broken up into chunks of this size.
-If your process is choking on big inputs, try lowering the value.")
+(defcustom term-input-chunk-size 512
+  "Long inputs send to term processes are broken up into chunks of this size.
+If your process is choking on big inputs, try lowering the value."
+  :group 'term
+  :type 'integer)
 
 (defun term-send-string (proc str)
   "Send to PROC the contents of STR as input.
@@ -2409,66 +2399,66 @@ See `term-prompt-regexp'."
   (term-next-prompt (- n)))
 
 ;;; Support for source-file processing commands.
-;;;============================================================================
-;;; Many command-interpreters (e.g., Lisp, Scheme, Soar) have
-;;; commands that process files of source text (e.g. loading or compiling
-;;; files).  So the corresponding process-in-a-buffer modes have commands
-;;; for doing this (e.g., lisp-load-file).  The functions below are useful
-;;; for defining these commands.
-;;;
-;;; Alas, these guys don't do exactly the right thing for Lisp, Scheme
-;;; and Soar, in that they don't know anything about file extensions.
-;;; So the compile/load interface gets the wrong default occasionally.
-;;; The load-file/compile-file default mechanism could be smarter -- it
-;;; doesn't know about the relationship between filename extensions and
-;;; whether the file is source or executable.  If you compile foo.lisp
-;;; with compile-file, then the next load-file should use foo.bin for
-;;; the default, not foo.lisp.  This is tricky to do right, particularly
-;;; because the extension for executable files varies so much (.o, .bin,
-;;; .lbin, .mo, .vo, .ao, ...).
+;;============================================================================
+;; Many command-interpreters (e.g., Lisp, Scheme, Soar) have
+;; commands that process files of source text (e.g. loading or compiling
+;; files).  So the corresponding process-in-a-buffer modes have commands
+;; for doing this (e.g., lisp-load-file).  The functions below are useful
+;; for defining these commands.
+;;
+;; Alas, these guys don't do exactly the right thing for Lisp, Scheme
+;; and Soar, in that they don't know anything about file extensions.
+;; So the compile/load interface gets the wrong default occasionally.
+;; The load-file/compile-file default mechanism could be smarter -- it
+;; doesn't know about the relationship between filename extensions and
+;; whether the file is source or executable.  If you compile foo.lisp
+;; with compile-file, then the next load-file should use foo.bin for
+;; the default, not foo.lisp.  This is tricky to do right, particularly
+;; because the extension for executable files varies so much (.o, .bin,
+;; .lbin, .mo, .vo, .ao, ...).
 
 
-;;; TERM-SOURCE-DEFAULT -- determines defaults for source-file processing
-;;; commands.
-;;;
-;;; TERM-CHECK-SOURCE -- if FNAME is in a modified buffer, asks you if you
-;;; want to save the buffer before issuing any process requests to the command
-;;; interpreter.
-;;;
-;;; TERM-GET-SOURCE -- used by the source-file processing commands to prompt
-;;; for the file to process.
+;; TERM-SOURCE-DEFAULT -- determines defaults for source-file processing
+;; commands.
+;;
+;; TERM-CHECK-SOURCE -- if FNAME is in a modified buffer, asks you if you
+;; want to save the buffer before issuing any process requests to the command
+;; interpreter.
+;;
+;; TERM-GET-SOURCE -- used by the source-file processing commands to prompt
+;; for the file to process.
 
-;;; (TERM-SOURCE-DEFAULT previous-dir/file source-modes)
-;;;============================================================================
-;;; This function computes the defaults for the load-file and compile-file
-;;; commands for tea, soar, cmulisp, and cmuscheme modes.
-;;;
-;;; - PREVIOUS-DIR/FILE is a pair (directory . filename) from the last
-;;; source-file processing command, or nil if there hasn't been one yet.
-;;; - SOURCE-MODES is a list used to determine what buffers contain source
-;;; files: if the major mode of the buffer is in SOURCE-MODES, it's source.
-;;; Typically, (lisp-mode) or (scheme-mode).
-;;;
-;;; If the command is given while the cursor is inside a string, *and*
-;;; the string is an existing filename, *and* the filename is not a directory,
-;;; then the string is taken as default.  This allows you to just position
-;;; your cursor over a string that's a filename and have it taken as default.
-;;;
-;;; If the command is given in a file buffer whose major mode is in
-;;; SOURCE-MODES, then the filename is the default file, and the
-;;; file's directory is the default directory.
-;;;
-;;; If the buffer isn't a source file buffer (e.g., it's the process buffer),
-;;; then the default directory & file are what was used in the last source-file
-;;; processing command (i.e., PREVIOUS-DIR/FILE).  If this is the first time
-;;; the command has been run (PREVIOUS-DIR/FILE is nil), the default directory
-;;; is the cwd, with no default file.  (\"no default file\" = nil)
-;;;
-;;; SOURCE-REGEXP is typically going to be something like (tea-mode)
-;;; for T programs, (lisp-mode) for Lisp programs, (soar-mode lisp-mode)
-;;; for Soar programs, etc.
-;;;
-;;; The function returns a pair: (default-directory . default-file).
+;; (TERM-SOURCE-DEFAULT previous-dir/file source-modes)
+;;============================================================================
+;; This function computes the defaults for the load-file and compile-file
+;; commands for tea, soar, cmulisp, and cmuscheme modes.
+;;
+;; - PREVIOUS-DIR/FILE is a pair (directory . filename) from the last
+;; source-file processing command, or nil if there hasn't been one yet.
+;; - SOURCE-MODES is a list used to determine what buffers contain source
+;; files: if the major mode of the buffer is in SOURCE-MODES, it's source.
+;; Typically, (lisp-mode) or (scheme-mode).
+;;
+;; If the command is given while the cursor is inside a string, *and*
+;; the string is an existing filename, *and* the filename is not a directory,
+;; then the string is taken as default.  This allows you to just position
+;; your cursor over a string that's a filename and have it taken as default.
+;;
+;; If the command is given in a file buffer whose major mode is in
+;; SOURCE-MODES, then the filename is the default file, and the
+;; file's directory is the default directory.
+;;
+;; If the buffer isn't a source file buffer (e.g., it's the process buffer),
+;; then the default directory & file are what was used in the last source-file
+;; processing command (i.e., PREVIOUS-DIR/FILE).  If this is the first time
+;; the command has been run (PREVIOUS-DIR/FILE is nil), the default directory
+;; is the cwd, with no default file.  (\"no default file\" = nil)
+;;
+;; SOURCE-REGEXP is typically going to be something like (tea-mode)
+;; for T programs, (lisp-mode) for Lisp programs, (soar-mode lisp-mode)
+;; for Soar programs, etc.
+;;
+;; The function returns a pair: (default-directory . default-file).
 
 (defun term-source-default (previous-dir/file source-modes)
   (cond ((and buffer-file-name (memq major-mode source-modes))
@@ -2479,13 +2469,13 @@ See `term-prompt-regexp'."
 	 (cons default-directory nil))))
 
 
-;;; (TERM-CHECK-SOURCE fname)
-;;;============================================================================
-;;; Prior to loading or compiling (or otherwise processing) a file (in the CMU
-;;; process-in-a-buffer modes), this function can be called on the filename.
-;;; If the file is loaded into a buffer, and the buffer is modified, the user
-;;; is queried to see if he wants to save the buffer before proceeding with
-;;; the load or compile.
+;; (TERM-CHECK-SOURCE fname)
+;;============================================================================
+;; Prior to loading or compiling (or otherwise processing) a file (in the CMU
+;; process-in-a-buffer modes), this function can be called on the filename.
+;; If the file is loaded into a buffer, and the buffer is modified, the user
+;; is queried to see if he wants to save the buffer before proceeding with
+;; the load or compile.
 
 (defun term-check-source (fname)
   (let ((buff (get-file-buffer fname)))
@@ -2494,42 +2484,39 @@ See `term-prompt-regexp'."
 	       (y-or-n-p (format "Save buffer %s first? "
 				 (buffer-name buff))))
       ;; save BUFF.
-      (let ((old-buffer (current-buffer)))
-	(set-buffer buff)
-	(save-buffer)
-	(set-buffer old-buffer)))))
+      (with-current-buffer buff
+	(save-buffer)))))
 
 
-;;; (TERM-GET-SOURCE prompt prev-dir/file source-modes mustmatch-p)
-;;;============================================================================
-;;; TERM-GET-SOURCE is used to prompt for filenames in command-interpreter
-;;; commands that process source files (like loading or compiling a file).
-;;; It prompts for the filename, provides a default, if there is one,
-;;; and returns the result filename.
-;;;
-;;; See TERM-SOURCE-DEFAULT for more on determining defaults.
-;;;
-;;; PROMPT is the prompt string.  PREV-DIR/FILE is the (directory . file) pair
-;;; from the last source processing command.  SOURCE-MODES is a list of major
-;;; modes used to determine what file buffers contain source files.  (These
-;;; two arguments are used for determining defaults).  If MUSTMATCH-P is true,
-;;; then the filename reader will only accept a file that exists.
-;;;
-;;; A typical use:
-;;; (interactive (term-get-source "Compile file: " prev-lisp-dir/file
-;;;                                 '(lisp-mode) t))
+;; (TERM-GET-SOURCE prompt prev-dir/file source-modes mustmatch-p)
+;;============================================================================
+;; TERM-GET-SOURCE is used to prompt for filenames in command-interpreter
+;; commands that process source files (like loading or compiling a file).
+;; It prompts for the filename, provides a default, if there is one,
+;; and returns the result filename.
+;;
+;; See TERM-SOURCE-DEFAULT for more on determining defaults.
+;;
+;; PROMPT is the prompt string.  PREV-DIR/FILE is the (directory . file) pair
+;; from the last source processing command.  SOURCE-MODES is a list of major
+;; modes used to determine what file buffers contain source files.  (These
+;; two arguments are used for determining defaults).  If MUSTMATCH-P is true,
+;; then the filename reader will only accept a file that exists.
+;;
+;; A typical use:
+;; (interactive (term-get-source "Compile file: " prev-lisp-dir/file
+;;                                 '(lisp-mode) t))
 
-;;; This is pretty stupid about strings.  It decides we're in a string
-;;; if there's a quote on both sides of point on the current line.
+;; This is pretty stupid about strings.  It decides we're in a string
+;; if there's a quote on both sides of point on the current line.
 (defun term-extract-string ()
   "Return string around `point' that starts the current line or nil."
   (save-excursion
     (let* ((point (point))
-	   (bol (progn (beginning-of-line) (point)))
-	   (eol (progn (end-of-line) (point)))
-	   (start (progn (goto-char point)
-			 (and (search-backward "\"" bol t)
-			      (1+ (point)))))
+	   (bol (line-beginning-position))
+	   (eol (line-end-position))
+	   (start (and (search-backward "\"" bol t)
+                       (1+ (point))))
 	   (end (progn (goto-char point)
 		       (and (search-forward "\"" eol t)
 			    (1- (point))))))
@@ -2556,30 +2543,30 @@ See `term-prompt-regexp'."
 			      mustmatch-p)))
     (list (expand-file-name (substitute-in-file-name ans)))))
 
-;;; I am somewhat divided on this string-default feature.  It seems
-;;; to violate the principle-of-least-astonishment, in that it makes
-;;; the default harder to predict, so you actually have to look and see
-;;; what the default really is before choosing it.  This can trip you up.
-;;; On the other hand, it can be useful, I guess.  I would appreciate feedback
-;;; on this.
-;;;     -Olin
+;; I am somewhat divided on this string-default feature.  It seems
+;; to violate the principle-of-least-astonishment, in that it makes
+;; the default harder to predict, so you actually have to look and see
+;; what the default really is before choosing it.  This can trip you up.
+;; On the other hand, it can be useful, I guess.  I would appreciate feedback
+;; on this.
+;;     -Olin
 
 
 ;;; Simple process query facility.
-;;; ===========================================================================
-;;; This function is for commands that want to send a query to the process
-;;; and show the response to the user.  For example, a command to get the
-;;; arglist for a Common Lisp function might send a "(arglist 'foo)" query
-;;; to an inferior Common Lisp process.
-;;;
-;;; This simple facility just sends strings to the inferior process and pops
-;;; up a window for the process buffer so you can see what the process
-;;; responds with.  We don't do anything fancy like try to intercept what the
-;;; process responds with and put it in a pop-up window or on the message
-;;; line.  We just display the buffer.  Low tech.  Simple.  Works good.
+;; ===========================================================================
+;; This function is for commands that want to send a query to the process
+;; and show the response to the user.  For example, a command to get the
+;; arglist for a Common Lisp function might send a "(arglist 'foo)" query
+;; to an inferior Common Lisp process.
+;;
+;; This simple facility just sends strings to the inferior process and pops
+;; up a window for the process buffer so you can see what the process
+;; responds with.  We don't do anything fancy like try to intercept what the
+;; process responds with and put it in a pop-up window or on the message
+;; line.  We just display the buffer.  Low tech.  Simple.  Works good.
 
-;;; Send to the inferior process PROC the string STR.  Pop-up but do not select
-;;; a window for the inferior process so that its response can be seen.
+;; Send to the inferior process PROC the string STR.  Pop-up but do not select
+;; a window for the inferior process so that its response can be seen.
 (defun term-proc-query (proc str)
   (let* ((proc-buf (process-buffer proc))
 	 (proc-mark (process-mark proc)))
@@ -2599,8 +2586,8 @@ See `term-prompt-regexp'."
 	      (push-mark opoint)
 	    (set-window-point proc-win opoint)))))))
 
-;;; Returns the current column in the current screen line.
-;;; Note: (current-column) yields column in buffer line.
+;; Returns the current column in the current screen line.
+;; Note: (current-column) yields column in buffer line.
 
 (defun term-horizontal-column ()
   (- (term-current-column) (term-start-line-column)))
@@ -2609,8 +2596,8 @@ See `term-prompt-regexp'."
 (defmacro term-vertical-motion (count)
   (list 'funcall 'term-vertical-motion count))
 
-;; An emulation of vertical-motion that is independent of having a window.
-;; Instead, it uses the term-width variable as the logical window width.
+; An emulation of vertical-motion that is independent of having a window.
+; Instead, it uses the term-width variable as the logical window width.
 
 (defun term-buffer-vertical-motion (count)
   (cond ((= count 0)
@@ -2651,7 +2638,7 @@ See `term-prompt-regexp'."
 	     (move-to-column (* (- H todo 1) term-width))
 	     count)))))
 
-;;; The term-start-line-column variable is used as a cache.
+;; The term-start-line-column variable is used as a cache.
 (defun term-start-line-column ()
   (cond (term-start-line-column)
 	((let ((save-pos (point)))
@@ -2660,31 +2647,28 @@ See `term-prompt-regexp'."
 	   (goto-char save-pos)
 	   term-start-line-column))))
 
-;;; Same as (current-column), but uses term-current-column as a cache.
+;; Same as (current-column), but uses term-current-column as a cache.
 (defun term-current-column ()
   (cond (term-current-column)
 	((setq term-current-column (current-column)))))
 
-;;; Move DELTA column right (or left if delta < 0 limiting at column 0).
+;; Move DELTA column right (or left if delta < 0 limiting at column 0).
 
 (defun term-move-columns (delta)
   (setq term-current-column (max 0 (+ (term-current-column) delta)))
-  (let (point-at-eol)
-    (save-excursion
-      (end-of-line)
-      (setq point-at-eol (point)))
+  (let ((point-at-eol (line-end-position)))
     (move-to-column term-current-column t)
     ;; If move-to-column extends the current line it will use the face
     ;; from the last character on the line, set the face for the chars
     ;; to default.
     (when (> (point) point-at-eol)
-      (put-text-property point-at-eol (point) 'face 'default))))
+      (put-text-property point-at-eol (point) 'font-lock-face 'default))))
 
 ;; Insert COUNT copies of CHAR in the default face.
 (defun term-insert-char (char count)
   (let ((old-point (point)))
     (insert-char char count)
-    (put-text-property old-point (point) 'face 'default)))
+    (put-text-property old-point (point) 'font-lock-face 'default)))
 
 (defun term-current-row ()
   (cond (term-current-row)
@@ -2708,15 +2692,14 @@ See `term-prompt-regexp'."
       (setq y (term-vertical-motion term-height))
       (cons x y))))
 
-;;;Function that handles term messages: code by rms ( and you can see the
-;;;difference ;-) -mm
+;;Function that handles term messages: code by rms (and you can see the
+;;difference ;-) -mm
 
 (defun term-handle-ansi-terminal-messages (message)
   ;; Is there a command here?
   (while (string-match "\eAnSiT.+\n" message)
     ;; Extract the command code and the argument.
     (let* ((start (match-beginning 0))
-	   (end (match-end 0))
 	   (command-code (aref message (+ start 6)))
 	   (argument
 	    (save-match-data
@@ -2768,9 +2751,9 @@ See `term-prompt-regexp'."
   message)
 
 
-;;; Terminal emulation
-;;; This is the standard process filter for term buffers.
-;;; It emulates (most of the features of) a VT100/ANSI-style terminal.
+;; Terminal emulation
+;; This is the standard process filter for term buffers.
+;; It emulates (most of the features of) a VT100/ANSI-style terminal.
 
 (defun term-emulate-terminal (proc str)
   (with-current-buffer (process-buffer proc)
@@ -2786,10 +2769,8 @@ See `term-prompt-regexp'."
 	   (str-length (length str)))
       (save-selected-window
 
-	;; Let's handle the messages. -mm
-
-        (let* ((newstr (term-handle-ansi-terminal-messages str)))
-          (when (not (eq str newstr))
+        (let ((newstr (term-handle-ansi-terminal-messages str)))
+          (unless (eq str newstr)
 	    (setq handled-ansi-message t
 		  str newstr)))
         (setq str-length (length str))
@@ -2799,18 +2780,19 @@ See `term-prompt-regexp'."
 	  (delete-region term-pending-delete-marker (process-mark proc))
 	  (set-marker term-pending-delete-marker nil))
 
+	(when (/= (point) (process-mark proc))
+	  (setq save-point (point-marker)))
+
+	;; Note if the window size has changed.  We used to reset
+	;; point too, but that gives incorrect results (Bug#4635).
 	(if (eq (window-buffer) (current-buffer))
 	    (progn
 	      (setq term-vertical-motion (symbol-function 'vertical-motion))
 	      (term-check-size proc))
 	  (setq term-vertical-motion
 		(symbol-function 'term-buffer-vertical-motion)))
-
 	(setq save-marker (copy-marker (process-mark proc)))
-
-	(when (/= (point) (process-mark proc))
-	  (setq save-point (point-marker))
-	  (goto-char (process-mark proc)))
+	(goto-char (process-mark proc))
 
 	(save-restriction
 	  ;; If the buffer is in line mode, and there is a partial
@@ -2849,14 +2831,17 @@ See `term-prompt-regexp'."
 				 ;; around.  Go to the beginning of
 				 ;; the next line and switch to state
 				 ;; 0.
-				 (term-down 1 t)
-				 (term-move-columns (- (term-current-column)))
+                                 (if term-suppress-hard-newline
+                                     (term-move-columns 1)
+                                   (term-down 1 t)
+                                   (term-move-columns (- (term-current-column))))
 				 (setq term-terminal-state 0)))
 			  (setq count (length decoded-substring))
 			  (setq temp (- (+ (term-horizontal-column) count)
 					term-width))
-			  (cond ((<= temp 0)) ;; All count chars fit in line.
-				((> count temp)	;; Some chars fit.
+			  (cond ((<= temp 0))
+				;; All count chars fit in line.
+				((> count temp) ;; Some chars fit.
 				 ;; This iteration, handle only what fits.
 				 (setq count (- count temp))
 				 (setq count-bytes
@@ -2910,7 +2895,7 @@ See `term-prompt-regexp'."
 			  (setq term-current-column nil)
 
 			  (put-text-property old-point (point)
-					     'face term-current-face)
+					     'font-lock-face term-current-face)
 			  ;; If the last char was written in last column,
 			  ;; back up one column, but remember we did so.
 			  ;; Thus we emulate xterm/vt100-style line-wrapping.
@@ -2956,8 +2941,10 @@ See `term-prompt-regexp'."
 			  (let ((end (string-match "\r?$" str i)))
 			    (if end
 				(funcall term-command-hook
-					 (prog1 (substring str (1+ i) end)
-					   (setq i (match-end 0))))
+					 (decode-coding-string
+					  (prog1 (substring str (1+ i) end)
+					    (setq i (match-end 0)))
+					  locale-coding-system))
 			      (setq term-terminal-parameter (substring str i))
 			      (setq term-terminal-state 4)
 			      (setq i str-length))))
@@ -2968,9 +2955,11 @@ See `term-prompt-regexp'."
 		  ((eq term-terminal-state 2)	  ; Seen Esc
 		   (cond ((eq char ?\133)	  ;; ?\133 = ?[
 
-;;; Some modifications to cope with multiple settings like ^[[01;32;43m -mm
-;;; Note that now the init value of term-terminal-previous-parameter has
-;;; been changed to -1
+                          ;; Some modifications to cope with multiple
+                          ;; settings like ^[[01;32;43m -mm
+                          ;; Note that now the init value of
+                          ;; term-terminal-previous-parameter has been
+                          ;; changed to -1
 
 			  (setq term-terminal-parameter 0)
 			  (setq term-terminal-previous-parameter -1)
@@ -3051,7 +3040,8 @@ See `term-prompt-regexp'."
 			  (setq term-terminal-parameter
 				(+ (* 10 term-terminal-parameter) (- char ?0))))
 			 ((eq char ?\;)
-;;; Some modifications to cope with multiple settings like ^[[01;32;43m -mm
+                          ;; Some modifications to cope with multiple
+                          ;; settings like ^[[01;32;43m -mm
 			  (setq term-terminal-more-parameters 1)
 			  (setq term-terminal-previous-parameter-4
 				term-terminal-previous-parameter-3)
@@ -3143,7 +3133,7 @@ See `term-prompt-regexp'."
 			 (recenter -1)))))
 		 (not (eq win last-win))))
 
-;;; Stolen from comint.el and adapted -mm
+        ;; Stolen from comint.el and adapted -mm
 	(when (> term-buffer-maximum-size 0)
 	  (save-excursion
 	    (goto-char (process-mark (get-buffer-process (current-buffer))))
@@ -3165,135 +3155,122 @@ See `term-prompt-regexp'."
 	(set-marker term-home-marker (point))
 	(setq term-current-row (1- term-height))))))
 
-;;; Reset the terminal, delete all the content and set the face to the
-;;; default one.
 (defun term-reset-terminal ()
+  "Reset the terminal, delete all the content and set the face to the default one."
   (erase-buffer)
+  (term-ansi-reset)
   (setq term-current-row 0)
   (setq term-current-column 1)
   (setq term-scroll-start 0)
   (setq term-scroll-end term-height)
   (setq term-insert-mode nil)
-  (setq term-current-face nil)
-  (setq term-ansi-current-underline nil)
-  (setq term-ansi-current-bold nil)
-  (setq term-ansi-current-reverse nil)
-  (setq term-ansi-current-color 0)
-  (setq term-ansi-current-invisible nil)
-  (setq term-ansi-face-already-done nil)
-  (setq term-ansi-current-bg-color 0))
+  ;; FIXME: No idea why this is here, it looks wrong.  --Stef
+  (setq term-ansi-face-already-done nil))
 
-;;; New function to deal with ansi colorized output, as you can see you can
-;;; have any bold/underline/fg/bg/reverse combination. -mm
+;; New function to deal with ansi colorized output, as you can see you can
+;; have any bold/underline/fg/bg/reverse combination. -mm
 
 (defun term-handle-colors-array (parameter)
   (cond
 
-;;; Bold  (terminfo: bold)
+   ;; Bold  (terminfo: bold)
    ((eq parameter 1)
     (setq term-ansi-current-bold t))
 
-;;; Underline
+   ;; Underline
    ((eq parameter 4)
     (setq term-ansi-current-underline t))
 
-;;; Blink (unsupported by Emacs), will be translated to bold.
-;;; This may change in the future though.
+   ;; Blink (unsupported by Emacs), will be translated to bold.
+   ;; This may change in the future though.
    ((eq parameter 5)
     (setq term-ansi-current-bold t))
 
-;;; Reverse (terminfo: smso)
+   ;; Reverse (terminfo: smso)
    ((eq parameter 7)
     (setq term-ansi-current-reverse t))
 
-;;; Invisible
+   ;; Invisible
    ((eq parameter 8)
     (setq term-ansi-current-invisible t))
 
-;;; Reset underline (terminfo: rmul)
+   ;; Reset underline (terminfo: rmul)
    ((eq parameter 24)
     (setq term-ansi-current-underline nil))
 
-;;; Reset reverse (terminfo: rmso)
+   ;; Reset reverse (terminfo: rmso)
    ((eq parameter 27)
     (setq term-ansi-current-reverse nil))
 
-;;; Foreground
+   ;; Foreground
    ((and (>= parameter 30) (<= parameter 37))
     (setq term-ansi-current-color (- parameter 29)))
 
-;;; Reset foreground
+   ;; Reset foreground
    ((eq parameter 39)
     (setq term-ansi-current-color 0))
 
-;;; Background
+   ;; Background
    ((and (>= parameter 40) (<= parameter 47))
     (setq term-ansi-current-bg-color (- parameter 39)))
 
-;;; Reset background
+   ;; Reset background
    ((eq parameter 49)
     (setq term-ansi-current-bg-color 0))
 
-;;; 0 (Reset) or unknown (reset anyway)
+   ;; 0 (Reset) or unknown (reset anyway)
    (t
-    (setq term-current-face nil)
-    (setq term-ansi-current-underline nil)
-    (setq term-ansi-current-bold nil)
-    (setq term-ansi-current-reverse nil)
-    (setq term-ansi-current-color 0)
-    (setq term-ansi-current-invisible nil)
-    (setq term-ansi-face-already-done t)
-    (setq term-ansi-current-bg-color 0)))
+    (term-ansi-reset)))
 
-  ;; (message "Debug: U-%S R-%S B-%S I-%S D-%S F-%S B-%S"
-  ;;       	   term-ansi-current-underline
-  ;;       	   term-ansi-current-reverse
-  ;;       	   term-ansi-current-bold
-  ;;       	   term-ansi-current-invisible
-  ;;       	   term-ansi-face-already-done
-  ;;       	   term-ansi-current-color
-  ;;       	   term-ansi-current-bg-color)
-
+  ;; (message "Debug: U-%d R-%d B-%d I-%d D-%d F-%d B-%d"
+  ;;          term-ansi-current-underline
+  ;;          term-ansi-current-reverse
+  ;;          term-ansi-current-bold
+  ;;          term-ansi-current-invisible
+  ;;          term-ansi-face-already-done
+  ;;          term-ansi-current-color
+  ;;          term-ansi-current-bg-color)
 
   (unless term-ansi-face-already-done
-    (setq term-current-face nil)
-    (when (/= term-ansi-current-color 0)
+    (if term-ansi-current-invisible
+        (let ((color
+               (if term-ansi-current-reverse
+                   (face-foreground
+                    (elt ansi-term-color-vector term-ansi-current-color)
+                    nil 'default)
+                 (face-background
+                  (elt ansi-term-color-vector term-ansi-current-bg-color)
+                  nil 'default))))
+          (setq term-current-face
+                (list :background color
+                      :foreground color))
+          ) ;; No need to bother with anything else if it's invisible.
       (setq term-current-face
-            (append (list :foreground (elt ansi-term-color-vector term-ansi-current-color)) term-current-face)))
-    (when (/= term-ansi-current-bg-color 0)
-      (setq term-current-face
-            (append (list :background (elt ansi-term-color-vector term-ansi-current-bg-color)) term-current-face)))
-    (when term-ansi-current-invisible
-      (setq term-current-face
-            ;; TODO: handle invisible
-            (if (= term-ansi-current-bg-color 0)
-                (list :background
-                      term-default-bg-color
-                      :foreground
-                      term-default-bg-color)
-              (list :foreground
-                    (elt ansi-term-color-vector term-ansi-current-bg-color)
-                    :background
-                    (elt ansi-term-color-vector term-ansi-current-bg-color)))
-            ;; No need to bother with anything else if it's invisible
-            ))
-    (when term-ansi-current-bold
-      (setq term-current-face
-            (append '(:weight bold) term-current-face)))
-    (when term-ansi-current-underline
-      (setq term-current-face
-            (append '(:underline t) term-current-face)))
-    (when term-ansi-current-reverse
-      (setq term-current-face
-            (append '(:inverse-video t) term-current-face)))
+            (list :foreground
+                  (face-foreground
+                   (elt ansi-term-color-vector term-ansi-current-color)
+                   nil 'default)
+                  :background
+                  (face-background
+                   (elt ansi-term-color-vector term-ansi-current-bg-color)
+                   nil 'default)
+                  :inverse-video term-ansi-current-reverse))
 
-    ;; (message "Debug %S" term-current-face)
-    )
+      (when term-ansi-current-bold
+        (setq term-current-face
+              `(,term-current-face :inherit term-bold)))
+
+      (when term-ansi-current-underline
+        (setq term-current-face
+              `(,term-current-face :inherit term-underline)))))
+
+  ;;	(message "Debug %S" term-current-face)
+  ;; FIXME: shouldn't we set term-ansi-face-already-done to t here?  --Stef
   (setq term-ansi-face-already-done nil))
 
 
-;;; Handle a character assuming (eq terminal-state 2) -
-;;; i.e. we have previously seen Escape followed by ?[.
+;; Handle a character assuming (eq terminal-state 2) -
+;; i.e. we have previously seen Escape followed by ?[.
 
 (defun term-handle-ansi-escape (proc char)
   (cond
@@ -3336,7 +3313,7 @@ See `term-prompt-regexp'."
    ((eq char ?C)
     (term-move-columns
      (max 1
-	  (if (>= (+ term-terminal-parameter (term-current-column)) term-width)
+	  (if (>= (+ term-terminal-parameter (term-horizontal-column)) term-width)
 	      (- term-width (term-current-column)  1)
 	    term-terminal-parameter))))
    ;; \E[D - cursor left (terminfo: cub)
@@ -3375,7 +3352,7 @@ See `term-prompt-regexp'."
 	  ;; (term-switch-to-alternate-sub-buffer nil))
 	  ))
 
-;;; Modified to allow ansi coloring -mm
+   ;; Modified to allow ansi coloring -mm
    ;; \E[m - Set/reset modes, set bg/fg
    ;;(terminfo: smso,rmso,smul,rmul,rev,bold,sgr0,invis,op,setab,setaf)
    ((eq char ?m)
@@ -3389,10 +3366,11 @@ See `term-prompt-regexp'."
       (term-handle-colors-array term-terminal-previous-parameter))
     (term-handle-colors-array term-terminal-parameter))
 
-   ;; \E[6n - Report cursor position
+   ;; \E[6n - Report cursor position (terminfo: u7)
    ((eq char ?n)
     (term-handle-deferred-scroll)
     (process-send-string proc
+			 ;; (terminfo: u6)
 			 (format "\e[%s;%sR"
 				 (1+ (term-current-row))
 				 (1+ (term-horizontal-column)))))
@@ -3484,11 +3462,11 @@ The top-most line is line 0."
 (defun term-display-buffer-line (buffer line)
   (let* ((window (display-buffer buffer t))
 	 (pos))
-    (save-excursion
-      (set-buffer buffer)
+    (with-current-buffer buffer
       (save-restriction
 	(widen)
-	(goto-line line)
+	(goto-char (point-min))
+	(forward-line (1- line))
 	(setq pos (point))
 	(setq overlay-arrow-string "=>")
 	(or overlay-arrow-position
@@ -3499,9 +3477,9 @@ The top-most line is line 0."
 	     (goto-char pos))))
     (set-window-point window overlay-arrow-position)))
 
-;;; The buffer-local marker term-home-marker defines the "home position"
-;;; (in terms of cursor motion).  However, we move the term-home-marker
-;;; "down" as needed so that is no more that a window-full above (point-max).
+;; The buffer-local marker term-home-marker defines the "home position"
+;; (in terms of cursor motion).  However, we move the term-home-marker
+;; "down" as needed so that is no more that a window-full above (point-max).
 
 (defun term-goto-home ()
   (term-handle-deferred-scroll)
@@ -3522,56 +3500,16 @@ The top-most line is line 0."
   (term-down row)
   (term-move-columns col))
 
-; The page is full, so enter "pager" mode, and wait for input.
+;; The page is full, so enter "pager" mode, and wait for input.
 
 (defun term-process-pager ()
-  (when (not term-pager-break-map)
-    (let* ((map (make-keymap))
-	   (i 0) tmp)
-;	(while (< i 128)
-;	  (define-key map (make-string 1 i) 'term-send-raw)
-;	  (setq i (1+ i)))
-      (define-key map "\e"
-	(lookup-key (current-global-map) "\e"))
-      (define-key map "\C-x"
-	(lookup-key (current-global-map) "\C-x"))
-      (define-key map "\C-u"
-	(lookup-key (current-global-map) "\C-u"))
-      (define-key map " " 'term-pager-page)
-      (define-key map "\r" 'term-pager-line)
-      (define-key map "?" 'term-pager-help)
-      (define-key map "h" 'term-pager-help)
-      (define-key map "b" 'term-pager-back-page)
-      (define-key map "\177" 'term-pager-back-line)
-      (define-key map "q" 'term-pager-discard)
-      (define-key map "D" 'term-pager-disable)
-      (define-key map "<" 'term-pager-bob)
-      (define-key map ">" 'term-pager-eob)
-
-      ;; Add menu bar.
-      (unless (featurep 'xemacs)
-	(define-key map [menu-bar terminal] term-terminal-menu)
-	(define-key map [menu-bar signals] term-signals-menu)
-	(setq tmp (make-sparse-keymap "More pages?"))
-	(define-key tmp [help] '("Help" . term-pager-help))
-	(define-key tmp [disable]
-	  '("Disable paging" . term-fake-pager-disable))
-	(define-key tmp [discard]
-	  '("Discard remaining output" . term-pager-discard))
-	(define-key tmp [eob] '("Goto to end" . term-pager-eob))
-	(define-key tmp [bob] '("Goto to beginning" . term-pager-bob))
-	(define-key tmp [line] '("1 line forwards" . term-pager-line))
-	(define-key tmp [bline] '("1 line backwards" . term-pager-back-line))
-	(define-key tmp [back] '("1 page backwards" . term-pager-back-page))
-	(define-key tmp [page] '("1 page forwards" . term-pager-page))
-	(define-key map [menu-bar page] (cons "More pages?" tmp))
-	)
-
-      (setq term-pager-break-map map)))
-;  (let ((process (get-buffer-process (current-buffer))))
-;    (stop-process process))
+  ;; (let ((process (get-buffer-process (current-buffer))))
+  ;;   (stop-process process))
   (setq term-pager-old-local-map (current-local-map))
   (use-local-map term-pager-break-map)
+  (easy-menu-add term-terminal-menu)
+  (easy-menu-add term-signals-menu)
+  (easy-menu-add term-pager-menu)
   (make-local-variable 'term-old-mode-line-format)
   (setq term-old-mode-line-format mode-line-format)
   (setq mode-line-format
@@ -3596,7 +3534,7 @@ The top-most line is line 0."
   (interactive "p")
   (term-pager-line (* arg term-height)))
 
-; Pager mode command to go to beginning of buffer
+;; Pager mode command to go to beginning of buffer.
 (defun term-pager-bob ()
   (interactive)
   (goto-char (point-min))
@@ -3604,7 +3542,7 @@ The top-most line is line 0."
     (backward-char))
   (recenter (1- term-height)))
 
-; pager mode command to go to end of buffer
+;; Pager mode command to go to end of buffer.
 (defun term-pager-eob ()
   (interactive)
   (goto-char term-home-marker)
@@ -3632,8 +3570,8 @@ The top-most line is line 0."
   (interrupt-process nil t)
   (term-pager-continue term-height))
 
-; Disable pager processing.
-; Only callable while in pager mode.  (Contrast term-disable-pager.)
+;; Disable pager processing.
+;; Only callable while in pager mode.  (Contrast term-disable-pager.)
 (defun term-pager-disable ()
   (interactive)
   (if (term-handling-pager)
@@ -3641,7 +3579,7 @@ The top-most line is line 0."
     (setq term-pager-count nil))
   (term-update-mode-line))
 
-; Enable pager processing.
+;; Enable pager processing.
 (defun term-pager-enable ()
   (interactive)
   (or (term-pager-enabled)
@@ -3651,14 +3589,6 @@ The top-most line is line 0."
 (defun term-pager-toggle ()
   (interactive)
   (if (term-pager-enabled) (term-pager-disable) (term-pager-enable)))
-
-(unless (featurep 'xemacs)
- (defalias 'term-fake-pager-enable 'term-pager-toggle)
- (defalias 'term-fake-pager-disable 'term-pager-toggle)
- (put 'term-char-mode 'menu-enable '(term-in-line-mode))
- (put 'term-line-mode 'menu-enable '(term-in-char-mode))
- (put 'term-fake-pager-enable 'menu-enable '(not term-pager-count))
- (put 'term-fake-pager-disable 'menu-enable 'term-pager-count))
 
 (defun term-pager-help ()
   "Provide help on commands available in a terminal-emulator **MORE** break."
@@ -3755,11 +3685,14 @@ all pending output has been dealt with."))
       (term-adjust-current-row-cache down)
       (when (or (/= (point) (point-max)) (< down 0))
 	(setq down (- down (term-vertical-motion down)))))
-    (cond ((>= down 0)
+    (cond ((> down 0)
 	   ;; Extend buffer with extra blank lines if needed.
 	   (term-insert-char ?\n down)
 	   (setq term-current-column 0)
 	   (setq term-start-line-column 0))
+          ((= down 0)
+           (setq term-start-line-column nil)
+           (setq term-current-column (term-start-line-column)))
 	  (t
 	   (when (= term-current-row 0)
 	     ;; Insert lines if at the beginning.
@@ -3780,7 +3713,9 @@ all pending output has been dealt with."))
 ;; if the line above point wraps around, add a ?\n to undo the wrapping.
 ;; FIXME:  Probably should be called more than it is.
 (defun term-unwrap-line ()
-  (when (not (bolp)) (insert-before-markers ?\n)))
+  (when (not (bolp))
+    (insert-before-markers ?\n)
+    t))
 
 (defun term-erase-in-line (kind)
   (when (= kind 1) ;; erase left of point
@@ -3806,11 +3741,11 @@ all pending output has been dealt with."))
       (when wrapped
 	(insert ? ))
       (insert ?\n)
-      (put-text-property saved-point (point) 'face 'default)
+      (put-text-property saved-point (point) 'font-lock-face 'default)
       (goto-char saved-point))))
 
 (defun term-erase-in-display (kind)
-  "Erases (that is blanks out) part of the window.
+  "Erase (that is blank out) part of the window.
 If KIND is 0, erase from (point) to (point-max);
 if KIND is 1, erase from home to point; else erase from home to point-max."
   (term-handle-deferred-scroll)
@@ -3831,32 +3766,35 @@ if KIND is 1, erase from home to point; else erase from home to point-max."
 	   (term-goto row col)))))
 
 (defun term-delete-chars (count)
-  (let ((save-point (point)))
+  (let ((save-point (point)) (unwrapped))
     (term-vertical-motion 1)
-    (term-unwrap-line)
+    (setq unwrapped (term-unwrap-line))
     (goto-char save-point)
     (move-to-column (+ (term-current-column) count) t)
-    (delete-region save-point (point))))
+    (delete-region save-point (point))
+    (setq save-point(point))
+    (when unwrapped
+      (term-vertical-motion 1)
+      (delete-region (1- (point)) (point))
+      (goto-char save-point))))
 
-;;; Insert COUNT spaces after point, but do not change any of
-;;; following screen lines.  Hence we may have to delete characters
-;;; at the end of this screen line to make room.
+;; Insert COUNT spaces after point, but do not change any of
+;; following screen lines.  Hence we may have to delete characters
+;; at the end of this screen line to make room.
 
 (defun term-insert-spaces (count)
   (let ((save-point (point)) (save-eol) (pnt-at-eol))
     (term-vertical-motion 1)
     (when (bolp)
       (backward-char))
-    (setq save-eol (point))
-    (save-excursion
-      (end-of-line)
-      (setq pnt-at-eol (point)))
+    (setq save-eol (point)
+          pnt-at-eol (line-end-position))
     (move-to-column (+ (term-start-line-column) (- term-width count)) t)
     ;; If move-to-column extends the current line it will use the face
     ;; from the last character on the line, set the face for the chars
     ;; to default.
     (when (>= (point) pnt-at-eol)
-      (put-text-property pnt-at-eol (point) 'face 'default))
+      (put-text-property pnt-at-eol (point) 'font-lock-face 'default))
     (when (> save-eol (point))
       (delete-region (point) save-eol))
     (goto-char save-point)
@@ -3926,8 +3864,7 @@ if KIND is 1, erase from home to point; else erase from home to point-max."
 	     (message "Output logging off."))
     (if (get-buffer name)
 	nil
-      (save-excursion
-	(set-buffer (get-buffer-create name))
+      (with-current-buffer (get-buffer-create name)
 	(fundamental-mode)
 	(buffer-disable-undo (current-buffer))
 	(erase-buffer)))
@@ -3946,7 +3883,7 @@ if KIND is 1, erase from home to point; else erase from home to point-max."
   (goto-char (point-max))
   (recenter -1))
 
-;;; Do the user's customisation...
+;;; Do the user's customization...
 
 (defvar term-load-hook nil
   "This hook is run when term is loaded in.
@@ -3956,48 +3893,58 @@ This is a good place to put keybindings.")
 
 
 ;;; Filename/command/history completion in a buffer
-;;; ===========================================================================
-;;; Useful completion functions, courtesy of the Ergo group.
+;; ===========================================================================
+;; Useful completion functions, courtesy of the Ergo group.
 
-;;; Six commands:
-;;; term-dynamic-complete		Complete or expand command, filename,
-;;;                                     history at point.
-;;; term-dynamic-complete-filename	Complete filename at point.
-;;; term-dynamic-list-filename-completions List completions in help buffer.
-;;; term-replace-by-expanded-filename	Expand and complete filename at point;
-;;;					replace with expanded/completed name.
-;;; term-dynamic-simple-complete	Complete stub given candidates.
+;; Six commands:
+;; term-dynamic-complete		Complete or expand command, filename,
+;;					history at point.
+;; term-dynamic-complete-filename	Complete filename at point.
+;; term-dynamic-list-filename-completions List completions in help buffer.
+;; term-replace-by-expanded-filename	Expand and complete filename at point;
+;;					replace with expanded/completed name.
 
-;;; These are not installed in the term-mode keymap.  But they are
-;;; available for people who want them.  Shell-mode installs them:
-;;; (define-key shell-mode-map "\t" 'term-dynamic-complete)
-;;; (define-key shell-mode-map "\M-?"
-;;;             'term-dynamic-list-filename-completions)))
-;;;
-;;; Commands like this are fine things to put in load hooks if you
-;;; want them present in specific modes.
+;; These are not installed in the term-mode keymap.  But they are
+;; available for people who want them.  Shell-mode installs them:
+;; (define-key shell-mode-map "\t" 'term-dynamic-complete)
+;; (define-key shell-mode-map "\M-?"
+;;             'term-dynamic-list-filename-completions)))
+;;
+;; Commands like this are fine things to put in load hooks if you
+;; want them present in specific modes.
 
-(defvar term-completion-autolist nil
-  "*If non-nil, automatically list possibilities on partial completion.
-This mirrors the optional behavior of tcsh.")
+(defcustom term-completion-autolist nil
+  "If non-nil, automatically list possibilities on partial completion.
+This mirrors the optional behavior of tcsh."
+  :group 'term
+  :type 'boolean)
 
-(defvar term-completion-addsuffix t
-  "*If non-nil, add a `/' to completed directories, ` ' to file names.
+(defcustom term-completion-addsuffix t
+  "If non-nil, add a `/' to completed directories, ` ' to file names.
 If a cons pair, it should be of the form (DIRSUFFIX . FILESUFFIX) where
 DIRSUFFIX and FILESUFFIX are strings added on unambiguous or exact
-completion.  This mirrors the optional behavior of tcsh.")
+completion.  This mirrors the optional behavior of tcsh."
+  :group 'term
+  :type '(choice (const :tag "No suffix" nil)
+                 (cons (string :tag "dirsuffix") (string :tag "filesuffix"))
+                 (other :tag "Suffix" t)))
 
-(defvar term-completion-recexact nil
-  "*If non-nil, use shortest completion if characters cannot be added.
+(defcustom term-completion-recexact nil
+  "If non-nil, use shortest completion if characters cannot be added.
 This mirrors the optional behavior of tcsh.
 
-A non-nil value is useful if `term-completion-autolist' is non-nil too.")
+A non-nil value is useful if `term-completion-autolist' is non-nil too."
+  :group 'term
+  :type 'boolean)
 
-(defvar term-completion-fignore nil
-  "*List of suffixes to be disregarded during file completion.
+(defcustom term-completion-fignore nil
+  "List of suffixes to be disregarded during file completion.
 This mirrors the optional behavior of bash and tcsh.
 
-Note that this applies to `term-dynamic-complete-filename' only.")
+Note that this applies to `term-dynamic-complete-filename' only."
+  :group 'term
+  :type '(choice (const nil)
+                 (repeat :tag "List of suffixes" string)))
 
 (defvar term-file-name-prefix ""
   "Prefix prepended to absolute file names taken from process input.
@@ -4142,6 +4089,7 @@ Returns `partial' if completed as far as possible with the completion matches.
 Returns `listed' if a completion listing was shown.
 
 See also `term-dynamic-complete-filename'."
+  (declare (obsolete completion-in-region "23.2"))
   (let* ((completion-ignore-case nil)
 	 (candidates (mapcar (function (lambda (x) (list x))) candidates))
 	 (completions (all-completions stub candidates)))
@@ -4176,7 +4124,6 @@ See also `term-dynamic-complete-filename'."
 		    (message "Partially completed")
 		    'partial)))))))
 
-
 (defun term-dynamic-list-filename-completions ()
   "List in help buffer possible completions of the filename at point."
   (interactive)
@@ -4199,26 +4146,26 @@ Typing SPC flushes the help buffer."
       (display-completion-list (sort completions 'string-lessp)))
     (message "Hit space to flush")
     (let (key first)
-      (if (save-excursion
-	    (set-buffer (get-buffer "*Completions*"))
+      (if (with-current-buffer (get-buffer "*Completions*")
 	    (setq key (read-key-sequence nil)
 		  first (aref key 0))
 	    (and (consp first)
 		 (eq (window-buffer (posn-window (event-start first)))
 		     (get-buffer "*Completions*"))
-		 (eq (key-binding key) 'mouse-choose-completion)))
-	  ;; If the user does mouse-choose-completion with the mouse,
+		 (memq (key-binding key)
+                       '(mouse-choose-completion choose-completion))))
+	  ;; If the user does choose-completion with the mouse,
 	  ;; execute the command, then delete the completion window.
 	  (progn
-	    (mouse-choose-completion first)
+	    (choose-completion first)
 	    (set-window-configuration conf))
 	(if (eq first ?\s)
 	    (set-window-configuration conf)
 	  (setq unread-command-events (listify-key-sequence key)))))))
 
-;;; I need a make-term that doesn't surround with *s -mm
+;; I need a make-term that doesn't surround with *s -mm
 (defun term-ansi-make-term (name program &optional startfile &rest switches)
-"Make a term process NAME in a buffer, running PROGRAM.
+  "Make a term process NAME in a buffer, running PROGRAM.
 The name of the buffer is NAME.
 If there is already a running process in that buffer, it is not restarted.
 Optional third arg STARTFILE is the name of a file to send the contents of to
@@ -4227,8 +4174,7 @@ the process.  Any more args are arguments to PROGRAM."
     ;; If no process, or nuked process, crank up a new one and put buffer in
     ;; term mode.  Otherwise, leave buffer and existing process alone.
     (cond ((not (term-check-proc buffer))
-	   (save-excursion
-	     (set-buffer buffer)
+	   (with-current-buffer buffer
 	     (term-mode)) ; Install local vars, mode, keymap, ...
 	   (term-exec buffer name program startfile switches)))
     buffer))
@@ -4269,24 +4215,29 @@ the process.  Any more args are arguments to PROGRAM."
   (term-mode)
   (term-char-mode)
 
-;; I wanna have find-file on C-x C-f -mm
-;; your mileage may definitely vary, maybe it's better to put this in your
-;; .emacs ...
-
-  (term-set-escape-char ?\C-x)
+  ;; Historical baggage.  A call to term-set-escape-char used to not
+  ;; undo any previous call to t-s-e-c.  Because of this, ansi-term
+  ;; ended up with both C-x and C-c as escape chars.  Who knows what
+  ;; the original intention was, but people could have become used to
+  ;; either.   (Bug#12842)
+  (let (term-escape-char)
+    ;; I wanna have find-file on C-x C-f -mm
+    ;; your mileage may definitely vary, maybe it's better to put this in your
+    ;; .emacs ...
+    (term-set-escape-char ?\C-x))
 
   (switch-to-buffer term-ansi-buffer-name))
 
 
 ;;; Serial terminals
-;;; ===========================================================================
+;; ===========================================================================
 (defun serial-port-is-file-p ()
   "Guess whether serial ports are files on this system.
 Return t if this is a Unix-based system, where serial ports are
 files, such as /dev/ttyS0.
 Return nil if this is Windows or DOS, where serial ports have
 special identifiers such as COM1."
-  (not (member system-type (list 'windows-nt 'cygwin 'ms-dos))))
+  (not (memq system-type '(windows-nt cygwin ms-dos))))
 
 (defvar serial-name-history
   (if (serial-port-is-file-p)
@@ -4296,7 +4247,7 @@ special identifiers such as COM1."
   "History of serial ports used by `serial-read-name'.")
 
 (defvar serial-speed-history
-  ;; Initialised with reasonable values for newbies.
+  ;; Initialized with reasonable values for newbies.
   (list "9600" ;; Given twice because 9600 b/s is the most common speed
         "1200" "2400" "4800" "9600" "14400" "19200"
         "28800" "38400" "57600" "115200")
@@ -4308,8 +4259,8 @@ special identifiers such as COM1."
     (setq x
          (sort
           (copy-sequence serial-speed-history)
-          '(lambda (a b) (when (and (stringp a) (stringp b))
-                           (> (string-to-number a) (string-to-number b))))))
+          (lambda (a b) (when (and (stringp a) (stringp b))
+                     (> (string-to-number a) (string-to-number b))))))
     (dolist (i x) (when (not (equal i (car y))) (push i y)))
     y))
 
@@ -4320,7 +4271,7 @@ returns nil, which is recognized by `serial-process-configure'
 for special serial ports that cannot be configured.")
 
 (defun serial-supported-or-barf ()
-  "Signal an error if serial processes are not supported"
+  "Signal an error if serial processes are not supported."
   (unless (fboundp 'make-serial-process)
     (error "Serial processes are not supported on this system")))
 
@@ -4413,8 +4364,7 @@ use in that buffer.
                    :coding 'no-conversion
                    :noquery t))
          (buffer (process-buffer process)))
-    (save-excursion
-      (set-buffer buffer)
+    (with-current-buffer buffer
       (term-mode)
       (term-char-mode)
       (goto-char (point-max))
@@ -4483,9 +4433,7 @@ The return value may be nil for a special serial port."
 (defun serial-update-config-menu ()
   (setq serial-mode-line-config-menu (make-sparse-keymap "Configuration"))
   (let ((config (process-contact
-                 (get-buffer-process (current-buffer)) t))
-        (y)
-        (str))
+                 (get-buffer-process (current-buffer)) t)))
     (dolist (y '((:flowcontrol hw   "Hardware flowcontrol (RTS/CTS)")
                  (:flowcontrol sw   "Software flowcontrol (XON/XOFF)")
                  (:flowcontrol nil  "No flowcontrol")
@@ -4511,85 +4459,84 @@ The return value may be nil for a special serial port."
 
 
 ;;; Converting process modes to use term mode
-;;; ===========================================================================
-;;; Renaming variables
-;;; Most of the work is renaming variables and functions.  These are the common
-;;; ones:
-;;; Local variables:
-;;;	last-input-start	term-last-input-start
-;;; 	last-input-end		term-last-input-end
-;;;	shell-prompt-pattern	term-prompt-regexp
-;;;     shell-set-directory-error-hook <no equivalent>
-;;; Miscellaneous:
-;;;	shell-set-directory	<unnecessary>
-;;; 	shell-mode-map		term-mode-map
-;;; Commands:
-;;;	shell-send-input	term-send-input
-;;;	shell-send-eof		term-delchar-or-maybe-eof
-;;; 	kill-shell-input	term-kill-input
-;;;	interrupt-shell-subjob	term-interrupt-subjob
-;;;	stop-shell-subjob	term-stop-subjob
-;;;	quit-shell-subjob	term-quit-subjob
-;;;	kill-shell-subjob	term-kill-subjob
-;;;	kill-output-from-shell	term-kill-output
-;;;	show-output-from-shell	term-show-output
-;;;	copy-last-shell-input	Use term-previous-input/term-next-input
-;;;
-;;; SHELL-SET-DIRECTORY is gone, its functionality taken over by
-;;; SHELL-DIRECTORY-TRACKER, the shell mode's term-input-filter-functions.
-;;; Term mode does not provide functionality equivalent to
-;;; shell-set-directory-error-hook; it is gone.
-;;;
-;;; term-last-input-start is provided for modes which want to munge
-;;; the buffer after input is sent, perhaps because the inferior
-;;; insists on echoing the input.  The LAST-INPUT-START variable in
-;;; the old shell package was used to implement a history mechanism,
-;;; but you should think twice before using term-last-input-start
-;;; for this; the input history ring often does the job better.
-;;;
-;;; If you are implementing some process-in-a-buffer mode, called foo-mode, do
-;;; *not* create the term-mode local variables in your foo-mode function.
-;;; This is not modular.  Instead, call term-mode, and let *it* create the
-;;; necessary term-specific local variables.  Then create the
-;;; foo-mode-specific local variables in foo-mode.  Set the buffer's keymap to
-;;; be foo-mode-map, and its mode to be foo-mode.  Set the term-mode hooks
-;;; (term-{prompt-regexp, input-filter, input-filter-functions,
-;;; get-old-input) that need to be different from the defaults.  Call
-;;; foo-mode-hook, and you're done.  Don't run the term-mode hook yourself;
-;;; term-mode will take care of it.  The following example, from shell.el,
-;;; is typical:
-;;;
-;;; (defvar shell-mode-map '())
-;;; (cond ((not shell-mode-map)
-;;;        (setq shell-mode-map (copy-keymap term-mode-map))
-;;;        (define-key shell-mode-map "\C-c\C-f" 'shell-forward-command)
-;;;        (define-key shell-mode-map "\C-c\C-b" 'shell-backward-command)
-;;;        (define-key shell-mode-map "\t" 'term-dynamic-complete)
-;;;        (define-key shell-mode-map "\M-?"
-;;;          'term-dynamic-list-filename-completions)))
-;;;
-;;; (defun shell-mode ()
-;;;   (interactive)
-;;;   (term-mode)
-;;;   (setq term-prompt-regexp shell-prompt-pattern)
-;;;   (setq major-mode 'shell-mode)
-;;;   (setq mode-name "Shell")
-;;;   (use-local-map shell-mode-map)
-;;;   (make-local-variable 'shell-directory-stack)
-;;;   (setq shell-directory-stack nil)
-;;;   (add-hook 'term-input-filter-functions 'shell-directory-tracker)
-;;;   (run-mode-hooks 'shell-mode-hook))
-;;;
-;;;
-;;; Completion for term-mode users
-;;;
-;;; For modes that use term-mode, term-dynamic-complete-functions is the
-;;; hook to add completion functions to.  Functions on this list should return
-;;; non-nil if completion occurs (i.e., further completion should not occur).
-;;; You could use term-dynamic-simple-complete to do the bulk of the
-;;; completion job.
+;; ===========================================================================
+;; Renaming variables
+;; Most of the work is renaming variables and functions.  These are the common
+;; ones:
+;; Local variables:
+;;	last-input-start	term-last-input-start
+;; 	last-input-end		term-last-input-end
+;;	shell-prompt-pattern	term-prompt-regexp
+;;     shell-set-directory-error-hook <no equivalent>
+;; Miscellaneous:
+;;	shell-set-directory	<unnecessary>
+;; 	shell-mode-map		term-mode-map
+;; Commands:
+;;	shell-send-input	term-send-input
+;;	shell-send-eof		term-delchar-or-maybe-eof
+;; 	kill-shell-input	term-kill-input
+;;	interrupt-shell-subjob	term-interrupt-subjob
+;;	stop-shell-subjob	term-stop-subjob
+;;	quit-shell-subjob	term-quit-subjob
+;;	kill-shell-subjob	term-kill-subjob
+;;	kill-output-from-shell	term-kill-output
+;;	show-output-from-shell	term-show-output
+;;	copy-last-shell-input	Use term-previous-input/term-next-input
+;;
+;; SHELL-SET-DIRECTORY is gone, its functionality taken over by
+;; SHELL-DIRECTORY-TRACKER, the shell mode's term-input-filter-functions.
+;; Term mode does not provide functionality equivalent to
+;; shell-set-directory-error-hook; it is gone.
+;;
+;; term-last-input-start is provided for modes which want to munge
+;; the buffer after input is sent, perhaps because the inferior
+;; insists on echoing the input.  The LAST-INPUT-START variable in
+;; the old shell package was used to implement a history mechanism,
+;; but you should think twice before using term-last-input-start
+;; for this; the input history ring often does the job better.
+;;
+;; If you are implementing some process-in-a-buffer mode, called foo-mode, do
+;; *not* create the term-mode local variables in your foo-mode function.
+;; This is not modular.  Instead, call term-mode, and let *it* create the
+;; necessary term-specific local variables.  Then create the
+;; foo-mode-specific local variables in foo-mode.  Set the buffer's keymap to
+;; be foo-mode-map, and its mode to be foo-mode.  Set the term-mode hooks
+;; (term-{prompt-regexp, input-filter, input-filter-functions,
+;; get-old-input) that need to be different from the defaults.  Call
+;; foo-mode-hook, and you're done.  Don't run the term-mode hook yourself;
+;; term-mode will take care of it.  The following example, from shell.el,
+;; is typical:
+;;
+;; (defvar shell-mode-map '())
+;; (cond ((not shell-mode-map)
+;;        (setq shell-mode-map (copy-keymap term-mode-map))
+;;        (define-key shell-mode-map "\C-c\C-f" 'shell-forward-command)
+;;        (define-key shell-mode-map "\C-c\C-b" 'shell-backward-command)
+;;        (define-key shell-mode-map "\t" 'term-dynamic-complete)
+;;        (define-key shell-mode-map "\M-?"
+;;          'term-dynamic-list-filename-completions)))
+;;
+;; (defun shell-mode ()
+;;   (interactive)
+;;   (term-mode)
+;;   (setq term-prompt-regexp shell-prompt-pattern)
+;;   (setq major-mode 'shell-mode)
+;;   (setq mode-name "Shell")
+;;   (use-local-map shell-mode-map)
+;;   (make-local-variable 'shell-directory-stack)
+;;   (setq shell-directory-stack nil)
+;;   (add-hook 'term-input-filter-functions 'shell-directory-tracker)
+;;   (run-mode-hooks 'shell-mode-hook))
+;;
+;;
+;; Completion for term-mode users
+;;
+;; For modes that use term-mode, term-dynamic-complete-functions is the
+;; hook to add completion functions to.  Functions on this list should return
+;; non-nil if completion occurs (i.e., further completion should not occur).
+;; You could use completion-in-region to do the bulk of the
+;; completion job.
 
 (provide 'term)
 
-;; arch-tag: eee16bc8-2cd7-4147-9534-a5694752f716
 ;;; term.el ends here
