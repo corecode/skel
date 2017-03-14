@@ -19,6 +19,7 @@
         (awk-mode . "awk")
         (other . "2c")))
 
-(define-key c-mode-map (kbd "<return>") 'c-context-line-break)
+(define-key c-mode-base-map (kbd "<return>") 'c-context-line-break)
+(define-key c-mode-base-map (kbd "M-j") nil)
 
 (provide 'setup-cc-mode)

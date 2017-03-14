@@ -19,3 +19,5 @@ if [[ -n "" && $TERM == eterm-color && -z "$TERMCAP" && -z "$TERMINFO" ]]; then
 fi
 
 [[ -f $HOME/.rvm/environments/default ]] && source $HOME/.rvm/environments/default
+
+export GOPATH=$HOME/go

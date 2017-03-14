@@ -70,6 +70,12 @@ autocutsel -selection CLIPBOARD -fork &
 # xsettings to make java use antialias
 xsettingsd &
 
+# keyboard shortcuts
+xbindkeys
+
+# color calibration
+xiccd &
+
 # makes gtk happy and pick the right fonts?
 export GNOME_DESKTOP_SESSION_ID=foo
 

@@ -3,6 +3,8 @@
 (add-hook 'emacs-lisp-mode-hook (lambda () (elisp-slime-nav-mode t)))
 (eval-after-load 'elisp-slime-nav '(diminish 'elisp-slime-nav-mode))
 
+(add-hook 'scheme-mode 'turn-on-geiser-mode)
+
 (require 'nrepl)
 
 (dolist (mode '(lisp-mode-hook
@@ -10,7 +12,8 @@
                 clojure-mode-hook
                 nrepl-repl-mode-hook
                 scheme-mode-hook
-                inferior-scheme-mode-hook))
+                inferior-scheme-mode-hook
+                geiser-repl-mode-hook))
   (add-hook mode 'enable-paredit-mode))
 
 (define-key nrepl-interaction-mode-map (kbd "C-c v") 'nrepl-eval-buffer)
@@ -26,6 +29,9 @@
 (add-hook 'emacs-lisp-mode-hook (lambda () (eldoc-mode 1)))
 (add-hook 'nrepl-interaction-mode-hook 'nrepl-turn-on-eldoc-mode)
 (diminish 'eldoc-mode)
+(eldoc-add-command
+ 'paredit-backward-delete
+ 'paredit-close-round)
 
 ;; dim + colored parens
 (dolist (mode '(clojure-mode-hook

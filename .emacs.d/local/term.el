@@ -3274,6 +3274,12 @@ See `term-prompt-regexp'."
 
 (defun term-handle-ansi-escape (proc char)
   (cond
+   ((eq char ?G) ;; cursor motion horizontal
+    (when (<= term-terminal-parameter 0)
+      (setq term-terminal-parameter 1))
+    (when (> term-terminal-parameter term-width)
+      (setq term-terminal-parameter term-width))
+    (term-goto term-current-row (1- term-terminal-parameter)))
    ((or (eq char ?H)  ;; cursor motion (terminfo: cup,home)
 	;; (eq char ?f) ;; xterm seems to handle this sequence too, not
 	;; needed for now

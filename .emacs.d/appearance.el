@@ -90,8 +90,8 @@
   '(diminish 'helm-mode))
 (eval-after-load 'flyspell
   '(diminish 'flyspell-mode))
-(eval-after-load 'magit
-  '(diminish 'magit-auto-revert-mode))
+(eval-after-load 'subword
+  '(diminish 'subword-mode))
 
 ;; ;; Make zooming affect frame instead of buffers
 ;; (require 'zoom-frm)

@@ -20,7 +20,7 @@ for x in /tmp/.X11-unix/*; do
 
 	    for out in $(echo "$xrandr_o" | awk '$2 == "connected" && $1 != "LVDS1" { print $1 }')
 	    do
-		args="$args --output $out --auto --right-of LVDS1"
+		args="$args --output $out --auto --left-of LVDS1"
 	    done
 
 	    /usr/bin/xrandr $args

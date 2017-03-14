@@ -3,6 +3,13 @@
 ;; The Emacs-Starter-Kit is licenced under the GPLv3.  Refer to the URL above for details.
 ;; More adaptation from <https://github.com/magnars/.emacs.d>
 
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 (progn
   ;; Turn off mouse interface early in startup to avoid momentary display
   (dolist (mode '(menu-bar-mode tool-bar-mode scroll-bar-mode))
@@ -18,6 +25,7 @@
 
 ;; set up load path
 (add-to-list 'load-path dotfiles-dir)
+(add-to-list 'load-path (expand-file-name "local" dotfiles-dir))
 (add-to-list 'load-path site-lisp-dir)
 
 ;; Add external projects to load path
@@ -68,7 +76,8 @@
         ;; coffee-mode
         change-inner
         clojure-mode
-        clojure-project-mode
+        cmake-mode
+        confluence
         color-moccur
         dash
         diminish
@@ -84,6 +93,7 @@
         find-file-in-project
         flymake-cursor
         flymake-ruby
+        flymake-jshint
         fold-this
         ;; frame-fns
         ;; frame-cmds
@@ -100,6 +110,7 @@
         ido-ubiquitous
         iedit
         inf-ruby
+        jabber
         json
         js2-mode
         js2-refactor
@@ -108,7 +119,7 @@
         magit
         magit-gh-pulls
         magit-push-remote
-        mailcap
+        magit-svn
         mark-multiple
         markdown-mode
         mediawiki
@@ -179,6 +190,9 @@
 (require 'setup-verilog)
 (require 'setup-opengrok)
 (require 'setup-android)
+;(require 'setup-confluence)
+(require 'setup-ts-mode)
+(require 'setup-go-mode)
 
 ;; Language specific setup files
 (eval-after-load 'js2-mode '(require 'setup-js2-mode))

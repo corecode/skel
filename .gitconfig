@@ -11,3 +11,5 @@
 	host = imaps://0x2c.org
 	user = 2
 	preformattedHTML = true
+[push]
+	default = simple

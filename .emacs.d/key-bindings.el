@@ -3,6 +3,10 @@
 (global-set-key (kbd "C-x r q") 'save-buffers-kill-terminal)
 (global-set-key (kbd "C-x C-c") 'delete-frame)
 
+;; no suspend
+(global-unset-key (kbd "C-z"))
+(global-unset-key (kbd "C-x C-z"))
+
 ;; Completion that uses many different methods to find options.
 (global-set-key (kbd "M-/") 'hippie-expand-no-case-fold)
 (global-set-key (kbd "M-?") 'hippie-expand-lines)
@@ -261,7 +265,6 @@
 ;; Buffer file functions
 (global-set-key (kbd "C-x t") 'touch-buffer-file)
 (global-set-key (kbd "C-x C-r") 'rename-current-buffer-file)
-(global-set-key (kbd "C-x C-k") 'delete-current-buffer-file)
 
 ;; Jump from file to containing directory
 (global-set-key (kbd "C-x C-j") 'dired-jump) (autoload 'dired-jump "dired")

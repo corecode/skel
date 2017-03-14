@@ -245,6 +245,8 @@ bindkey '\e[B' down-line-or-beginning-search
 bindkey '\e[A' up-line-or-beginning-search
 bindkey '\eOB' down-line-or-beginning-search
 bindkey '\eOA' up-line-or-beginning-search
+bindkey '\eP' down-line-or-beginning-search
+bindkey '\eN' up-line-or-beginning-search
 autoload run-help
 bindkey '\eOP' run-help
 bindkey '\e[M' run-help

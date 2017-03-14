@@ -52,12 +52,14 @@
 
 ;; Don't redefine C-a for me please, js2-mode
 (define-key js2-mode-map (kbd "C-a") nil)
+;; Nor M-j.
+(define-key js2-mode-map (kbd "M-j") nil)
 
 ;; When renaming/deleting js-files, check for corresponding testfile
 (define-key js2-mode-map (kbd "C-x C-r") 'js2r-rename-current-buffer-file)
 (define-key js2-mode-map (kbd "C-x C-k") 'js2r-delete-current-buffer-file)
 
-;; Use lambda for anonymous functions
+;; Use ƒ for anonymous functions
 (font-lock-add-keywords
  'js2-mode `(("\\_<\\(function\\) *("
               (0 (progn (compose-region (match-beginning 1)
@@ -134,5 +136,7 @@
                     (:else 0)))))
     (unless first-line
       (indent-line-to offset))))
+
+(require 'flymake-jshint)
 
 (provide 'setup-js2-mode)

@@ -65,11 +65,13 @@ import qualified XMonad.StackSet as S
 import XMonad.Actions.CycleWS
 import XMonad.Actions.FloatKeys
 import XMonad.Actions.UpdatePointer
+import XMonad.Actions.GridSelect
 import XMonad.Config.Gnome
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
+import XMonad.Hooks.SetWMName
 import XMonad.Layout.Combo
 import XMonad.Layout.Grid
 import XMonad.Layout.LayoutModifier
@@ -144,6 +146,7 @@ floatManageHooks = composeAll
                    , className =? "Gimp"           --> doFloat
                    , className =? "emulator-arm"   --> doFloat
                    , className =? "emulator64-arm" --> doFloat
+                   , className =? "Gnuradio-companion" --> doFloat
                    ]
 
 -- Mod4 is the Super / Windows key
@@ -174,6 +177,7 @@ myKeys conf = M.fromList $
     , ((myModMask              , xK_F11   ), sendMessage $ Toggle NBFULL)
     , ((myModMask              , xK_b     ), sendMessage (IncMasterN 1))
     , ((myModMask              , xK_v     ), sendMessage (IncMasterN (-1)))
+    , ((myModMask              , xK_g     ), goToSelected defaultGSConfig)
     , ((myModMask .|. controlMask, xK_q   ), broadcastMessage ReleaseResources >> restart "xmonad" True)
     , ((myModMask .|. controlMask, xK_backslash   ), broadcastMessage ReleaseResources >> restart "stumpwm" True)
     , ((myModMask .|. shiftMask .|. controlMask, xK_q     ), io (exitWith ExitSuccess)) -- %! Quit xmonad
@@ -201,7 +205,7 @@ withOtherWorkspace f ws = f (otherWorkspace ws) ws
     otherWorkspace = S.tag . S.workspace . head . S.visible
 
 -- move mouse cursor when we switch focus by keyboard
-myLogHook = updatePointer (Relative 0.5 0.5)
+myLogHook = updatePointer (0.5, 0.5) (0, 0)
 
 -- xmobar
 myPP = xmobarPP
@@ -223,6 +227,7 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
 -- put it all together
 main = xmonad =<< statusBar "xmobar" myPP toggleMobarKey myBaseConfig
     { modMask = myModMask
+    , startupHook = setWMName "LG3D"
     , workspaces = myWorkspaces
     , layoutHook = myLayoutHook
     , manageHook = myManageHook
