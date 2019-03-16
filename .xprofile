@@ -5,11 +5,25 @@ exec > .xsession-errors 2>&1
 
 # tell xdg-open that we want to use exo-open
 export DESKTOP_SESSION=xfce
+export XDG_CURRENT_DESKTOP=xfce
 
-if [ -z "$ZSH_VERSION" ] && which zsh 2>/dev/null >&2
+if which zsh 2>/dev/null >&2
 then
-	exec zsh -l "$0" "$@"
+	if [ -n "$ZSH_VERSION" ] || setopt | grep login >/dev/null
+	then
+		: # nothing
+	else
+		echo "launch login shell"
+		exec zsh -l "$0" "$@"
+	fi
 fi
+
+. ~/.zprofile
+
+env
+ps lxaw
+
+xrandr --dpi 138
 
 if [ -d /etc/X11/xinit/xinitrc.d ]; then
         for f in /etc/X11/xinit/xinitrc.d/*; do
@@ -28,6 +42,7 @@ for ring in pkcs11 secrets gpg ssh
 do
 	# start gnome-keyring-daemon for $ring and set the correct vars
 	v=$(gnome-keyring-daemon --start --daemonize --components=$ring)
+	[ $? -ne 0 ] && break
 	# change the commands to export these vars as well
         v=$(echo "$v"|sed -Ee 's/^([^=]*)(.*)/\1\2; export \1;/')
 	eval $v
@@ -58,7 +73,7 @@ xset b off &
 xsetroot -solid "#504050" -cursor_name left_ptr &
 
 # for transparency
-xcompmgr &
+#xcompmgr &
 
 # drop cursor if not needed
 unclutter -noevents &
@@ -77,10 +92,14 @@ xbindkeys
 xiccd &
 
 # makes gtk happy and pick the right fonts?
-export GNOME_DESKTOP_SESSION_ID=foo
+#export GNOME_DESKTOP_SESSION_ID=foo
+
+export QT_QPA_PLATFORMTHEME="qt5ct"
 
 # xscreensaver does blanking and locking
 xscreensaver -nosplash &
+
+~/devel/dpms-gateway/bin/dpms-gateway &
 
 # enable dpms, disable automatic off (xscreensaver handles this instead)
 {
