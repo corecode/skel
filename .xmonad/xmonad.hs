@@ -153,12 +153,19 @@ floatManageHooks = composeAll
 myModMask = mod4Mask
 altMask = mod1Mask
 
-myKeys conf = M.fromList $
+myBindings =
+  [ ("<XF86AudioMute>", spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+  , ("<XF86AudioRaiseVolume>", spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%")
+  , ("<XF86AudioLowerVolume>", spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
+  ]
+
+myKeys conf = M.union (mkKeymap conf myBindings) $
+  M.fromList $
     [ ((myModMask              , xK_Return), spawn $ XMonad.terminal conf)
     , ((myModMask              , xK_space), windows $ withOtherWorkspace S.view)
     , ((myModMask .|. controlMask, xK_space), windows $ withOtherWorkspace S.greedyView)
     , ((myModMask .|. shiftMask, xK_e     ), spawn "e -c")
-    , ((altMask .|. controlMask, xK_l     ), spawn "sxlock -f fixed")
+    , ((altMask .|. controlMask, xK_l     ), spawn "csxlock -f fixed -b '#000000' -o '#00ff00'")
     , ((myModMask,               xK_p     ), spawn "dmenu-launch") -- %! Launch dmenu
     , ((myModMask .|. shiftMask, xK_p     ), spawn "gmrun") -- %! Launch gmrun
     , ((myModMask              , xK_i     ), spawn "xcalib -a -i")
