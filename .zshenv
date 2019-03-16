@@ -1,8 +1,12 @@
 typeset -U path
-path=(~/bin $path)
+path=(~/bin ~/.local/bin $path)
 
-: ${LC_CTYPE:=en_US.UTF-8}
-export LC_CTYPE
+#: ${LC_CTYPE:=en_DK.UTF-8}
+#export LC_CTYPE
+
+if which ruby >/dev/null && which gem >/dev/null; then
+        PATH="$(ruby -rrubygems -e 'puts Gem.user_dir')/bin:$PATH"
+fi
 
 export RUBYLIB=$HOME/lib/ruby
 
