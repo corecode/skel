@@ -72,16 +72,20 @@
         ;; auto-complete
         auto-indent-mode
         browse-kill-ring
+        blackboard-theme
         ;; csharp-mode
         ;; coffee-mode
         change-inner
+        cider
         clojure-mode
         cmake-mode
-        confluence
+        company
+        ;confluence
         color-moccur
         dash
         diminish
         dired-details
+        dtrt-indent
         edit-server
         elisp-slime-nav
         ;; emacs-goodies-el
@@ -98,13 +102,12 @@
         ;; frame-fns
         ;; frame-cmds
         gist
-        git-commit-mode
         gitconfig-mode
         gitignore-mode
+        go-mode
         goto-chg
         haskell-mode
         helm
-        helm-gist
         highlight-indentation
         ;; idle-highlight-mode
         ido-ubiquitous
@@ -118,7 +121,6 @@
         key-chord
         magit
         magit-gh-pulls
-        magit-push-remote
         magit-svn
         mark-multiple
         markdown-mode
@@ -127,8 +129,8 @@
         multi-term
         multifiles
         multiple-cursors
-        nrepl
         org
+        org-clock-csv
         ;; oddmuse
         paredit
         ;; php-mode
@@ -146,10 +148,10 @@
         s
         session
         slime
-        smart-tab
         smart-forward
         smex
         smooth-scrolling
+        tide
         top-mode
         ;; tuareg-mode
         undo-tree
@@ -158,6 +160,7 @@
         yari
         yaml-mode
         yasnippet
+        znc
         zoom-frm
         ))
 
@@ -181,18 +184,21 @@
 (require 'setup-paredit)
 (require 'setup-indent)
 (require 'setup-term)
-(require 'setup-helm)
+;(require 'setup-helm)
 (require 'setup-tex)
 (require 'setup-jabber)
 (require 'setup-erc)
 (require 'setup-browser)
 (require 'setup-autocommit)
 (require 'setup-verilog)
-(require 'setup-opengrok)
+;(require 'setup-opengrok)
 (require 'setup-android)
 ;(require 'setup-confluence)
 (require 'setup-ts-mode)
 (require 'setup-go-mode)
+(require 'setup-rust)
+(require 'setup-print)
+(load "/usr/share/gforth/gforth.el")
 
 ;; Language specific setup files
 (eval-after-load 'js2-mode '(require 'setup-js2-mode))
@@ -226,7 +232,7 @@
 (require 'smart-forward)
 (require 'change-inner)
 (require 'multifiles)
-(require 'git-modeline)
+;(require 'git-modeline)
 (require 'goto-chg)
 
 ;; ;; Fill column indicator

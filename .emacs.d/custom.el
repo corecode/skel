@@ -27,10 +27,17 @@
     (:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t)))
  '(package-selected-packages
    (quote
-    (systemtap-mode org org-clock-csv git-commit-mode zoom-frm yari yaml-mode wgrep w3m undo-tree top-mode tide tern-auto-complete smooth-scrolling smex smart-tab smart-forward slime shader-mode session scad-preview rvm ruby-end ruby-compilation ruby-block request rainbow-delimiters quack qml-mode python-mode powerline pkgbuild-mode paredit org-journal nrepl nodejs-repl nim-mode nhexl-mode multifiles multi-term move-text minitest mediawiki markdown-mode mark-multiple magit-svn magit-push-remote magit-gh-pulls lua-mode key-chord jump-char js2-refactor jabber-otr ipython iedit ido-ubiquitous highlight-indentation helm-gist haskell-mode graphviz-dot-mode goto-chg go-stacktracer go-scratch go-rename go-errcheck go-eldoc go-dlv go-autocomplete glsl-mode gitignore-mode gitconfig-mode forth-mode fold-this flymake-ruby flymake-jshint flymake-go flymake-cursor flycheck-typescript-tslint find-file-in-project fill-column-indicator ess erc-hl-nicks eproject elisp-slime-nav edit-server dired-details diminish csharp-mode confluence company color-moccur cmake-project cmake-mode change-inner browse-kill-ring auto-indent-mode auctex android-mode ace-jump-mode ac-nrepl)))
+    (company-racer racer flycheck-inline blackboard-theme flycheck flycheck-rust rust-mode dtrt-indent f go-mode gh ghub gist python-mode pyvenv typescript-mode jabber znc platformio-mode pydoc-info floobits pydoc elpy jedi systemtap-mode org org-clock-csv git-commit-mode zoom-frm yari yaml-mode wgrep w3m undo-tree top-mode tide tern-auto-complete smooth-scrolling smex smart-forward slime shader-mode session scad-preview rvm ruby-end ruby-compilation ruby-block request rainbow-delimiters quack qml-mode powerline pkgbuild-mode paredit org-journal nrepl nodejs-repl nim-mode nhexl-mode multifiles multi-term move-text minitest mediawiki markdown-mode mark-multiple magit-svn magit-push-remote magit-gh-pulls lua-mode key-chord jump-char js2-refactor jabber-otr ipython iedit ido-ubiquitous highlight-indentation helm-gist haskell-mode graphviz-dot-mode goto-chg go-stacktracer go-scratch go-rename go-errcheck go-eldoc go-dlv go-autocomplete glsl-mode gitignore-mode gitconfig-mode forth-mode fold-this flymake-ruby flymake-jshint flymake-go flymake-cursor flycheck-typescript-tslint find-file-in-project fill-column-indicator ess erc-hl-nicks eproject elisp-slime-nav edit-server dired-details diminish csharp-mode confluence company color-moccur cmake-project cmake-mode change-inner browse-kill-ring auto-indent-mode auctex android-mode ace-jump-mode ac-nrepl)))
  '(safe-local-variable-values
    (quote
-    ((org-latex-minted-options
+    ((eval c-set-offset
+           (quote innamespace)
+           0)
+     (eval when
+           (fboundp
+            (quote c-toggle-comment-style))
+           (c-toggle-comment-style 1))
+     (org-latex-minted-options
       ("fontsize" "\\tiny")
       ("linenos" ""))
      (org-latex-minted-options

@@ -3,26 +3,35 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        backward-sexp
         c-electric-brace
         c-electric-colon
         c-electric-delete-forward
         c-electric-lt-gt
         c-electric-paren
         c-electric-semi&comma
+        c-electric-slash
         c-electric-star
         delete-horizontal-space
         electric-verilog-semi
+        electric-verilog-tick
+        forward-sexp
         hippie-expand-no-case-fold
         iedit-mode
+        indent-for-tab-command
         indent-pp-sexp
         js2-end-of-line
         jump-char-forward
         jump-char-process-char
         jump-char-repeat-backward
+        keyboard-escape-quit
         kill-region-or-backward-word
+        org-beginning-of-line
         org-delete-char
+        org-end-of-line
         org-force-self-insert
         org-self-insert-command
+        org-yank
         paredit-backslash
         paredit-backward-kill-word
         paredit-comment-dwim
@@ -33,18 +42,26 @@
         paredit-kill
         paredit-open-round
         paredit-splice-sexp
+        py-electric-colon
+        py-electric-delete
+        py-indent-or-complete
         quack-insert-closing-paren
         quack-insert-opening-paren
         ruby-end-space
         save-region-or-current-line
-        smart-tab
+        transpose-sexps
+        typescript-insert-and-indent
         ))
 
 (setq mc/cmds-to-run-once
       '(
         ace-jump-mode
+        handle-switch-frame
+        iedit-switch-to-mc-mode
+        info
         org-cycle
         paredit-doublequote
         smex
+        term-send-up
         universal-argument-minus
         ))

@@ -20,7 +20,7 @@
   (make-local-variable 'scroll-conservatively)
   (setq scroll-conservatively 5))
 
-(setq-default erc-ignore-list '("nox!" "evilbetty" "ohsix" "flyback" "mkad" "@ns.nurlon.be" "Johnsen" "dongs"))
+(setq-default erc-ignore-list '("nox!" "evilbetty" "ohsix" "flyback" "mkad" "@ns.nurlon.be" "Johnsen" "dongs" "John___" "Mittens" "cutebutpsycho*" "moriarty" "jammi" "rpifan" "promach*"))
 
 ;; (setq-default erc-track-priority-faces-only 'all)
 ;; (setq-default erc-track-faces-priority-list

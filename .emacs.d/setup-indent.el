@@ -24,35 +24,33 @@
 
 ;; guess tab/offset mode
 (require 'dtrt-indent)
-(add-to-list 'dtrt-indent-hook-mapping-list
-             '(js2-mode c/c++/java    js2-basic-offset))
-(dtrt-indent-mode 1)
-(setq global-mode-string (delq 'dtrt-indent-mode-line-info global-mode-string))
+(dtrt-indent-global-mode 1)
+(diminish 'dtrt-indent-mode)
 
 ;; make <tab> do the right thing
-(require 'smart-tab)
-(diminish 'smart-tab-mode)
+;; (require 'smart-tab)
+;; (diminish 'smart-tab-mode)
 
 ;; please use default
-(setq smart-tab-using-hippie-expand t)
-(setq smart-tab-completion-functions-alist
-      (assq-delete-all 'emacs-lisp-mode smart-tab-completion-functions-alist))
+;; (setq smart-tab-using-hippie-expand t)
+;; (setq smart-tab-completion-functions-alist
+;;       (assq-delete-all 'emacs-lisp-mode smart-tab-completion-functions-alist))
 
 ;; nrepl works better than smart-tab
-(add-hook 'nrepl-interaction-mode-hook 'smart-tab-mode-off)
+;; (add-hook 'nrepl-interaction-mode-hook 'smart-tab-mode-off)
 
 ;; w3m does not like smart-tab-mode
 ;; solution from <http://stackoverflow.com/questions/6837511/automatically-disable-a-global-minor-mode-for-a-specific-major-mode>
-(define-globalized-minor-mode global-smart-tab-mode
-  smart-tab-mode
-  (lambda ()
-    (unless (or (memq major-mode '(w3m-mode
-                                   jabber-chat-mode
-                                   erc-mode))
-                (and (boundp 'nrepl-interaction-mode) nrepl-interaction-mode))
-      (smart-tab-mode-on)))
-  :group 'smart-tab)
+;; (define-globalized-minor-mode global-smart-tab-mode
+;;   smart-tab-mode
+;;   (lambda ()
+;;     (unless (or (memq major-mode '(w3m-mode
+;;                                    jabber-chat-mode
+;;                                    erc-mode))
+;;                 (and (boundp 'nrepl-interaction-mode) nrepl-interaction-mode))
+;;       (smart-tab-mode-on)))
+;;   :group 'smart-tab)
 
-(global-smart-tab-mode 1)
+;; (global-smart-tab-mode 1)
 
 (provide 'setup-indent)

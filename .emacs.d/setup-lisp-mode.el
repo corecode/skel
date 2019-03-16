@@ -5,29 +5,29 @@
 
 (add-hook 'scheme-mode 'turn-on-geiser-mode)
 
-(require 'nrepl)
+(require 'cider)
 
 (dolist (mode '(lisp-mode-hook
                 emacs-lisp-mode-hook
                 clojure-mode-hook
-                nrepl-repl-mode-hook
+                cider-repl-mode-hook
                 scheme-mode-hook
                 inferior-scheme-mode-hook
                 geiser-repl-mode-hook))
   (add-hook mode 'enable-paredit-mode))
 
-(define-key nrepl-interaction-mode-map (kbd "C-c v") 'nrepl-eval-buffer)
-(define-key nrepl-interaction-mode-map (kbd "TAB") 'nrepl-tab)
+;; (define-key cider-interaction-mode-map (kbd "C-c v") 'cider-eval-buffer)
+;; (define-key cider-interaction-mode-map (kbd "TAB") 'cider-tab)
 
-(defun nrepl-goto-prompt ()
-  (interactive)
-  (goto-char nrepl-input-start-mark))
-(define-key nrepl-repl-mode-map (kbd "C-a") 'nrepl-goto-prompt)
-(define-key nrepl-repl-mode-map (kbd "C-S-k") 'nrepl-delete-current-input)
+;; (defun cider-goto-prompt ()
+;;   (interactive)
+;;   (goto-char cider-input-start-mark))
+;; (define-key cider-repl-mode-map (kbd "C-a") 'cider-goto-prompt)
+;; (define-key cider-repl-mode-map (kbd "C-S-k") 'cider-delete-current-input)
 
 (require 'eldoc)
 (add-hook 'emacs-lisp-mode-hook (lambda () (eldoc-mode 1)))
-(add-hook 'nrepl-interaction-mode-hook 'nrepl-turn-on-eldoc-mode)
+;; (add-hook 'cider-interaction-mode-hook 'cider-turn-on-eldoc-mode)
 (diminish 'eldoc-mode)
 (eldoc-add-command
  'paredit-backward-delete
@@ -41,7 +41,7 @@
                 jess-mode-hook
                 lisp-interaction-mode-hook
                 lisp-mode-hook
-                nrepl-repl-mode-hook
+                ;;cider-repl-mode-hook
                 scheme-mode-hook
                 inferior-scheme-mode-hook
                 slime-repl-mode-hook))
