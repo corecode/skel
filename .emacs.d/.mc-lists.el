@@ -12,8 +12,11 @@
         c-electric-semi&comma
         c-electric-slash
         c-electric-star
+        c-indent-line-or-region
         delete-horizontal-space
+        electric-verilog-colon
         electric-verilog-semi
+        electric-verilog-tab
         electric-verilog-tick
         forward-sexp
         hippie-expand-no-case-fold
@@ -32,6 +35,7 @@
         org-force-self-insert
         org-self-insert-command
         org-yank
+        overwrite-mode
         paredit-backslash
         paredit-backward-kill-word
         paredit-comment-dwim

@@ -6,6 +6,8 @@
 [alias]
 	co = checkout
 	ci = commit
+[url "git+ssh://corecode@git.launchpad.net/"]
+        insteadof = lp:
 [imap]
 	folder = Drafts
 	host = imaps://0x2c.org
