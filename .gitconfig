@@ -15,3 +15,5 @@
 	preformattedHTML = true
 [push]
 	default = simple
+[include]
+        path = .gitconfig.auth
