@@ -1,0 +1,1051 @@
+#+STARTUP: overview
+#+PROPERTY: header-args :comments yes :results silent
+
+* Startup tuning
+** Turn off mouse interface early in startup to avoid momentary display
+#+BEGIN_SRC emacs-lisp
+(dolist (mode '(menu-bar-mode
+                tool-bar-mode
+                scroll-bar-mode))
+  (when (fboundp mode)
+    (funcall mode -1)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(setq inhibit-startup-message t)
+#+END_SRC
+
+* Load path
+#+BEGIN_SRC emacs-lisp
+;; Set path to dependencies
+(setq dotfiles-dir (file-name-directory
+                    (or (buffer-file-name) load-file-name)))
+(setq site-lisp-dir
+      (expand-file-name "site-lisp" dotfiles-dir))
+
+;; set up load path
+(add-to-list 'load-path dotfiles-dir)
+(add-to-list 'load-path (expand-file-name "local" dotfiles-dir))
+(add-to-list 'load-path site-lisp-dir)
+
+;; Add external projects to load path
+(dolist (project (directory-files site-lisp-dir t "\\w+"))
+  (when (file-directory-p project)
+    (add-to-list 'load-path project)))
+
+;; same for themes
+(setq site-theme-dir
+      (expand-file-name "themes" dotfiles-dir))
+(add-to-list 'custom-theme-load-path site-theme-dir)
+(dolist (dir (directory-files site-theme-dir t "\\w+"))
+  (when (file-directory-p dir)
+    (add-to-list 'custom-theme-load-path dir)))
+#+END_SRC
+
+* Package setup
+** use-package
+#+begin_src emacs-lisp
+(unless (package-installed-p 'use-package)
+  (message (format "use-package installed: %s" (package-installed-p 'use-package)))
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(setq use-package-verbose t)
+(setq use-package-always-ensure t)
+(require 'use-package)
+#+end_src
+
+* Tools used in scripts
+#+begin_src emacs-lisp
+(use-package dash)
+#+end_src
+
+** File handling functions
+#+begin_src emacs-lisp
+(use-package file-defuns :ensure nil)
+#+end_src
+
+* Looks & unsorted stuff
+** Frame look
+#+begin_src emacs-lisp
+(setq visible-bell t
+      font-lock-maximum-decoration t
+      color-theme-is-global nil
+      truncate-partial-width-windows nil)
+#+end_src
+
+** theme
+#+begin_src emacs-lisp
+(use-package blackboard-theme
+  :config
+  (load-theme 'blackboard t)
+
+  (set-face-background 'region "#464740")
+  (set-face-foreground 'font-lock-warning-face "#ff6666")
+
+  ;; modify modeline
+  (face-spec-set 'mode-line '((t (:background "darkred" :foreground "white" :box (:line-width -1 :style released-button))))))
+#+end_src
+
+** default font
+#+begin_src emacs-lisp
+(setq default-frame-alist (assq-delete-all 'font default-frame-alist))
+(setq default-frame-alist (delq (assoc 'font default-frame-alist) default-frame-alist))
+(add-to-list 'default-frame-alist '(font . "Liberation Mono-10:weight=normal"))
+#+end_src
+
+#+begin_src emacs-lisp
+;; org-mode colors
+(setq org-todo-keyword-faces
+      '(
+        ("INPR" . (:foreground "yellow" :weight bold))
+        ("DONE" . (:foreground "green" :weight bold))
+        ("IMPEDED" . (:foreground "red" :weight bold))
+        ))
+#+end_src
+
+** Replace lambdas
+#+begin_src emacs-lisp
+(defun esk-pretty-lambdas ()
+  (font-lock-add-keywords
+   nil `(("(?\\(lambda\\>\\)"
+          (0 (progn (compose-region (match-beginning 1) (match-end 1)
+                                    ,(make-char 'greek-iso8859-7 107))
+                    nil))))))
+
+(add-hook 'prog-mode-hook 'esk-pretty-lambdas)
+#+end_src
+
+** Highlight marker words
+#+begin_src emacs-lisp
+(defun esk-add-watchwords ()
+  (font-lock-add-keywords
+   nil '(("\\<\\(XXX\\|FIXME\\|TODO\\|FIX\\|HACK\\|REFACTOR\\|NOCOMMIT\\)\\>"
+          1 font-lock-warning-face t))))
+
+(add-hook 'prog-mode-hook 'esk-add-watchwords)
+#+end_src
+
+
+** Highlight matching parentheses when the point is on them.
+#+begin_src emacs-lisp
+(show-paren-mode 1)
+#+end_src
+
+** set frame title
+#+begin_src emacs-lisp
+(setq frame-title-format
+      '(:eval
+        (if (buffer-file-name)
+            (abbreviate-file-name (buffer-file-name))
+          "%b")))
+#+end_src
+
+** disable tooltips
+#+begin_src emacs-lisp
+(tooltip-mode -1)
+#+end_src
+
+** do not blink cursor
+#+begin_src emacs-lisp
+(blink-cursor-mode -1)
+#+end_src
+
+** Highlight current line
+#+begin_src emacs-lisp
+(global-hl-line-mode 1)
+(set-face-background 'hl-line "#222222")
+#+end_src
+
+** use fancy mode-line
+#+begin_src emacs-lisp
+(use-package powerline)
+(powerline-default-theme)
+#+end_src
+
+** Diminish
+Reduce modeline clutter
+#+begin_src emacs-lisp
+(use-package diminish)
+#+end_src
+
+** Save point position between sessions
+#+BEGIN_SRC emacs-lisp
+(use-package saveplace)
+(setq-default save-place t)
+(setq save-place-file (expand-file-name ".places" dotfiles-dir))
+#+END_SRC
+
+** Write backup files to own directory
+#+BEGIN_SRC emacs-lisp
+(setq backup-directory-alist
+      `(("." . ,(expand-file-name
+                 (concat dotfiles-dir "backups")))))
+
+;; Make backups of files, even when they're in version control
+(setq vc-make-backup-files t)
+#+END_SRC
+
+** Keep emacs Custom-settings in separate file
+#+BEGIN_SRC emacs-lisp
+(setq custom-file (concat dotfiles-dir "custom.el"))
+(load custom-file 'noerror)
+#+END_SRC
+
+** Allow pasting selection outside of Emacs
+#+BEGIN_SRC emacs-lisp
+(setq x-select-enable-clipboard t)
+(setq x-select-enable-primary t)
+#+END_SRC
+
+** Auto refresh buffers
+#+BEGIN_SRC emacs-lisp
+(global-auto-revert-mode 1)
+
+;; Also auto refresh dired, but be quiet about it
+(setq global-auto-revert-non-file-buffers t)
+(setq auto-revert-verbose nil)
+#+END_SRC
+
+** Move files to trash when deleting
+#+BEGIN_SRC emacs-lisp
+(setq delete-by-moving-to-trash t)
+#+END_SRC
+
+** Real emacs knights don't use shift to mark things
+#+BEGIN_SRC emacs-lisp
+(setq shift-select-mode nil)
+#+END_SRC
+
+** Transparently open compressed files
+#+BEGIN_SRC emacs-lisp
+(auto-compression-mode t)
+#+END_SRC
+
+** Enable syntax highlighting for older Emacsen that have it off
+#+BEGIN_SRC emacs-lisp
+(global-font-lock-mode t)
+#+END_SRC
+
+** Answering just 'y' or 'n' will do
+#+BEGIN_SRC emacs-lisp
+(defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+
+** UTF-8 please
+#+BEGIN_SRC emacs-lisp
+(setq locale-coding-system 'utf-8) ; pretty
+(set-terminal-coding-system 'utf-8) ; pretty
+(set-keyboard-coding-system 'utf-8) ; pretty
+(set-selection-coding-system 'utf-8) ; please
+(prefer-coding-system 'utf-8) ; with sugar on top
+#+END_SRC
+
+** Show active region
+#+BEGIN_SRC emacs-lisp
+(transient-mark-mode 1)
+(make-variable-buffer-local 'transient-mark-mode)
+(put 'transient-mark-mode 'permanent-local t)
+(setq-default transient-mark-mode t)
+#+END_SRC
+
+** Remove text in active region if inserting text
+#+BEGIN_SRC emacs-lisp
+(delete-selection-mode 1)
+#+END_SRC
+
+** Always display line and column numbers
+#+BEGIN_SRC emacs-lisp
+(setq line-number-mode t)
+(setq column-number-mode t)
+#+END_SRC
+
+** Lines should be 80 characters wide, not 72
+#+BEGIN_SRC emacs-lisp
+(setq fill-column 80)
+#+END_SRC
+
+** Save a list of recent files visited. (open recent file with C-x f)
+#+BEGIN_SRC emacs-lisp
+(use-package recentf
+  :config
+  (recentf-mode 1)
+  (setq recentf-max-saved-items 100))
+#+END_SRC
+
+** Undo/redo window configuration with C-c <left>/<right>
+#+BEGIN_SRC emacs-lisp
+(winner-mode 1)
+#+END_SRC
+
+** Mark trailing whitespace
+#+BEGIN_SRC emacs-lisp
+(global-whitespace-mode 1)
+(diminish 'global-whitespace-mode)
+
+;; Whitespace-style
+(setq whitespace-style '(trailing lines space-before-tab
+                                  indentation space-after-tab)
+      whitespace-line-column 100)
+#+END_SRC
+
+** Show me empty lines after buffer end
+#+BEGIN_SRC emacs-lisp
+(set-default 'indicate-empty-lines t)
+#+END_SRC
+
+** Easily navigate sillycased words
+#+BEGIN_SRC emacs-lisp
+(global-subword-mode 1)
+#+END_SRC
+
+** Keep cursor away from edges when scrolling up/down
+#+BEGIN_SRC emacs-lisp
+(use-package smooth-scrolling)
+#+END_SRC
+
+** Fontify org-mode code blocks
+#+BEGIN_SRC emacs-lisp
+(setq org-src-fontify-natively t)
+#+END_SRC
+
+** Represent undo-history as an actual tree (visualize with C-x u)
+#+BEGIN_SRC emacs-lisp
+(setq undo-tree-mode-lighter "")
+(use-package undo-tree)
+(global-undo-tree-mode)
+#+END_SRC
+
+** Add parts of each file's directory to the buffer name if not unique
+#+BEGIN_SRC emacs-lisp
+(use-package uniquify
+  :ensure nil
+  :config
+  (setq uniquify-buffer-name-style 'forward))
+#+END_SRC
+
+** Run at full power please
+#+BEGIN_SRC emacs-lisp
+(put 'downcase-region 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
+(put 'erase-buffer 'disabled nil)
+#+END_SRC
+
+** text editing tools
+#+BEGIN_SRC emacs-lisp
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+(add-hook 'text-mode-hook 'turn-on-flyspell)
+#+END_SRC
+
+** A saner ediff
+#+BEGIN_SRC emacs-lisp
+(setq ediff-diff-options "-w")
+(setq ediff-split-window-function 'split-window-horizontally)
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+#+END_SRC
+
+** Wut
+#+BEGIN_SRC emacs-lisp
+(setq eval-expression-print-level nil)
+#+END_SRC
+
+** Wut2
+#+BEGIN_SRC emacs-lisp
+;; When popping the mark, continue popping until the cursor actually moves
+;; Also, if the last command was a copy - skip past all the expand-region cruft.
+(defadvice pop-to-mark-command (around ensure-new-position activate)
+  (let ((p (point)))
+    (when (eq last-command 'save-region-or-current-line)
+      ad-do-it
+      ad-do-it
+      ad-do-it)
+    (dotimes (i 10)
+      (when (= p (point)) ad-do-it))))
+#+END_SRC
+
+** Open PDF with evince
+#+BEGIN_SRC emacs-lisp
+(eval-after-load 'mailcap
+  '(mailcap-add "application/pdf" "evince %s"))
+#+END_SRC
+
+** Wut3
+#+BEGIN_SRC emacs-lisp
+;; fix faces
+(defface popup-mouse-face nil nil)
+#+END_SRC
+
+** Use system browser for URLs
+#+begin_src emacs-lisp
+(setq browse-url-browser-function 'browse-url-xdg-open)
+#+end_src
+
+** Print setup
+#+begin_src emacs-lisp
+(setq-default pdf-misc-print-programm "/usr/bin/lpr")
+#+end_src
+
+** Seed the random-number generator
+#+begin_src emacs-lisp
+(random t)
+#+end_src
+** Auth setup
+#+begin_src emacs-lisp
+(use-package auth-source
+  :config
+  (setq auth-sources '("~/.authinfo.gpg")))
+(use-package secrets)
+
+(condition-case ex
+    (load (concat dotfiles-dir "passwords-nocommit.el"))
+  ('error))
+#+end_src
+* UI navigation
+** Do not easily exit emacs
+#+begin_src emacs-lisp
+(global-unset-key (kbd "C-x C-c"))
+(global-unset-key (kbd "C-z"))
+(global-unset-key (kbd "C-x C-z"))
+#+end_src
+
+** Man
+#+begin_src emacs-lisp
+(define-key help-map (kbd "C-m") 'man)
+(define-key help-map (kbd "M") 'man)
+#+end_src
+
+** Ivy, Swiper, Counsel
+#+BEGIN_SRC emacs-lisp
+(use-package ivy
+  :diminish
+  :config
+  (setq ivy-use-virtual-buffers t)
+  (ivy-mode 1))
+
+(use-package swiper
+  :bind (("C-s" . swiper)))
+
+(use-package counsel
+  :bind (("M-x" . counsel-M-x)
+         ("C-x C-f" . counsel-find-file)
+         ("C-h f" . counsel-describe-function)
+         ("C-h v" . counsel-describe-variable)
+         ("C-h l" . counsel-find-library)
+         ("C-h u" . counsel-unicode-char)
+         ("C-c c" . counsel-compile)))
+#+END_SRC
+
+** Show available keys
+#+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :diminish
+  :config
+  (which-key-mode)
+  (setq echo-keystrokes 0.1))
+#+END_SRC
+
+** Ace window
+#+begin_src emacs-lisp
+(use-package ace-window
+  :config
+  (setq aw-scope 'frame)
+  (ace-window-display-mode)
+  :bind ("C-x o" . ace-window))
+#+end_src
+
+** Windmove
+#+begin_src emacs-lisp
+(use-package windmove
+  :bind (("<S-right>" . windmove-right)
+         ("<S-left>" . windmove-left)
+         ("<S-up>" . windmove-up)
+         ("<S-down>" . windmove-down)))
+#+end_src
+
+** Eyebrowse
+#+begin_src emacs-lisp
+(use-package eyebrowse
+  :config
+  (eyebrowse-mode))
+#+end_src
+
+** Ibuffer
+#+begin_src emacs-lisp
+(bind-keys ("C-x C-b" . ibuffer))
+#+end_src
+
+* Text navigation
+** Expand region
+#+begin_src emacs-lisp
+(use-package expand-region
+  :bind ("C-'" . er/expand-region))
+#+end_src
+
+** Multiple cursors
+#+begin_src emacs-lisp
+(use-package multiple-cursors
+  :bind (("M-'" . mc/mark-all-like-this-dwim)
+         ("C-\\" . mc/mark-next-like-this)
+         ("C-]" . mc/mark-previous-like-this)
+         ("M-C-'" . mc/mark-more-like-this-extended)
+         ("M-]" . mc/mark-all-in-region)))
+#+end_src
+
+** Visual regex
+#+begin_src emacs-lisp
+(use-package visual-regexp
+  :bind ("M-&" . vr/query-replace))
+#+end_src
+
+** Avy
+#+begin_src emacs-lisp
+(use-package avy
+  :bind ("C-:" . avy-goto-char))
+#+end_src
+
+** Dumb jump
+#+begin_src emacs-lisp
+(use-package dumb-jump
+  :config
+  (dumb-jump-mode))
+#+end_src
+** Ripgrep
+#+begin_src emacs-lisp
+(use-package rg
+  :config
+  (rg-enable-default-bindings))
+#+end_src
+
+** Fuzzy file finder
+#+begin_src emacs-lisp
+(use-package fzf)
+#+end_src
+
+
+** Navigation bindings
+#+begin_src emacs-lisp
+(use-package emacs
+  :no-require :demand
+  :preface
+  (defun region-as-string ()
+    (buffer-substring (region-beginning)
+                      (region-end)))
+
+  (defun goto-line-with-feedback ()
+    "Show line numbers temporarily, while prompting for the line number input"
+    (interactive)
+    (unwind-protect
+        (progn
+          (linum-mode 1)
+          (call-interactively 'goto-line))
+      (linum-mode -1)))
+
+  ;; Add spaces and proper formatting to linum-mode. It uses more room than
+  ;; necessary, but that's not a problem since it's only in use when going to
+  ;; lines.
+  (setq linum-format (lambda (line)
+                       (propertize
+                        (format (concat " %"
+                                        (number-to-string
+                                         (length (number-to-string
+                                                  (line-number-at-pos (point-max)))))
+                                        "d ")
+                                line)
+                        'face 'linum)))
+
+  (defun kill-region-or-backward-word ()
+    (interactive)
+    (if (region-active-p)
+        (kill-region (region-beginning) (region-end))
+      (backward-kill-word 1)))
+
+  (defun kill-to-beginning-of-line ()
+    (interactive)
+    (kill-region (save-excursion (beginning-of-line) (point))
+                 (point)))
+
+  :bind (("M-i" . back-to-indentation)
+         ([remap goto-line] . goto-line-with-feedback)
+         ("M-p" . backward-paragraph)
+         ("M-n" . forward-paragraph)
+         ("C-S-n" . (lambda () (interactive) (next-line 5)))
+         ("C-S-p" . (lambda () (interactive) (previous-line 5)))
+
+         ("C-S-k" . kill-whole-line)
+         ("C-w" . kill-region-or-backward-word)
+         ("C-c C-w" . kill-to-beginning-of-line)
+         ("M-j" . (lambda () (interactive (join-line -1))))
+         ("C-S-y" . yank-unindented)
+
+         ("C-c C-e" . eval-and-replace)
+         ("C-c v" . eval-buffer)
+
+         ("C-c r" . revert-buffer)
+         ("C-c y" . bury-buffer)
+
+         ;; use global M-n
+         :map Info-mode-map
+         ("M-n" . nil)))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package iedit)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package goto-chg)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package browse-kill-ring
+  :config
+  (setq browse-kill-ring-quit-action 'save-and-restore)
+  :bind ("C-x C-y" . browse-kill-ring))
+#+end_src
+
+** remove trailing whitespace on save
+#+begin_src emacs-lisp
+(defun cleanup-buffer-safe ()
+  "Perform a bunch of safe operations on the whitespace content of a buffer.
+Does not indent buffer, because it is used for a before-save-hook, and that
+might be bad."
+  (interactive)
+  (unless (eq buffer-file-coding-system 'binary)
+    ;; (untabify-buffer)
+    (delete-trailing-whitespace)
+    (set-buffer-file-coding-system 'utf-8)))
+
+(add-hook 'before-save-hook 'cleanup-buffer-safe)
+#+end_src
+* Text editing
+** Indent defaults
+#+begin_src emacs-lisp
+(global-set-key (kbd "RET") 'reindent-then-newline-and-indent)
+
+;; default to indent 8, only use tabs in certain modes
+(setq-default standard-indent 8
+              tab-always-indent t
+              indent-tabs-mode nil
+              backward-delete-char-untabify-method nil)
+
+;; guess tab/offset mode
+(use-package dtrt-indent
+  :diminish
+  :config
+  (dtrt-indent-global-mode 1))
+#+end_src
+
+** Hippie expand
+#+begin_src emacs-lisp
+(use-package hippie-exp
+  :bind ("M-/" . hippie-expand))
+#+end_src
+
+* Modes
+** org
+#+begin_src emacs-lisp
+(use-package org
+  :pin org
+  :config
+  (setq org-src-fontify-natively t
+        org-src-window-setup 'split-window-below
+        org-src-strip-leading-and-trailing-blank-lines t
+        org-src-preserve-indentation t
+        org-src-tab-acts-natively t)
+
+  ;; Unfortunately this also indents the block if it is the first element
+  ;; after a heading.
+  (add-to-list 'org-structure-template-alist
+               '("el" . "src emacs-lisp"))
+  (require 'org-tempo)
+
+  :bind (:map org-mode-map
+            ("M-n" . org-forward-element)
+            ("M-p" . org-backward-element)
+            ("<S-up>")
+            ("<S-down>")
+            ("<S-left>")
+            ("<S-right>")))
+#+end_src
+
+** dired
+#+begin_src emacs-lisp
+(require 'dired)
+
+(add-hook 'dired-mode-hook 'dired-hide-details-mode)
+
+;; Reload dired after making changes
+(--each '(dired-do-rename
+          dired-create-directory
+          wdired-abort-changes)
+  (eval `(defadvice ,it (after revert-buffer activate)
+           (revert-buffer))))
+
+;; C-a is nicer in dired if it moves back to start of files
+(defun dired-back-to-start-of-files ()
+  (interactive)
+  (backward-char (- (current-column) 2)))
+
+(define-key dired-mode-map (kbd "C-a") 'dired-back-to-start-of-files)
+
+;; M-up is nicer in dired if it moves to the third line - straight to the ".."
+(defun dired-back-to-top ()
+  (interactive)
+  (beginning-of-buffer)
+  (next-line 2)
+  (dired-back-to-start-of-files))
+
+(define-key dired-mode-map (vector 'remap 'beginning-of-buffer) 'dired-back-to-top)
+(define-key dired-mode-map (vector 'remap 'smart-up) 'dired-back-to-top)
+
+;; M-down is nicer in dired if it moves to the last file
+(defun dired-jump-to-bottom ()
+  (interactive)
+  (end-of-buffer)
+  (next-line -1)
+  (dired-back-to-start-of-files))
+
+(define-key dired-mode-map (vector 'remap 'end-of-buffer) 'dired-jump-to-bottom)
+(define-key dired-mode-map (vector 'remap 'smart-down) 'dired-jump-to-bottom)
+
+;; Delete with C-x C-k to match file buffers and magit
+(define-key dired-mode-map (kbd "C-x C-k") 'dired-do-delete)
+
+(use-package wdired
+  :bind (:map wdired-mode-map
+              ("C-a" . dired-back-to-start-of-files)
+              ([remap beginning-of-buffer] . dired-back-to-top)
+              ([remap end-of-buffer] . dired-jump-to-bottom)))
+#+end_src
+
+** git / magit
+#+begin_src emacs-lisp
+(use-package magit
+  :config
+  (defun magit-kill-file-on-line ()
+    "Show file on current magit line and prompt for deletion."
+    (interactive)
+    (call-interactively (key-binding [remap magit-visit-thing]))
+    (delete-current-buffer-file)
+    (magit-refresh))
+
+  :bind (("C-x m" . magit-status)
+         :map magit-status-mode-map
+         ("q" . magit-quit-session)
+         ("C-x C-k" . magit-kill-file-on-line)))
+#+end_src
+
+*** Full screen status
+#+begin_src emacs-lisp
+(defadvice magit-status (around magit-fullscreen activate)
+  (window-configuration-to-register :magit-fullscreen)
+  ad-do-it
+  (delete-other-windows))
+
+(defun magit-quit-session ()
+  "Restores the previous window configuration and kills the magit buffer"
+  (interactive)
+  (kill-buffer)
+  (jump-to-register :magit-fullscreen))
+#+end_src
+
+*** gist
+#+begin_src emacs-lisp
+(use-package gist)
+#+end_src
+
+** rgrep
+#+begin_src emacs-lisp
+(use-package grep)
+#+end_src
+
+*** wgrep = edit results in grep buffer
+#+begin_src emacs-lisp
+(use-package wgrep
+  :config
+  (setq wgrep-enable-key "e")
+  :bind (:map grep-mode-map
+              ("C-x C-s" . 'wgrep-save-all-buffers)))
+#+end_src
+
+** paredit
+#+begin_src emacs-lisp
+(use-package paredit
+  :diminish "()")
+#+end_src
+
+** term
+#+begin_src emacs-lisp
+(use-package term)
+(use-package multi-term
+  :bind ("C-t" . multi-term))
+
+(setq term-unbind-key-list
+      '("M-x"
+        "C-c"
+        "C-x"
+        "C-t"
+        "S-<left>"
+        "S-<right>"
+        "S-<up>"
+        "S-<down>"))
+
+;; from multi-term.el, just use C-s and C-p with prefix.
+(setq term-bind-key-alist
+      '(
+        ("C-c C-c" . term-interrupt-subjob)
+        ("C-p" . previous-line)
+        ("C-n" . next-line)
+        ("M-C-s" . isearch-forward)
+        ("M-C-r" . isearch-backward)
+        ("C-m" . term-send-raw)
+        ;; ("M-f" . term-send-forward-word)
+        ;; ("M-b" . term-send-backward-word)
+        ;; ("M-o" . term-send-backspace)
+        ;; ("M-p" . term-send-up)
+        ;; ("M-n" . term-send-down)
+        ;; ("M-M" . term-send-forward-kill-word)
+        ;; ("M-N" . term-send-backward-kill-word)
+        ;; ("M-r" . term-send-reverse-search-history)
+        ("M-," . term-send-input)
+        ("M-." . comint-dynamic-complete)))
+
+(term-set-escape-char ?\C-x)
+
+;; disable minor modes that use C-c
+(defun term-disable-interfering-minor-modes ()
+  (winner-mode -1))
+(add-hook 'term-mode-hook 'term-disable-interfering-minor-modes)
+
+;; don't switch to other terminals
+(setq multi-term-switch-after-close nil)
+
+;; match my prompt
+(setq term-prompt-regexp "^\\([0-9]+ \\)[%#] ")
+
+(setq term-suppress-hard-newline t)
+
+;; term.el is silly and extracts defaults when no frame exists yet
+(defun term-setup-default-faces (&optional frame)
+  (setq
+   term-default-fg-color (face-foreground term-current-face)
+   term-default-bg-color (face-background term-current-face))
+  (remove-hook 'after-make-frame-functions 'term-setup-default-faces))
+(add-hook 'after-make-frame-functions 'term-setup-default-faces)
+
+(defun 2c-rename-term ()
+  (let ((bufname (buffer-name))
+            (index 1)
+            termname
+            (newname (lambda () (format "*%s<%d> %s*" termname index default-directory))))
+
+        (set (make-local-variable '2c-prev-default-directory) default-directory)
+
+        (string-match "^[*]?\\(.*?\\)\\(?:<\\(.*?\\)>\\)" bufname)
+        (setq termname (match-string 1 bufname))
+        (if (match-string 2 bufname)
+            (setq index (string-to-number (match-string 2 bufname))))
+        (unless (string-equal bufname (funcall newname))
+          (while (buffer-live-p (get-buffer (funcall newname)))
+            (setq index (1+ index)))
+          (rename-buffer (funcall newname)))))
+
+(defadvice term-handle-ansi-terminal-messages (after 2c-update-term-buf-name activate)
+  (if (or (not (boundp '2c-prev-default-directory))
+          (not (string-equal default-directory 2c-prev-default-directory)))
+      (2c-rename-term)))
+
+;; remove SHLVL.  For any shell, we're the top level
+(setenv "SHLVL" nil)
+#+end_src
+
+** erc/znc
+#+begin_src emacs-lisp
+(use-package znc)
+(use-package erc)
+(use-package erc-hl-nicks)
+
+(setq erc-hide-list '("JOIN" "PART" "QUIT"))
+
+;;; from <http://www.emacswiki.org/emacs/ErcFilling>
+(make-variable-buffer-local 'erc-fill-column)
+(add-hook 'window-configuration-change-hook
+          '(lambda ()
+             (save-excursion
+               (walk-windows
+                (lambda (w)
+                  (let ((buffer (window-buffer w)))
+                    (set-buffer buffer)
+                    (when (eq major-mode 'erc-mode)
+                      (setq erc-fill-column (- (window-width w) 2)))))))))
+
+(defun 2c-erc-set-scroll-conservatively ()
+  (make-local-variable 'scroll-conservatively)
+  (setq scroll-conservatively 5))
+
+(setq-default erc-ignore-list '( "evilbetty" "ohsix" "flyback" "mkad" "@ns.nurlon.be" "Johnsen" "dongs" "John___" "Mittens" "cutebutpsycho*" "moriarty" "jammi" "rpifan" "promach*" "Corvus*" "Haohmaru*"))
+
+(add-hook 'erc-mode-hook
+          (lambda () (subword-mode 0)))
+#+end_src
+
+* Languages
+** TeX
+#+begin_src emacs-lisp
+(use-package tex
+  :ensure auctex
+  :config
+  (setq-default TeX-master 'dwim)
+  (setq-default TeX-auto-save t
+                TeX-parse-self t
+                reftex-plug-into-AUCTeX t
+                TeX-newline-function 'reindent-then-newline-and-indent)
+
+  (add-hook 'LaTeX-mode-hook (lambda ()
+                               (visual-line-mode t)
+                               (flyspell-mode t)
+                               (LaTeX-math-mode t)
+                               (turn-on-reftex)
+                               (TeX-PDF-mode t)))
+
+  (setq reftex-label-alist
+        '(("compactenum" ?i "item:" nil item nil))))
+#+end_src
+** Typescript
+#+begin_src emacs-lisp
+(use-package tide
+  :diminish)
+
+(use-package typescript-mode)
+
+(add-hook 'typescript-mode-hook
+          (lambda ()
+            (tide-setup)
+            (flycheck-mode t)
+            (setq flycheck-check-syntax-automatically '(mode-enabled idle-change new-line mode-enabled))
+            (eldoc-mode t)))
+
+;; Use ƒ for anonymous functions
+(font-lock-add-keywords
+ 'typescript-mode `(("\\_<\\(function\\) *("
+                     (0 (progn (compose-region (match-beginning 1)
+                                               (match-end 1) "ƒ")
+                               nil)))))
+#+end_src
+** Go
+#+begin_src emacs-lisp
+(use-package go
+  :hook (before-save . gofmt-before-save))
+#+end_src
+
+** Forth
+#+BEGIN_SRC emacs-lisp
+(load "/usr/share/gforth/gforth.el")
+#+END_SRC
+
+** C & C-like
+#+begin_src emacs-lisp
+(c-add-style "2c"
+             '("bsd"
+               (c-hanging-braces-alist (brace-list-open)
+                                       (brace-entry-open)
+                                       (statement-cont)
+                                       (substatement-open after)
+                                       (block-close . c-snug-do-while)
+                                       (extern-lang-open after)
+                                       (namespace-open after)
+                                       (module-open after)
+                                       (composition-open after)
+                                       (inexpr-class-open after)
+                                       (inexpr-class-close before)
+                                       (class-open after))
+               (c-offsets-alist (label . [0]))))
+
+(setq c-default-style
+      '((java-mode . "java")
+        (awk-mode . "awk")
+        (other . "2c")))
+
+(define-key c-mode-base-map (kbd "<return>") 'c-context-line-break)
+(define-key c-mode-base-map (kbd "M-j") nil)
+#+end_src
+
+** Lisp & Lisp-y
+#+begin_src emacs-lisp
+(dolist (mode '(lisp-mode-hook
+                emacs-lisp-mode-hook
+                clojure-mode-hook
+                cider-repl-mode-hook
+                scheme-mode-hook
+                inferior-scheme-mode-hook))
+  (add-hook mode 'enable-paredit-mode))
+
+(diminish 'eldoc-mode)
+
+(eldoc-add-command
+ 'paredit-backward-delete
+ 'paredit-close-round)
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
+** Python
+#+begin_src emacs-lisp
+(use-package python-mode)
+(use-package pydoc)
+#+end_src
+
+** Ruby
+#+begin_src emacs-lisp
+(use-package yari)
+#+end_src
+
+
+* Desktop & Server
+** Save desktop
+#+begin_src emacs-lisp
+(use-package desktop)
+(add-to-list 'desktop-globals-to-save 'kill-ring)
+(add-to-list 'desktop-globals-to-save 'search-ring)
+(add-to-list 'desktop-globals-to-save 'regexp-search-ring)
+
+;;; From <http://www.emacswiki.org/emacs/DeskTop>
+
+(defun emacs-process-p (pid)
+  "If pid is the process ID of an emacs process, return t, else nil.
+Also returns nil if pid is nil."
+  (when pid
+    (let ((attributes (process-attributes pid)) (cmd))
+      (dolist (attr attributes)
+        (if (string= "comm" (car attr))
+            (setq cmd (cdr attr))))
+      (if (and cmd (or (string= "emacs" cmd) (string= "emacs.exe" cmd))) t))))
+
+(defadvice desktop-owner (after pry-from-cold-dead-hands activate)
+  "Don't allow dead emacsen to own the desktop file."
+  (when (not (emacs-process-p ad-return-value))
+    (setq ad-return-value nil)))
+
+(defun my-desktop-autosave ()
+  (interactive)
+  ;; Don't call desktop-save-in-desktop-dir, as it prints a message.
+  ;; (if (eq (desktop-owner) (emacs-pid))
+  ;;     )
+  (if desktop-dirname
+      (desktop-save desktop-dirname)))
+(add-hook 'auto-save-hook 'my-desktop-autosave)
+
+;; all hooks done, now start.
+(desktop-save-mode 1)
+(savehist-mode 1)
+(provide 'setup-desktop)
+
+#+end_src
+
+** Start emacs server
+#+begin_src emacs-lisp
+(use-package server)
+(unless (server-running-p)
+  (server-start))
+#+END_SRC

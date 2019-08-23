@@ -2,6 +2,13 @@
 loaddefs.el*
 backups/*
 auto-save-list
+abbrev_defs
+config.el
+ido.last
+network-security.data
+recentf
+transient
+bookmarks
 *elc
 places
 url/cookies

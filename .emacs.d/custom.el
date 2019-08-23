@@ -22,12 +22,24 @@
  '(org-agenda-files (quote ("~/.org/notes.org" "~/.org/todo.org")))
  '(org-journal-file-format "%Y%m")
  '(org-log-into-drawer t)
+ '(org-structure-template-alist
+   (quote
+    (("a" . "export ascii")
+     ("c" . "center")
+     ("C" . "comment")
+     ("e" . "example")
+     ("E" . "export")
+     ("h" . "export html")
+     ("l" . "export latex")
+     ("q" . "quote")
+     ("s" . "src")
+     ("v" . "verse"))))
  '(org-time-clocksum-format
    (quote
     (:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t)))
  '(package-selected-packages
    (quote
-    (number company-racer racer flycheck-inline blackboard-theme flycheck flycheck-rust rust-mode dtrt-indent f go-mode gh ghub gist python-mode pyvenv typescript-mode jabber znc platformio-mode pydoc-info floobits pydoc elpy jedi systemtap-mode org org-clock-csv git-commit-mode zoom-frm yari yaml-mode wgrep w3m undo-tree top-mode tide tern-auto-complete smooth-scrolling smex smart-forward slime shader-mode session scad-preview rvm ruby-end ruby-compilation ruby-block request rainbow-delimiters quack qml-mode powerline pkgbuild-mode paredit org-journal nrepl nodejs-repl nim-mode nhexl-mode multifiles multi-term move-text minitest mediawiki markdown-mode mark-multiple magit-svn magit-push-remote magit-gh-pulls lua-mode key-chord jump-char js2-refactor jabber-otr ipython iedit ido-ubiquitous highlight-indentation helm-gist haskell-mode graphviz-dot-mode goto-chg go-stacktracer go-scratch go-rename go-errcheck go-eldoc go-dlv go-autocomplete glsl-mode gitignore-mode gitconfig-mode forth-mode fold-this flymake-ruby flymake-jshint flymake-go flymake-cursor flycheck-typescript-tslint find-file-in-project fill-column-indicator ess erc-hl-nicks eproject elisp-slime-nav edit-server dired-details diminish csharp-mode confluence company color-moccur cmake-project cmake-mode change-inner browse-kill-ring auto-indent-mode auctex android-mode ace-jump-mode ac-nrepl)))
+    (magit multiple-cursors expand-region counsel swiper ivy undo-tree fzf rg try rgrep visual-regexp zoom-frm znc yasnippet-snippets yari yaml-mode xml-rpc which-key wgrep w3m use-package top-mode tide term-projectile smooth-scrolling smex smart-forward slime session rvm ruby-end ruby-compilation ruby-block rainbow-mode rainbow-delimiters racer quack python-mode pydoc-info pydoc powerline pkgbuild-mode paredit org-clock-csv org-bullets number multifiles multi-term move-text markdown-mode mark-multiple magit-svn magit-popup magit-gh-pulls key-chord jump-char js2-refactor jedi jabber iedit ido-completing-read+ highlight haskell-mode graphviz-dot-mode graphql goto-chg go-mode go gitignore-mode gitconfig-mode gist ghub forth-mode fold-this flymake-ruby flymake-jshint flymake-cursor flycheck-rust flycheck-inline fill-column-indicator eyebrowse ess erc-hl-nicks eproject elpy elisp-slime-nav edit-server dumb-jump dtrt-indent dired-details diminish counsel-pydoc counsel-projectile counsel-org-clock counsel-gtags counsel-etags company-racer color-moccur cmake-mode change-inner browse-kill-ring blackboard-theme auto-indent-mode auctex android-mode ace-window ace-jump-mode ac-nrepl)))
  '(safe-local-variable-values
    (quote
     ((eval c-set-offset
