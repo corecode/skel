@@ -1,4 +1,4 @@
-#+STARTUP: overview
+#+STARTUP: showall
 #+PROPERTY: header-args :comments yes :results silent
 
 * Startup tuning
@@ -41,19 +41,6 @@
   (when (file-directory-p dir)
     (add-to-list 'custom-theme-load-path dir)))
 #+END_SRC
-
-* Package setup
-** use-package
-#+begin_src emacs-lisp
-(unless (package-installed-p 'use-package)
-  (message (format "use-package installed: %s" (package-installed-p 'use-package)))
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-(setq use-package-verbose t)
-(setq use-package-always-ensure t)
-(require 'use-package)
-#+end_src
 
 * Tools used in scripts
 #+begin_src emacs-lisp
@@ -331,12 +318,6 @@ Reduce modeline clutter
 (put 'erase-buffer 'disabled nil)
 #+END_SRC
 
-** text editing tools
-#+BEGIN_SRC emacs-lisp
-(add-hook 'text-mode-hook 'turn-on-auto-fill)
-(add-hook 'text-mode-hook 'turn-on-flyspell)
-#+END_SRC
-
 ** A saner ediff
 #+BEGIN_SRC emacs-lisp
 (setq ediff-diff-options "-w")
@@ -423,7 +404,7 @@ Reduce modeline clutter
   (ivy-mode 1))
 
 (use-package swiper
-  :bind (("C-s" . swiper)))
+  :bind (("M-s s" . swiper)))
 
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
@@ -531,6 +512,20 @@ Reduce modeline clutter
     (buffer-substring (region-beginning)
                       (region-end)))
 
+  (defun isearch-forward-use-region ()
+    (interactive)
+    (when (region-active-p)
+      (add-to-history 'search-ring (region-as-string))
+      (deactivate-mark))
+    (call-interactively 'isearch-forward))
+
+  (defun isearch-backward-use-region ()
+    (interactive)
+    (when (region-active-p)
+      (add-to-history 'search-ring (region-as-string))
+      (deactivate-mark))
+    (call-interactively 'isearch-backward))
+
   (defun goto-line-with-feedback ()
     "Show line numbers temporarily, while prompting for the line number input"
     (interactive)
@@ -570,6 +565,9 @@ Reduce modeline clutter
          ("M-n" . forward-paragraph)
          ("C-S-n" . (lambda () (interactive) (next-line 5)))
          ("C-S-p" . (lambda () (interactive) (previous-line 5)))
+
+         ("C-s" . isearch-forward-use-region)
+         ("C-r" . isearch-backward-use-region)
 
          ("C-S-k" . kill-whole-line)
          ("C-w" . kill-region-or-backward-word)
@@ -639,6 +637,30 @@ might be bad."
 #+begin_src emacs-lisp
 (use-package hippie-exp
   :bind ("M-/" . hippie-expand))
+#+end_src
+
+** Flyspell in text buffers
+#+begin_src emacs-lisp
+(use-package flyspell
+  :diminish
+  :hook text-mode)
+#+end_src
+
+** Auto fill in text buffers
+#+BEGIN_SRC emacs-lisp
+(use-package auto-fill-mode
+  :ensure nil
+  :no-require
+  :diminish auto-fill-function
+  :hook text-mode)
+#+END_SRC
+
+** Completions: company-mode
+#+begin_src emacs-lisp
+(use-package company
+  :diminish
+  :config
+  (global-company-mode))
 #+end_src
 
 * Modes
@@ -934,7 +956,7 @@ might be bad."
 #+end_src
 ** Go
 #+begin_src emacs-lisp
-(use-package go
+(use-package go-mode
   :hook (before-save . gofmt-before-save))
 #+end_src
 

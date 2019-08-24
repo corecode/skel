@@ -1,5 +1,8 @@
 (require 'package)
 
+;; we need all this setup here instead of in config.org, because we
+;; need to update org-mode instead of using the packaged version.
+
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.org/packages/") t)
 
@@ -11,6 +14,15 @@
 
 (setq package-enable-at-startup nil)
 (package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (message (format "use-package installed: %s" (package-installed-p 'use-package)))
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(setq use-package-verbose t)
+(setq use-package-always-ensure t)
+(require 'use-package)
 
 (use-package org
   :ensure org-plus-contrib

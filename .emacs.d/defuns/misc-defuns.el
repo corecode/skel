@@ -46,23 +46,6 @@
     (deactivate-mark))
   (isearch-yank-internal (lambda () (mark))))
 
-(defun region-as-string ()
-  (buffer-substring (region-beginning)
-                    (region-end)))
-
-(defun isearch-forward-use-region ()
-  (interactive)
-  (when (region-active-p)
-    (add-to-history 'search-ring (region-as-string))
-    (deactivate-mark))
-  (call-interactively 'isearch-forward))
-
-(defun isearch-backward-use-region ()
-  (interactive)
-  (when (region-active-p)
-    (add-to-history 'search-ring (region-as-string))
-    (deactivate-mark))
-  (call-interactively 'isearch-backward))
 
 (eval-after-load "multiple-cursors"
   '(progn

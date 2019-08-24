@@ -37,9 +37,6 @@
  '(org-time-clocksum-format
    (quote
     (:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t)))
- '(package-selected-packages
-   (quote
-    (magit multiple-cursors expand-region counsel swiper ivy undo-tree fzf rg try rgrep visual-regexp zoom-frm znc yasnippet-snippets yari yaml-mode xml-rpc which-key wgrep w3m use-package top-mode tide term-projectile smooth-scrolling smex smart-forward slime session rvm ruby-end ruby-compilation ruby-block rainbow-mode rainbow-delimiters racer quack python-mode pydoc-info pydoc powerline pkgbuild-mode paredit org-clock-csv org-bullets number multifiles multi-term move-text markdown-mode mark-multiple magit-svn magit-popup magit-gh-pulls key-chord jump-char js2-refactor jedi jabber iedit ido-completing-read+ highlight haskell-mode graphviz-dot-mode graphql goto-chg go-mode go gitignore-mode gitconfig-mode gist ghub forth-mode fold-this flymake-ruby flymake-jshint flymake-cursor flycheck-rust flycheck-inline fill-column-indicator eyebrowse ess erc-hl-nicks eproject elpy elisp-slime-nav edit-server dumb-jump dtrt-indent dired-details diminish counsel-pydoc counsel-projectile counsel-org-clock counsel-gtags counsel-etags company-racer color-moccur cmake-mode change-inner browse-kill-ring blackboard-theme auto-indent-mode auctex android-mode ace-window ace-jump-mode ac-nrepl)))
  '(safe-local-variable-values
    (quote
     ((eval c-set-offset
