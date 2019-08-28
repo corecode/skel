@@ -426,8 +426,25 @@ Reduce modeline clutter
      (p (swiper))
      ((region-active-p) (swiper (buffer-substring (region-beginning) (region-end))))
      (t (swiper-thing-at-point))))
-  :bind (("M-s s" . swiper-dwim)
-         ("M-s M-s" . swiper-dwim)))
+  (defun swiper-isearch-dwim (p)
+    (interactive "P")
+    (cond
+     ((region-active-p) (swiper-isearch (buffer-substring (region-beginning) (region-end))))
+     (p (swiper-isearch-thing-at-point))
+     (t (swiper-isearch))))
+  (defun swiper-isearch-dwim-backward (p)
+    (interactive "P")
+    (cond
+     ((region-active-p) (swiper-isearch-backward (buffer-substring (region-beginning) (region-end))))
+     (p (swiper-isearch-thing-at-point))
+     (t (swiper-isearch-backward))))
+  :bind (("C-s" . swiper-isearch-dwim)
+         ("C-r" . swiper-isearch-dwim-backward)
+         ("M-s s" . swiper-dwim)
+         ("M-s M-s" . swiper-dwim)
+         :map swiper-map
+         ;("C-s" . ivy-next-line-or-history)
+         ("C-r" . ivy-previous-line-or-history)))
 
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
@@ -629,8 +646,8 @@ M-x compile.
          ("C-S-n" . (lambda () (interactive) (next-line 5)))
          ("C-S-p" . (lambda () (interactive) (previous-line 5)))
 
-         ("C-s" . isearch-forward-use-region)
-         ("C-r" . isearch-backward-use-region)
+         ;; ("C-s" . isearch-forward-use-region)
+         ;; ("C-r" . isearch-backward-use-region)
 
          ("C-S-k" . kill-whole-line)
          ("C-w" . kill-region-or-backward-word)
