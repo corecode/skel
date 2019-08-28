@@ -1000,14 +1000,6 @@ string).  It returns t if a new completion is found, nil otherwise."
               ("C-x C-s" . 'wgrep-save-all-buffers)))
 #+end_src
 
-** paredit
-#+begin_src emacs-lisp
-(use-package paredit-mode
-  :ensure paredit
-  :diminish "()"
-  :hook (emacs-lisp-mode))
-#+end_src
-
 ** term
 #+begin_src emacs-lisp
 (use-package term)
@@ -1124,6 +1116,30 @@ string).  It returns t if a new completion is found, nil otherwise."
 #+end_src
 
 * Languages
+** paredit
+#+begin_src emacs-lisp
+(use-package paredit
+  :diminish (paredit-mode . "()")
+  :hook (emacs-lisp-mode . enable-paredit-mode))
+#+end_src
+
+
+** rainbow delimiters
+#+begin_src emacs-lisp
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
+** eldoc
+#+begin_src emacs-lisp
+(use-package eldoc
+  :diminish eldoc-mode)
+
+(eldoc-add-command
+ 'paredit-backward-delete
+ 'paredit-close-round)
+#+end_src
+
 ** TeX
 #+begin_src emacs-lisp
 (use-package tex
@@ -1212,26 +1228,6 @@ string).  It returns t if a new completion is found, nil otherwise."
 
 (define-key c-mode-base-map (kbd "<return>") 'c-context-line-break)
 (define-key c-mode-base-map (kbd "M-j") nil)
-#+end_src
-
-** Lisp & Lisp-y
-#+begin_src emacs-lisp
-(dolist (mode '(lisp-mode-hook
-                emacs-lisp-mode-hook
-                clojure-mode-hook
-                cider-repl-mode-hook
-                scheme-mode-hook
-                inferior-scheme-mode-hook))
-  (add-hook mode 'enable-paredit-mode))
-
-(diminish 'eldoc-mode)
-
-(eldoc-add-command
- 'paredit-backward-delete
- 'paredit-close-round)
-
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
 
 ** Python
