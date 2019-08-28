@@ -419,8 +419,15 @@ Reduce modeline clutter
   (ivy-posframe-mode 1))
 
 (use-package swiper
-  :bind (("M-s s" . swiper)
-         ("M-s M-s" . swiper)))
+  :preface
+  (defun swiper-dwim (p)
+    (interactive "P")
+    (cond
+     (p (swiper))
+     ((region-active-p) (swiper (buffer-substring (region-beginning) (region-end))))
+     (t (swiper-thing-at-point))))
+  :bind (("M-s s" . swiper-dwim)
+         ("M-s M-s" . swiper-dwim)))
 
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
