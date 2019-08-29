@@ -42,6 +42,11 @@
     (add-to-list 'custom-theme-load-path dir)))
 #+END_SRC
 
+* Packaging
+** Prevent package.el from writing to custom
+#+begin_src emacs-lisp
+(defun package--save-selected-packages (&rest opt) nil)
+#+end_src
 * Tools used in scripts
 #+begin_src emacs-lisp
 (use-package dash)
