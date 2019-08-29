@@ -400,8 +400,10 @@ Reduce modeline clutter
 (define-key help-map (kbd "M") 'man)
 #+end_src
 
-** Ivy, Swiper, Counsel
+** Ivy, Swiper, Counsel, Amx
 #+BEGIN_SRC emacs-lisp
+(use-package amx)
+
 (use-package ivy
   :diminish
   :config
@@ -445,7 +447,25 @@ Reduce modeline clutter
   :config
   (setq aw-scope 'frame)
   (ace-window-display-mode)
-  :bind ("C-x o" . ace-window))
+  (defun switch-buffer-or-window (p)
+    (interactive "P")
+    (if p
+        (counsel-switch-buffer)
+      (ivy-read "Switch to buffer: " #'internal-complete-buffer
+            :keymap ivy-switch-buffer-map
+            :preselect (buffer-name (other-buffer (current-buffer)))
+            :matcher #'ivy--switch-buffer-matcher
+            :caller #'switch-buffer-or-window
+            :action (lambda (buffer)
+                      (let* ((win-list (aw-window-list))
+                             (matched-windows (cl-remove-if-not (lambda (w) (string= buffer (buffer-name (window-buffer w)))) win-list))
+                             (ignored-windows (cl-remove-if (lambda (w) (string= buffer (buffer-name (window-buffer w)))) win-list))
+                             (aw-ignored-buffers (mapcar (lambda (w) (buffer-name (window-buffer w))) ignored-windows)))
+                        (if matched-windows
+                            (call-interactively 'ace-window)
+                          (ivy--switch-buffer-action buffer)))))))
+  :bind (("C-x o" . ace-window)
+         ("C-x b" . switch-buffer-or-window)))
 #+end_src
 
 ** Windmove
