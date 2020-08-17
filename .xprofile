@@ -111,4 +111,5 @@ xscreensaver -nosplash &
 thunar --daemon &
 
 # go!
+xmonad --recompile
 exec xmonad
