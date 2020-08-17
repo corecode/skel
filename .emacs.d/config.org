@@ -438,9 +438,7 @@ Reduce modeline clutter
      ((region-active-p) (swiper-isearch-backward (buffer-substring (region-beginning) (region-end))))
      (p (swiper-isearch-thing-at-point))
      (t (swiper-isearch-backward))))
-  :bind (("C-s" . swiper-isearch-dwim)
-         ("C-r" . swiper-isearch-dwim-backward)
-         ("M-s s" . swiper-dwim)
+  :bind (("M-s s" . swiper-dwim)
          ("M-s M-s" . swiper-dwim)
          :map swiper-map
          ;("C-s" . ivy-next-line-or-history)
@@ -646,8 +644,8 @@ M-x compile.
          ("C-S-n" . (lambda () (interactive) (next-line 5)))
          ("C-S-p" . (lambda () (interactive) (previous-line 5)))
 
-         ;; ("C-s" . isearch-forward-use-region)
-         ;; ("C-r" . isearch-backward-use-region)
+         ("C-s" . isearch-forward-use-region)
+         ("C-r" . isearch-backward-use-region)
 
          ("C-S-k" . kill-whole-line)
          ("C-w" . kill-region-or-backward-word)
@@ -698,7 +696,8 @@ might be bad."
 * Text editing
 ** Indent defaults
 #+begin_src emacs-lisp
-(global-set-key (kbd "RET") 'reindent-then-newline-and-indent)
+;(global-set-key (kbd "RET") 'reindent-then-newline-and-indent)
+(electric-indent-mode 1)
 
 ;; default to indent 8, only use tabs in certain modes
 (setq-default standard-indent 8
@@ -912,9 +911,7 @@ string).  It returns t if a new completion is found, nil otherwise."
 ** Completions: company-mode
 #+begin_src emacs-lisp
 (use-package company
-  :diminish
-  :config
-  (global-company-mode))
+)
 #+end_src
 
 * Modes
@@ -947,6 +944,8 @@ string).  It returns t if a new completion is found, nil otherwise."
             ("<S-right>")))
 
 (require 'org-tempo)
+
+(use-package org-clock-csv)
 #+end_src
 
 ** dired
@@ -997,6 +996,17 @@ string).  It returns t if a new completion is found, nil otherwise."
               ("C-a" . dired-back-to-start-of-files)
               ([remap beginning-of-buffer] . dired-back-to-top)
               ([remap end-of-buffer] . dired-jump-to-bottom)))
+#+end_src
+
+** yaml
+#+begin_src emacs-lisp
+(use-package yaml-mode)
+#+end_src
+
+** asciidoc
+#+begin_src emacs-lisp
+(use-package adoc-mode
+  :mode "\\.adoc\\'")
 #+end_src
 
 ** git / magit
@@ -1158,20 +1168,66 @@ string).  It returns t if a new completion is found, nil otherwise."
   (make-local-variable 'scroll-conservatively)
   (setq scroll-conservatively 5))
 
-(setq-default erc-ignore-list '( "evilbetty" "ohsix" "flyback" "mkad" "@ns.nurlon.be" "Johnsen" "dongs" "John___" "Mittens" "cutebutpsycho*" "moriarty" "jammi" "rpifan" "promach*" "Corvus*" "Haohmaru*"))
+(setq-default erc-ignore-list
+              '("evilbetty"
+                "ohsix"
+                "flyback"
+                "mkad"
+                "@ns.nurlon.be"
+                "Johnsen"
+                "dongs"
+                "John___"
+                "Mittens"
+                "cutebutpsycho*"
+                "moriarty"
+                "jammi"
+                "rpifan"
+                "promach*"
+                "Corvus*"
+                "Haohmaru*"
+                "linux_probe"
+                "\\^7heo"
+                "INFINITY@*"
+                "zap0"
+                "nickromancer"
+                "password4"
+                "fenirskunk"
+                "Mangy_Dog"
+                "jaggz"
+                "Jan-"
+                "____GOD____"
+                "intranick"
+                "zhanx"
+                "password2"
+                "flav0r"
+                "PaulWay*"
+                "ronox"
+                ))
 
 (add-hook 'erc-mode-hook
           (lambda () (subword-mode 0)))
 #+end_src
 
+** pkgbuild
+#+begin_src emacs-lisp
+(use-package pkgbuild-mode)
+#+end_src
+
 * Languages
+** flycheck
+#+begin_src emacs-lisp
+(use-package flycheck
+  :init (global-flycheck-mode)
+  :config
+  (setq flycheck-gnat-include-path '(".")))
+#+end_src
+
 ** paredit
 #+begin_src emacs-lisp
 (use-package paredit
   :diminish (paredit-mode . "()")
   :hook (emacs-lisp-mode . enable-paredit-mode))
 #+end_src
-
 
 ** rainbow delimiters
 #+begin_src emacs-lisp
@@ -1210,6 +1266,12 @@ string).  It returns t if a new completion is found, nil otherwise."
   (setq reftex-label-alist
         '(("compactenum" ?i "item:" nil item nil))))
 #+end_src
+
+** Markdown
+#+begin_src emacs-lisp
+(use-package markdown-mode)
+#+end_src
+
 ** Typescript
 #+begin_src emacs-lisp
 (use-package tide
@@ -1279,9 +1341,32 @@ string).  It returns t if a new completion is found, nil otherwise."
 (define-key c-mode-base-map (kbd "M-j") nil)
 #+end_src
 
+** Ada
+#+begin_src emacs-lisp
+(use-package ada-mode
+  :init
+  (assoc-delete-all 'ada-mode package--builtins)
+  (assoc-delete-all 'ada-mode package--builtin-versions)
+  :pin gnu)
+(use-package ada-ref-man
+  :no-require t)
+#+end_src
+** Verilog
+#+begin_src emacs-lisp
+(use-package verilog-mode
+  :config
+  (unbind-key "C-;" verilog-mode-map)
+)
+#+end_src
+
 ** Python
 #+begin_src emacs-lisp
-(use-package python-mode)
+(use-package elpy
+  :ensure t
+  :init
+  (elpy-enable)
+  :bind (("RET" . 'newline-and-indent)))
+
 (use-package pydoc)
 #+end_src
 
@@ -1290,6 +1375,15 @@ string).  It returns t if a new completion is found, nil otherwise."
 (use-package yari)
 #+end_src
 
+** CMake
+#+begin_src emacs-lisp
+(use-package cmake-mode)
+#+end_src
+
+** Dockerfile
+#+begin_src emacs-lisp
+(use-package dockerfile-mode)
+#+end_src
 
 * Desktop & Server
 ** Save desktop
