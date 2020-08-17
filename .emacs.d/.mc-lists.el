@@ -13,7 +13,9 @@
         c-electric-slash
         c-electric-star
         c-indent-line-or-region
+        counsel-M-x
         delete-horizontal-space
+        downcase-region
         electric-verilog-colon
         electric-verilog-semi
         electric-verilog-tab
@@ -23,6 +25,8 @@
         iedit-mode
         indent-for-tab-command
         indent-pp-sexp
+        isearch-forward-use-region
+        ivy-alt-done
         js2-end-of-line
         jump-char-forward
         jump-char-process-char
@@ -60,6 +64,7 @@
 (setq mc/cmds-to-run-once
       '(
         ace-jump-mode
+        counsel-find-file
         handle-switch-frame
         iedit-switch-to-mc-mode
         info
