@@ -518,18 +518,18 @@ Reduce modeline clutter
 ** Compile
 #+begin_src emacs-lisp
 (defun compile-again (pfx)
+  (interactive "P")
   """Run the same compile as the last time.
 
 If there was no last time, or there is a prefix argument, this acts like
 M-x compile.
 """
- (interactive "p")
- (if (and (eq pfx 1)
-	  compilation-last-buffer)
-     (progn
-       (set-buffer compilation-last-buffer)
-       (revert-buffer t t))
-   (call-interactively 'counsel-compile)))
+(if (and (not pfx)
+         (get-buffer "*compilation*"))
+    (progn
+      (set-buffer "*compilation*")
+      (revert-buffer t t))
+  (call-interactively 'counsel-compile)))
 
 (bind-keys ("C-c c" . compile-again))
 #+end_src
