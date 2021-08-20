@@ -1,5 +1,5 @@
 typeset -U path
-path=(~/bin ~/.local/bin $path)
+path=(~/bin ~/.local/bin ~/.cargo/bin $path)
 
 #: ${LC_CTYPE:=en_DK.UTF-8}
 #export LC_CTYPE
