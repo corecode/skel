@@ -164,8 +164,8 @@ myKeys conf = M.union (mkKeymap conf myBindings) $
     , ((myModMask .|. controlMask, xK_space), windows $ withOtherWorkspace S.greedyView)
     , ((myModMask .|. shiftMask, xK_e     ), spawn "e -c")
     , ((altMask .|. controlMask, xK_l     ), spawn "csxlock -f fixed -b '#000000' -o '#00ff00'")
-    , ((myModMask,               xK_p     ), spawn "dmenu-launch") -- %! Launch dmenu
-    , ((myModMask .|. shiftMask, xK_p     ), spawn "gmrun") -- %! Launch gmrun
+    , ((myModMask,               xK_p     ), spawn "rofi -show drun")
+    , ((myModMask .|. shiftMask, xK_p     ), spawn "rofi -show run")
     , ((myModMask              , xK_i     ), spawn "xcalib -a -i")
     , ((myModMask              , xK_c     ), kill)
     , ((myModMask .|. shiftMask, xK_space ), sendMessage NextLayout)
