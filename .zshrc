@@ -130,23 +130,36 @@ function prompt_jobs {
 
 function precmd {
 	title_generate
-	if [[ $TERM == eterm* ]]; then
-		emacs_tramp_generate
-	fi
 	prompt_generate
+	if [[ $TERM == eterm* ]]; then
+		emacs_vterm_generate
+	fi
 }
 
-function emacs_tramp_generate {
-	ansih='\eAnSiT'
+function vterm_printf {
+    if [[ -n "$TMUX" ]] && ([[ "${TERM%%-*}" = "tmux" ]] || [[ "${TERM%%-*}" = "screen" ]] ); then
+        # Tell tmux to pass the escape sequences through
+        printf "\ePtmux;\e\e]%s\007\e\\" "$1"
+    elif [[ "${TERM%%-*}" = "screen" ]]; then
+        # GNU screen (screen, screen-256color, screen-256color-bce)
+        printf "\eP\e]%s\007\e\\" "$1"
+    else
+        printf "\e]%s\e\\" "$1"
+    fi
+}
 
-	print -P "${ansih}u %n"
-	print -P "${ansih}c %/"
-	print -P "${ansih}h %M"
+function emacs_vterm_generate {
+	# ansih='\eAnSiT'
+
+	# print -P "${ansih}u %n"
+	# print -P "${ansih}c %/"
+	# print -P "${ansih}h %M"
+        PS1="$PS1$(vterm_printf "51;A$(whoami)@$(hostname):$(pwd)")"
 }
 
 function title_generate {}
 
-if [[ $TERM == (xterm|screen|rxvt)* ]]; then
+if [[ $TERM == (xterm|screen|rxvt|eterm)* ]]; then
 	function title_generate {
 		print -Pn "${title[start]}%n@%m:%~${title[end]}"
 	}
@@ -187,6 +200,8 @@ if [[ $TERM == (xterm|screen|rxvt)* ]]; then
 		print -Pn "%n@%m:%~"
 		print -n "${title[end]}"
 	}
+
+        precmd
 fi
 
 if which todo >/dev/null 2>&1; then

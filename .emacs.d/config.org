@@ -401,7 +401,7 @@ Reduce modeline clutter
 #+end_src
 
 ** Ivy, Swiper, Counsel, Amx
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC disabled
 (use-package amx)
 
 (use-package ivy
@@ -416,7 +416,7 @@ Reduce modeline clutter
 (use-package ivy-posframe
   :diminish
   :config
-  (ivy-posframe-mode 1))
+  (ivy-posframe-mode 0))
 
 (use-package swiper
   :preface
@@ -454,6 +454,187 @@ Reduce modeline clutter
          ("C-h u" . counsel-unicode-char)))
 #+END_SRC
 
+** Vertico, Consult, Orderless, Marginalia, Embark
+#+begin_src emacs-lisp
+(use-package orderless
+  :ensure t
+  :custom (completion-styles '(orderless)))
+
+(use-package vertico
+  :init (vertico-mode))
+
+;; (defun 2c-enter-dir-or-exit ()
+;;   (interactive)
+;;   (vertico-insert)
+;;   (let ((input (minibuffer-contents-no-properties)))
+;;     (unless (and minibuffer-completing-file-name
+;;                  (file-directory-p input))
+;;       (vertico-exit t))))
+
+;; (bind-key "RET" #'2c-enter-dir-or-exit vertico-map)
+
+
+(use-package consult
+  ;; Replace bindings. Lazily loaded due by `use-package'.
+  :bind (;; C-c bindings (mode-specific-map)
+         ("C-c h" . consult-history)
+         ("C-c m" . consult-mode-command)
+         ("C-c b" . consult-bookmark)
+         ("C-c k" . consult-kmacro)
+         ;; C-x bindings (ctl-x-map)
+         ("C-x f" . consult-recent-file)
+         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+         ;; Custom M-# bindings for fast register access
+         ("M-#" . consult-register-load)
+         ("M-@" . consult-register-store)          ;; orig. mark-word (unrelated)
+         ("M-'")          ;; orig. mark-word (unrelated)
+         ("C-M-#" . consult-register)
+         ;; Other custom bindings
+         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+         ("<help> a" . consult-apropos)            ;; orig. apropos-command
+         ;; M-g bindings (goto-map)
+         ("M-g e" . consult-compile-error)
+         ("M-g f" . consult-flycheck)              ;; Alternative: consult-flymake
+         ("M-g g" . consult-goto-line)             ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+         ("M-g m" . consult-mark)
+         ("M-g k" . consult-global-mark)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ;; M-s bindings (search-map)
+         ("M-s f" . consult-find)
+         ("M-s F" . consult-locate)
+         ("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s m" . consult-multi-occur)
+         ("M-s k" . consult-keep-lines)
+         ("M-s u" . consult-focus-lines)
+         ;; Isearch integration
+         ("M-s e" . consult-isearch)
+         :map isearch-mode-map
+         ("M-e" . consult-isearch)                 ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch)               ;; orig. isearch-edit-string
+         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi))           ;; needed by consult-line to detect isearch
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Optionally replace `completing-read-multiple' with an enhanced version.
+  (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
+  :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key (kbd "M-."))
+  ;; (setq consult-preview-key (list (kbd "<S-down>") (kbd "<S-up>")))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  (consult-customize
+   consult-theme
+   :preview-key '(:debounce 0.2 any)
+   consult-buffer
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-file consult--source-project-file consult--source-bookmark
+   :preview-key (kbd "M-."))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; (kbd "C-+")
+
+  ;; Optionally make narrowing help available in the minibuffer.
+  ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+  ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+  ;; Optionally configure a function which returns the project root directory.
+  ;; There are multiple reasonable alternatives to chose from.
+  ;;;; 1. project.el (project-roots)
+  (setq consult-project-root-function
+        (lambda ()
+          (when-let (project (project-current))
+            (car (project-roots project)))))
+  ;;;; 2. projectile.el (projectile-project-root)
+  ;; (autoload 'projectile-project-root "projectile")
+  ;; (setq consult-project-root-function #'projectile-project-root)
+  ;;;; 3. vc.el (vc-root-dir)
+  ;; (setq consult-project-root-function #'vc-root-dir)
+  ;;;; 4. locate-dominating-file
+  ;; (setq consult-project-root-function (lambda () (locate-dominating-file "." ".git")))
+)
+
+(use-package consult-lsp)
+
+;; Enable richer annotations using the Marginalia package
+(use-package marginalia
+  ;; Either bind `marginalia-cycle` globally or only in the minibuffer
+  :bind (:map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+
+  ;; The :init configuration is always executed (Not lazy!)
+  :init
+
+  ;; Must be in the :init section of use-package such that the mode gets
+  ;; enabled right away. Note that this forces loading the package.
+  (marginalia-mode))
+
+(use-package embark
+  :ensure t
+
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+  :init
+
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  :config
+
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :ensure t
+  :after (embark consult)
+  :demand t ; only necessary if you have the hook below
+  ;; if you want to have consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+#+end_src
+
 ** Show available keys
 #+BEGIN_SRC emacs-lisp
 (use-package which-key
@@ -469,25 +650,24 @@ Reduce modeline clutter
   :config
   (setq aw-scope 'frame)
   (ace-window-display-mode)
-  (defun switch-buffer-or-window (p)
-    (interactive "P")
-    (if p
-        (counsel-switch-buffer)
-      (ivy-read "Switch to buffer: " #'internal-complete-buffer
-            :keymap ivy-switch-buffer-map
-            :preselect (buffer-name (other-buffer (current-buffer)))
-            :matcher #'ivy--switch-buffer-matcher
-            :caller #'switch-buffer-or-window
-            :action (lambda (buffer)
-                      (let* ((win-list (aw-window-list))
-                             (matched-windows (cl-remove-if-not (lambda (w) (string= buffer (buffer-name (window-buffer w)))) win-list))
-                             (ignored-windows (cl-remove-if (lambda (w) (string= buffer (buffer-name (window-buffer w)))) win-list))
-                             (aw-ignored-buffers (mapcar (lambda (w) (buffer-name (window-buffer w))) ignored-windows)))
-                        (if matched-windows
-                            (call-interactively 'ace-window)
-                          (ivy--switch-buffer-action buffer)))))))
-  :bind (("C-x o" . ace-window)
-         ("C-x b" . switch-buffer-or-window)))
+  ;; (defun switch-buffer-or-window (p)
+  ;;   (interactive "P")
+  ;;   (if p
+  ;;       (consult-buffer)
+  ;;     (ivy-read "Switch to buffer: " #'internal-complete-buffer
+  ;;           :keymap ivy-switch-buffer-map
+  ;;           :preselect (buffer-name (other-buffer (current-buffer)))
+  ;;           :matcher #'ivy--switch-buffer-matcher
+  ;;           :caller #'switch-buffer-or-window
+  ;;           :action (lambda (buffer)
+  ;;                     (let* ((win-list (aw-window-list))
+  ;;                            (matched-windows (cl-remove-if-not (lambda (w) (string= buffer (buffer-name (window-buffer w)))) win-list))
+  ;;                            (ignored-windows (cl-remove-if (lambda (w) (string= buffer (buffer-name (window-buffer w)))) win-list))
+  ;;                            (aw-ignored-buffers (mapcar (lambda (w) (buffer-name (window-buffer w))) ignored-windows)))
+  ;;                       (if matched-windows
+  ;;                           (call-interactively 'ace-window)
+  ;;                         (ivy--switch-buffer-action buffer)))))))
+  :bind (("C-x o" . ace-window)))
 #+end_src
 
 ** Windmove
@@ -529,7 +709,7 @@ M-x compile.
     (progn
       (set-buffer "*compilation*")
       (revert-buffer t t))
-  (call-interactively 'counsel-compile)))
+  (call-interactively 'compile)))
 
 (bind-keys ("C-c c" . compile-again))
 #+end_src
@@ -884,8 +1064,7 @@ string).  It returns t if a new completion is found, nil otherwise."
     (let ((case-fold-search nil))
       (hippie-expand nil)))
 
-  :bind (("M-/" . hippie-expand-no-case-fold)
-         ("M-?" . hippie-expand-lines)))
+  :bind (("M-/" . hippie-expand-no-case-fold)))
 #+end_src
 
 ** Flyspell in text buffers
@@ -896,6 +1075,7 @@ string).  It returns t if a new completion is found, nil otherwise."
   :hook (prog-mode . flyspell-prog-mode)
   :bind (:map flyspell-mode-map
               ("C-;")
+              ("C-.")
               ("C-c C-." . flyspell-auto-correct-previous-word)))
 #+end_src
 
@@ -908,10 +1088,26 @@ string).  It returns t if a new completion is found, nil otherwise."
   :hook text-mode)
 #+END_SRC
 
-** Completions: company-mode
+** Completions: company-mode & yasnippet
 #+begin_src emacs-lisp
 (use-package company
-)
+  :ensure
+  :custom
+  (company-idle-delay 0.5) ;; how long to wait until popup
+  ;; (company-begin-commands nil) ;; uncomment to disable popup
+  :bind
+  (:map company-active-map
+	      ("C-n". company-select-next)
+	      ("C-p". company-select-previous)
+	      ("M-<". company-select-first)
+	      ("M->". company-select-last)))
+
+(use-package yasnippet
+  :ensure
+  :config
+  (yas-reload-all)
+  (add-hook 'prog-mode-hook 'yas-minor-mode)
+  (add-hook 'text-mode-hook 'yas-minor-mode))
 #+end_src
 
 * Modes
@@ -1061,6 +1257,29 @@ string).  It returns t if a new completion is found, nil otherwise."
 
 ** term
 #+begin_src emacs-lisp
+(use-package eterm-256color
+  :ensure t)
+
+(use-package vterm
+  :ensure t
+  :config
+  (setq vterm-term-environment-variable "eterm-color")
+  (setq vterm-buffer-name-string "term %s")
+  (setq vterm-max-scrollback 100000)
+  (setq vterm-always-compile-module 't)
+  (defun vterm-new ()
+    (interactive)
+    (vterm 't))
+  :bind (("C-t" . vterm-new)
+         :map vterm-mode-map
+         ("<C-backspace>" . (lambda () (interactive) (vterm-send-key (kbd "C-w"))))
+         ("C-t" . vterm-new)))
+
+;; remove SHLVL.  For any shell, we're the top level
+(setenv "SHLVL" nil)
+#+end_src
+
+#+begin_src disabled
 (use-package term)
 (use-package multi-term
   :bind ("C-t" . multi-term))
@@ -1168,41 +1387,58 @@ string).  It returns t if a new completion is found, nil otherwise."
   (make-local-variable 'scroll-conservatively)
   (setq scroll-conservatively 5))
 
-(setq-default erc-ignore-list
-              '("evilbetty"
-                "ohsix"
-                "flyback"
-                "mkad"
-                "@ns.nurlon.be"
-                "Johnsen"
-                "dongs"
-                "John___"
-                "Mittens"
-                "cutebutpsycho*"
-                "moriarty"
-                "jammi"
-                "rpifan"
-                "promach*"
-                "Corvus*"
-                "Haohmaru*"
-                "linux_probe"
-                "\\^7heo"
-                "INFINITY@*"
-                "zap0"
-                "nickromancer"
-                "password4"
-                "fenirskunk"
-                "Mangy_Dog"
-                "jaggz"
-                "Jan-"
-                "____GOD____"
-                "intranick"
-                "zhanx"
-                "password2"
-                "flav0r"
-                "PaulWay*"
-                "ronox"
-                ))
+(setq erc-ignore-list
+      '())
+
+(define-advice erc-server-connect (:around (oldfn server port buffer) "2c-strip-server-slug")
+  (let ((unslugged-server (progn
+                          (string-match "[^@]*$" server)
+                          (match-string 0 server))))
+    (message "unslug: %s -> %s" server unslugged-server)
+    (funcall oldfn unslugged-server port buffer)))
+
+(defun 2c-erc-generate-new-buffer-name (server port target)
+  "Create a new buffer name based on the arguments.  (fix from 28)"
+  (when (numberp port) (setq port (number-to-string port)))
+  (let* ((buf-name (or target
+                       (let ((name (concat server ":" port)))
+                         (when (> (length name) 1)
+                           name))
+                       ;; This fallback should in fact never happen.
+                       "*erc-server-buffer*"))
+         (full-buf-name (concat buf-name "/" server))
+         (candidate (if target full-buf-name buf-name))
+         buffer-name)
+    ;; Reuse existing buffers, but not if the buffer is a connected server
+    ;; buffer and not if its associated with a different server than the
+    ;; current ERC buffer.
+    ;; If buf-name is taken by a different connection (or by something !erc)
+    ;; then see if "buf-name/server" meets the same criteria.
+    (if (and erc-reuse-buffers
+             (or (not (get-buffer candidate))
+                 ;; Looking for a server buffer, so there's no target.
+                 (and (not target)
+                      (with-current-buffer (get-buffer candidate)
+                        (and (erc-server-buffer-p)
+                             (not (erc-server-process-alive)))))
+                 ;; Channel buffer; check that it's from the right server.
+                 (and target
+                      (with-current-buffer (get-buffer candidate)
+                        (and (string= erc-session-server server)
+                             (erc-port-equal erc-session-port port))))))
+        (setq buffer-name candidate)
+      (when (and (not buffer-name) (get-buffer buf-name) erc-reuse-buffers)
+        ;; A new buffer will be created with the name buf-name/server, rename
+        ;; the existing name-duplicated buffer with the same format as well.
+        (with-current-buffer (get-buffer buf-name)
+          (when (derived-mode-p 'erc-mode) ; ensure it's an erc buffer
+            (rename-buffer
+             (concat buf-name "/" (or erc-session-server erc-server-announced-name)))))))
+    ;; If buffer-name is unset, neither candidate worked out for us,
+    ;; fallback to the old <N> uniquification method:
+    (or buffer-name (generate-new-buffer-name full-buf-name))))
+
+(advice-add 'erc-generate-new-buffer-name :override #'2c-erc-generate-new-buffer-name)
 
 (add-hook 'erc-mode-hook
           (lambda () (subword-mode 0)))
@@ -1214,12 +1450,45 @@ string).  It returns t if a new completion is found, nil otherwise."
 #+end_src
 
 * Languages
+** LSP
+#+begin_src emacs-lisp
+(use-package lsp-mode
+  :ensure
+  :commands lsp
+  :init
+  ;;(setq lsp-keymap-prefix "C-c l")
+  :custom
+  ;; what to use when checking on-save. "check" is default, I prefer clippy
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-eldoc-render-all nil)
+  (lsp-idle-delay 0.6)
+  (lsp-rust-analyzer-server-display-inlay-hints t)
+  :hook ((python-mode . lsp-deferred)
+         (rustic-mode . lsp-deferred)
+         ;; if you want which-key integration
+         (lsp-mode . lsp-enable-which-key-integration)
+         (lsp-mode . lsp-ui-mode)))
+
+(use-package lsp-ui
+  :ensure
+  :commands lsp-ui-mode
+  :custom
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-sideline-show-hover nil))
+
+(use-package dap-mode)
+;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+
+#+end_src
 ** flycheck
 #+begin_src emacs-lisp
 (use-package flycheck
   :init (global-flycheck-mode)
   :config
-  (setq flycheck-gnat-include-path '(".")))
+  (setq flycheck-gnat-include-path '("."))
+  :hook
+  (c-mode . (lambda () (setq flycheck-clang-language-standard "gnu11")))
+  (c++-mode . (lambda () (setq flycheck-clang-language-standard "c++17"))))
 #+end_src
 
 ** paredit
@@ -1308,6 +1577,14 @@ string).  It returns t if a new completion is found, nil otherwise."
 
 ** C & C-like
 #+begin_src emacs-lisp
+(defun 2c-lineup-topmost-intro-cont (langelem)
+  (save-excursion
+    (beginning-of-line)
+    (c-forward-syntactic-ws)
+    (if (eq (char-after) ?\()
+        (1- c-basic-offset)
+      (c-lineup-topmost-intro-cont langelem))))
+
 (c-add-style "2c"
              '("bsd"
                (c-hanging-braces-alist (brace-list-open)
@@ -1322,7 +1599,9 @@ string).  It returns t if a new completion is found, nil otherwise."
                                        (inexpr-class-open after)
                                        (inexpr-class-close before)
                                        (class-open after))
-               (c-offsets-alist (label . [0]))
+               (c-offsets-alist (label . [0])
+                                (topmost-intro-cont . 2c-lineup-topmost-intro-cont)
+                                (func-decl-cont . (add + + +)))
                (c-doc-comment-style gtkdoc)))
 
 (c-add-style "2c-c++"
@@ -1375,6 +1654,11 @@ string).  It returns t if a new completion is found, nil otherwise."
 (use-package yari)
 #+end_src
 
+** JSON
+#+begin_src emacs-lisp
+(use-package json-mode)
+#+end_src
+
 ** CMake
 #+begin_src emacs-lisp
 (use-package cmake-mode)
@@ -1384,7 +1668,45 @@ string).  It returns t if a new completion is found, nil otherwise."
 #+begin_src emacs-lisp
 (use-package dockerfile-mode)
 #+end_src
+** Dart/Flutter
+#+begin_src emacs-lisp
+(use-package dart-mode)
+(use-package lsp-dart
+  :hook (dart-mode . lsp))
+#+end_src
 
+** Rust
+#+begin_src emacs-lisp
+(use-package rustic
+  :ensure
+  :bind (:map rustic-mode-map
+              ("M-j" . lsp-ui-imenu)
+              ("M-." . lsp-ui-peek-find-definitions)
+              ("M-?" . lsp-ui-peek-find-references)
+              ("C-c C-c l" . flycheck-list-errors)
+              ("C-c C-c a" . lsp-execute-code-action)
+              ("C-c C-c r" . lsp-rename)
+              ("C-c C-c q" . lsp-workspace-restart)
+              ("C-c C-c Q" . lsp-workspace-shutdown)
+              ("C-c C-c s" . lsp-rust-analyzer-status))
+  :config
+  ;; uncomment for less flashiness
+  ;; (setq lsp-eldoc-hook nil)
+  ;; (setq lsp-enable-symbol-highlighting nil)
+  ;; (setq lsp-signature-auto-activate nil)
+
+  ;; comment to disable rustfmt on save
+  (setq rustic-format-on-save t)
+  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+
+(defun rk/rustic-mode-hook ()
+  ;; so that run C-c C-c C-r works without having to confirm, but don't try to
+  ;; save rust buffers that are not file visiting. Once
+  ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
+  ;; no longer be necessary.
+  (when buffer-file-name
+    (setq-local buffer-save-without-query t)))
+#+end_src
 * Desktop & Server
 ** Save desktop
 #+begin_src emacs-lisp

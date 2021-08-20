@@ -36,3 +36,6 @@ ac-comphist.dat
 .emacs.desktop*
 *-nocommit.el
 semanticdb
+.*
+amx-items
+srecode-map.el
