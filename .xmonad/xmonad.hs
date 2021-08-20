@@ -154,9 +154,7 @@ myModMask = mod4Mask
 altMask = mod1Mask
 
 myBindings =
-  [ ("<XF86AudioMute>", spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
-  , ("<XF86AudioRaiseVolume>", spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%")
-  , ("<XF86AudioLowerVolume>", spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
+  [
   ]
 
 myKeys conf = M.union (mkKeymap conf myBindings) $

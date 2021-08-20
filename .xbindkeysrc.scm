@@ -32,8 +32,7 @@
 ;; Uncomment the lines below if you want to use them.
 ;; To dissable them, call the functions with #f
 
-(use-modules (ice-9 popen) (ice-9 rdelim))
-
+(use-modules (ice-9 popen) (ice-9 rdelim) (ice-9 format))
 ;;;;EXTRA FUNCTIONS: Enable numlock, scrolllock or capslock usage
 ;;(set-numlock! #t)
 ;;(set-scrolllock! #t)
@@ -170,6 +169,7 @@
            (newval (modify val))
            (frac (/ newval 100))
            (frac (- 1 (expt (- 1 frac) 2.4))))
+      (format #t "brightness set to ~a" newval)
       (system* "xbacklight" "-set" (number->string newval))
       ;(system* "xrandr" "--output" "HDMI2" "--brightness" (number->string frac))
       )))
@@ -177,18 +177,40 @@
 (xbindkey-function
  "XF86MonBrightnessDown"
  (brightness-adjust (lambda (val)
-                      (let* ((val (- val 10)))
-                        (if (< val 0)
-                            0
-                            val)))))
+                      (let* ((delta (* val (/ 0.2 (* (+ 1 0.2)))))
+                             (delta (max delta 1))
+                             (val (- val delta))
+                             (val (max val 0)))
+                        (round val)))))
 
 (xbindkey-function
  "XF86MonBrightnessUp"
  (brightness-adjust (lambda (val)
-                      (let* ((val (+ val 10)))
-                        (if (> val 100)
-                            100
-                            val)))))
+                      (let* ((delta (* val 0.2))
+                             (delta (max delta 1))
+                             (val (+ val delta))
+                             (val (min val 100)))
+                        (round val)))))
+
+(xbindkey
+ "XF86AudioMute"
+ "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+
+(xbindkey
+ "XF86AudioRaiseVolume"
+ "pactl set-sink-volume @DEFAULT_SINK@ +10%")
+
+(xbindkey
+ "XF86AudioLowerVolume"
+ "pactl set-sink-volume @DEFAULT_SINK@ -10%")
+
+(xbindkey
+ "XF86AudioPlay"
+ "playerctl play-pause")
+
+(xbindkey
+ "XF86AudioPause"
+ "playerctl play-pause")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; End of xbindkeys guile configuration ;;

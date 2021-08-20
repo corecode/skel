@@ -110,6 +110,9 @@ xscreensaver -nosplash &
 # automatic mount + popup
 thunar --daemon &
 
+# keep track of audio players
+playerctld daemon
+
 # go!
 xmonad --recompile
 exec xmonad
