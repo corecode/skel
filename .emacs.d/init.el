@@ -4,10 +4,10 @@
 ;; need to update org-mode instead of using the packaged version.
 
 (add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
+             '("melpa" . "https://melpa.org/packages/") t)
 
 (add-to-list 'package-archives
-             '("org" . "http://orgmode.org/elpa/") t)
+             '("org" . "https://orgmode.org/elpa/") t)
 
 ;; temp hack to allow emacs to fetch https from gnu.org
 (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
@@ -29,3 +29,4 @@
   :pin org)
 
 (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
+(put 'upcase-region 'disabled nil)
