@@ -16,6 +16,7 @@
         counsel-M-x
         delete-horizontal-space
         downcase-region
+        electric-newline-and-maybe-indent
         electric-verilog-colon
         electric-verilog-semi
         electric-verilog-tab
