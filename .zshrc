@@ -129,11 +129,10 @@ function prompt_jobs {
 }
 
 function precmd {
+        # keep these before prompt so that vterm doesn't get confused about how long the prompt line is
 	title_generate
+	emacs_vterm_generate
 	prompt_generate
-	if [[ $TERM == eterm* ]]; then
-		emacs_vterm_generate
-	fi
 }
 
 function vterm_printf {
@@ -154,7 +153,7 @@ function emacs_vterm_generate {
 	# print -P "${ansih}u %n"
 	# print -P "${ansih}c %/"
 	# print -P "${ansih}h %M"
-        PS1="$PS1$(vterm_printf "51;A$(whoami)@$(hostname):$(pwd)")"
+        vterm_printf "51;A$(whoami)@$(hostname):$(pwd)"
 }
 
 function title_generate {}
