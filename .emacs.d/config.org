@@ -1118,7 +1118,7 @@ string).  It returns t if a new completion is found, nil otherwise."
 ** org
 #+begin_src emacs-lisp
 (use-package org
-  :pin org
+  :pin gnu
   :config
   (setq org-src-fontify-natively t
         org-src-window-setup 'split-window-below

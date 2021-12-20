@@ -6,9 +6,6 @@
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/") t)
 
-(add-to-list 'package-archives
-             '("org" . "https://orgmode.org/elpa/") t)
-
 ;; temp hack to allow emacs to fetch https from gnu.org
 (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 
@@ -25,8 +22,8 @@
 (require 'use-package)
 
 (use-package org
-  :ensure org-plus-contrib
-  :pin org)
+  :ensure org
+  :pin gnu)
 
 (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
 (put 'upcase-region 'disabled nil)
