@@ -83,7 +83,13 @@
 #+begin_src emacs-lisp
 (setq default-frame-alist (assq-delete-all 'font default-frame-alist))
 (setq default-frame-alist (delq (assoc 'font default-frame-alist) default-frame-alist))
-(add-to-list 'default-frame-alist '(font . "Liberation Mono-10:weight=normal"))
+(cond ((eq (window-system) 'x)
+       (add-to-list 'default-frame-alist '(font . "Liberation Mono-10:weight=normal")))
+      ((eq (window-system) 'ns)
+       (add-to-list 'default-frame-alist '(font . "Menlo"))
+       (add-to-list 'default-frame-alist '(fontsize . 13))
+       (add-to-list 'default-frame-alist '(ns-appearance . 'dark))))
+
 #+end_src
 
 #+begin_src emacs-lisp
@@ -151,7 +157,13 @@
 
 ** use fancy mode-line
 #+begin_src emacs-lisp
-(use-package powerline)
+(use-package powerline
+  :config
+  ;; advise this function so that it doesn't produce a NaN
+  ;; when using color "darkred"
+  (advice-add 'pl/color-xyz-to-apple-rgb :filter-return
+              (lambda (rgb)
+                (mapcar (lambda (e) (if (isnan e) 0.0 e)) rgb))))
 (powerline-default-theme)
 #+end_src
 
@@ -387,6 +399,14 @@ Reduce modeline clutter
   ('error))
 #+end_src
 * UI navigation
+** OSX config
+#+begin_src emacs-lisp
+(when (eq (window-system) 'ns)
+  (use-package emacs
+    :config
+    (setq mac-command-modifier 'meta)
+    (setq mac-option-modifier 'super)))
+#+end_src
 ** Do not easily exit emacs
 #+begin_src emacs-lisp
 (global-unset-key (kbd "C-x C-c"))
