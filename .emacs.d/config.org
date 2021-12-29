@@ -1527,6 +1527,13 @@ string).  It returns t if a new completion is found, nil otherwise."
 #+end_src
 
 * Languages
+** Debugging
+#+begin_src emacs-lisp
+(use-package gud
+  :config
+  (setq gud-chdir-before-run nil))
+#+end_src
+
 ** LSP
 #+begin_src emacs-lisp
 (use-package lsp-mode
