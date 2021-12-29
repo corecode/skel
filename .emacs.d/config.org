@@ -1349,7 +1349,8 @@ string).  It returns t if a new completion is found, nil otherwise."
   :bind (("C-t" . vterm-new)
          :map vterm-mode-map
          ("<C-backspace>" . (lambda () (interactive) (vterm-send-key (kbd "C-w"))))
-         ("C-t" . vterm-new)))
+         ("C-t" . vterm-send-C-t)
+         ("C-x C-t" . vterm-new)))
 
 ;; remove SHLVL.  For any shell, we're the top level
 (setenv "SHLVL" nil)
