@@ -1760,7 +1760,19 @@ string).  It returns t if a new completion is found, nil otherwise."
 #+begin_src emacs-lisp
 (use-package dart-mode)
 (use-package lsp-dart
-  :hook (dart-mode . lsp))
+  :hook (dart-mode . lsp-deferred)
+  :bind (:map dart-mode-map
+	      ("C-c c" . lsp-dart-run-all-tests))
+  :config
+  (setq lsp-dart-test-tree-on-run nil)
+  (advice-add 'lsp-dart-test-output--handle-run-started :after
+	      (lambda (&rest r)
+		(setq lsp-dart-test-output--first-log nil)))
+  (advice-add 'lsp-dart-test-output--get-buffer-create :filter-return
+	      (lambda (test-buffer)
+		(with-current-buffer test-buffer
+		  (compilation-minor-mode t))
+		test-buffer)))
 #+end_src
 
 ** Rust
