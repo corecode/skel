@@ -1705,7 +1705,7 @@ string).  It returns t if a new completion is found, nil otherwise."
         (c++-mode . "2c-c++")
         (other . "2c")))
 
-(define-key c-mode-base-map (kbd "<return>") 'c-context-line-break)
+(define-key c-mode-base-map (kbd "RET") 'c-context-line-break)
 (define-key c-mode-base-map (kbd "M-j") nil)
 #+end_src
 
