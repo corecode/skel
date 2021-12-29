@@ -208,6 +208,16 @@
  "XF86AudioPlay"
  "playerctl play-pause")
 
+;; Lenovo Laptop Fn+F12 "Favorites"
+(xbindkey
+ '("m:0x0" "c:164")
+ "playerctl play-pause")
+
+;; Sony Headphones
+(xbindkey
+ '("m:0x0" "c:208")
+ "playerctl play-pause")
+
 (xbindkey
  "XF86AudioPause"
  "playerctl play-pause")
