@@ -39,3 +39,5 @@ semanticdb
 .*
 amx-items
 srecode-map.el
+quelpa
+elpy

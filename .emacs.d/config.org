@@ -47,6 +47,12 @@
 #+begin_src emacs-lisp
 (defun package--save-selected-packages (&rest opt) nil)
 #+end_src
+** Quelpa
+#+begin_src emacs-lisp
+(use-package quelpa)
+(use-package quelpa-use-package
+  :config (setq quelpa-use-package-inhibit-loading-quelpa t))
+#+end_src
 * Tools used in scripts
 #+begin_src emacs-lisp
 (use-package dash)
@@ -1640,6 +1646,11 @@ string).  It returns t if a new completion is found, nil otherwise."
 (define-key c-mode-base-map (kbd "M-j") nil)
 #+end_src
 
+** TODO Arduino
+#+begin_src emacs-lisp
+(use-package arduino-mode
+  :quelpa (arduino-mode :fetcher github :repo "Unigurd/arduino-mode"))
+#+end_src
 ** Ada
 #+begin_src emacs-lisp
 (use-package ada-mode
