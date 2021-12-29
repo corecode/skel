@@ -25,3 +25,7 @@ fi
 [[ -f $HOME/.rvm/environments/default ]] && source $HOME/.rvm/environments/default
 
 export GOPATH=$HOME/go
+
+if [[ -r ~/.cargo/env ]]; then
+    source ~/.cargo/env
+fi
