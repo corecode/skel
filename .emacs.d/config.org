@@ -1556,12 +1556,17 @@ string).  It returns t if a new completion is found, nil otherwise."
 (use-package lsp-ui
   :ensure
   :commands lsp-ui-mode
+  :config
+  (setq lsp-ui-sideline-show-code-actions nil)
   :custom
   (lsp-ui-peek-always-show t)
   (lsp-ui-sideline-show-hover nil))
 
 (use-package dap-mode)
 ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+
+(use-package lsp-pyright
+  :ensure t)
 
 #+end_src
 ** flycheck
