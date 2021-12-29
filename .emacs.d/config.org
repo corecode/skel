@@ -1547,11 +1547,16 @@ string).  It returns t if a new completion is found, nil otherwise."
   (lsp-eldoc-render-all nil)
   (lsp-idle-delay 0.6)
   (lsp-rust-analyzer-server-display-inlay-hints t)
+  :config
+  (defun 2c-lsp-format-on-save ()
+    (if (bound-and-true-p lsp-mode)
+	(lsp-format-buffer)))
   :hook ((python-mode . lsp-deferred)
          (rustic-mode . lsp-deferred)
          ;; if you want which-key integration
          (lsp-mode . lsp-enable-which-key-integration)
-         (lsp-mode . lsp-ui-mode)))
+         (lsp-mode . lsp-ui-mode)
+	 (before-save . 2c-lsp-format-on-save)))
 
 (use-package lsp-ui
   :ensure
