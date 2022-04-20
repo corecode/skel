@@ -89,13 +89,13 @@
 #+begin_src emacs-lisp
 (setq default-frame-alist (assq-delete-all 'font default-frame-alist))
 (setq default-frame-alist (delq (assoc 'font default-frame-alist) default-frame-alist))
-(cond ((eq (window-system) 'x)
-       (add-to-list 'default-frame-alist '(font . "Liberation Mono-10:weight=normal")))
-      ((eq (window-system) 'ns)
+(cond ((eq system-type 'darwin)
        (add-to-list 'default-frame-alist '(font . "Menlo"))
        (add-to-list 'default-frame-alist '(fontsize . 13))
-       (add-to-list 'default-frame-alist '(ns-appearance . 'dark))))
-
+       (add-to-list 'default-frame-alist '(ns-appearance . 'dark)))
+      (t
+       (add-to-list 'default-frame-alist '(font . "Liberation Mono-10:weight=normal"))))
+(message "default-frame-alist %s" default-frame-alist)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -322,7 +322,11 @@ Reduce modeline clutter
 ** Represent undo-history as an actual tree (visualize with C-x u)
 #+BEGIN_SRC emacs-lisp
 (setq undo-tree-mode-lighter "")
-(use-package undo-tree)
+(use-package undo-tree
+  :config
+  (setq undo-tree-history-directory-alist
+	`(("." . ,(expand-file-name
+                   (concat dotfiles-dir "undo-tree"))))))
 (global-undo-tree-mode)
 #+END_SRC
 
@@ -1574,6 +1578,12 @@ string).  It returns t if a new completion is found, nil otherwise."
   :ensure t)
 
 #+end_src
+** cov
+#+begin_src emacs-lisp
+(use-package cov
+  :ensure nil
+  :load-path "~/devel/3rdparty/cov")
+#+end_src
 ** flycheck
 #+begin_src emacs-lisp
 (use-package flycheck
@@ -1765,6 +1775,8 @@ string).  It returns t if a new completion is found, nil otherwise."
 #+begin_src emacs-lisp
 (use-package dart-mode)
 (use-package lsp-dart
+  :ensure nil
+  :load-path "~/devel/3rdparty/lsp-dart"
   :hook (dart-mode . lsp-deferred)
   :bind (:map dart-mode-map
 	      ("C-c c" . lsp-dart-run-all-tests))
@@ -1777,7 +1789,32 @@ string).  It returns t if a new completion is found, nil otherwise."
 	      (lambda (test-buffer)
 		(with-current-buffer test-buffer
 		  (compilation-minor-mode t))
-		test-buffer)))
+		test-buffer))
+  (defun 2c-set-dart-lcov-file ()
+    (if (and (derived-mode-p 'dart-mode)
+	     (lsp-workspace-root))
+	(let* ((root (lsp-workspace-root))
+	       (relative-path "coverage/lcov.info")
+	       (lcov-file (concat (file-name-as-directory root)
+				  relative-path)))
+	  (when (file-exists-p lcov-file)
+	      (set (make-local-variable 'cov-lcov-file-name)
+		   lcov-file)
+	      (message "lcov set to %s" cov-lcov-file-name)))))
+  (defun 2c-cov-lcov-fix-paths (cov-data)
+    (cl-loop for (srcfile . src-cov-data) in cov-data
+	     collect
+	     (progn
+	       (when (not (file-exists-p srcfile))
+		 (let* ((lcov-dir (file-name-directory cov-coverage-file))
+			(relfile (string-remove-prefix lcov-dir srcfile))
+			(projroot (string-remove-suffix "coverage" (directory-file-name lcov-dir)))
+			(projfile (concat projroot relfile)))
+		   (when (file-exists-p projfile)
+		     (setq srcfile projfile))))
+	       (cons srcfile src-cov-data))))
+  (advice-add 'cov--lcov-parse :filter-return #'2c-cov-lcov-fix-paths)
+  (add-hook 'lsp-mode-hook #'2c-set-dart-lcov-file))
 #+end_src
 
 ** Rust
@@ -1785,7 +1822,8 @@ string).  It returns t if a new completion is found, nil otherwise."
 (use-package rustic
   :ensure
   :bind (:map rustic-mode-map
-              ("M-j" . lsp-ui-imenu)
+              ;;("M-j" . lsp-ui-imenu)
+              ("M-j")
               ("M-." . lsp-ui-peek-find-definitions)
               ("M-?" . lsp-ui-peek-find-references)
               ("C-c C-c l" . flycheck-list-errors)
@@ -1810,7 +1848,10 @@ string).  It returns t if a new completion is found, nil otherwise."
   ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
   ;; no longer be necessary.
   (when buffer-file-name
-    (setq-local buffer-save-without-query t)))
+    (setq-local buffer-save-without-query t))
+  (setq indent-tabs-mode nil)
+  (setq lsp-ui-sideline-show-code-actions t)
+  (setq lsp-rust-analyzer-server-display-inlay-hints t))
 #+end_src
 * Desktop & Server
 ** Save desktop

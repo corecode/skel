@@ -22,6 +22,7 @@
 	electric-verilog-semi
 	electric-verilog-tab
 	electric-verilog-tick
+	end-of-buffer
 	forward-sexp
 	hippie-expand-no-case-fold
 	iedit-mode
@@ -36,6 +37,7 @@
 	jump-char-repeat-backward
 	keyboard-escape-quit
 	kill-region-or-backward-word
+	lsp-ui-doc--handle-mouse-movement
 	markdown-outdent-or-delete
 	org-beginning-of-line
 	org-delete-char
