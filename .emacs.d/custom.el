@@ -9,8 +9,6 @@
  '(custom-safe-themes
    '("f641bdb1b534a06baa5e05ffdb5039fb265fde2764fbfd9a90b0d23b75f3936b" default))
  '(doc-view-resolution 200)
- '(erc-modules
-   '(completion move-to-prompt stamp spelling truncate hl-nicks netsplit fill button match track readonly networks ring autojoin noncommands irccontrols move-to-prompt menu list scroll-conservatively))
  '(godoc-command "godoc")
  '(gofmt-command "goimports")
  '(jabber-account-list '(("2@0x2c.org")))
@@ -34,7 +32,9 @@
  '(org-time-clocksum-format
    '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
  '(safe-local-variable-values
-   '((cov-lcov-file-name . "converage/lcov.info")
+   '((eval add-to-list 'lsp-file-watch-ignored-directories "gecko_sdk")
+     (eval add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]flowos-vision3[/\\\\]src[/\\\\]gecko_sdk")
+     (cov-lcov-file-name . "converage/lcov.info")
      (eval c-set-offset 'innamespace 0)
      (eval when
 	   (fboundp 'c-toggle-comment-style)

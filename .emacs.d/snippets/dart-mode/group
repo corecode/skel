@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: test group
+# key: group
+# --
+group('$1', () {
+  $0
+});

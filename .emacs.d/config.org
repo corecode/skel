@@ -15,6 +15,14 @@
 (setq inhibit-startup-message t)
 #+END_SRC
 
+** Set limits to speed up LSP
+#+BEGIN_SRC emacs-lisp
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024))
+(setenv "LSP_USE_PLISTS" "1")
+(setq lsp-use-plists "true")
+#+END_SRC
+
 * Load path
 #+BEGIN_SRC emacs-lisp
 ;; Set path to dependencies
@@ -24,7 +32,7 @@
       (expand-file-name "site-lisp" dotfiles-dir))
 
 ;; set up load path
-(add-to-list 'load-path dotfiles-dir)
+;(add-to-list 'load-path dotfiles-dir)
 (add-to-list 'load-path (expand-file-name "local" dotfiles-dir))
 (add-to-list 'load-path site-lisp-dir)
 
@@ -94,8 +102,7 @@
        (add-to-list 'default-frame-alist '(fontsize . 13))
        (add-to-list 'default-frame-alist '(ns-appearance . 'dark)))
       (t
-       (add-to-list 'default-frame-alist '(font . "Liberation Mono-10:weight=normal"))))
-(message "default-frame-alist %s" default-frame-alist)
+       (add-to-list 'default-frame-alist '(font . "JetBrains Mono-9:weight=normal"))))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -191,6 +198,8 @@ Reduce modeline clutter
 (setq backup-directory-alist
       `(("." . ,(expand-file-name
                  (concat dotfiles-dir "backups")))))
+
+(setq backup-by-copying t)
 
 ;; Make backups of files, even when they're in version control
 (setq vc-make-backup-files t)
@@ -321,13 +330,14 @@ Reduce modeline clutter
 
 ** Represent undo-history as an actual tree (visualize with C-x u)
 #+BEGIN_SRC emacs-lisp
-(setq undo-tree-mode-lighter "")
-(use-package undo-tree
-  :config
-  (setq undo-tree-history-directory-alist
-	`(("." . ,(expand-file-name
-                   (concat dotfiles-dir "undo-tree"))))))
-(global-undo-tree-mode)
+;; (use-package undo-tree
+;;   :init
+;;   (setq undo-tree-mode-lighter "")
+;;   :config
+;;   (setq undo-tree-history-directory-alist
+;; 	`(("." . ,(expand-file-name
+;;                    (concat dotfiles-dir "undo-tree")))))
+;;   (global-undo-tree-mode))
 #+END_SRC
 
 ** Add parts of each file's directory to the buffer name if not unique
@@ -515,10 +525,39 @@ Reduce modeline clutter
   ;;        (shell-mode . corfu-mode)
   ;;        (eshell-mode . corfu-mode))
 
+  :bind
+  (:map corfu-map
+	      ("M-d" . corfu-popupinfo-toggle)
+              ("M-n" . corfu-popupinfo-scroll-up)
+              ("M-p" . corfu-popupinfo-scroll-down))
+
+  :custom
+  (lsp-completion-provider :none) ; Use corfu instead the default for lsp completions
+  (corfu-echo-documentation nil)
+  (corfu-popupinfo-delay 0.5)
+  :config
+  ;; Setup lsp to use corfu for lsp completion
+  (defun 2c/corfu-setup-lsp ()
+    "Use orderless completion style with lsp-capf instead of the
+default lsp-passthrough."
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless)))
+  :hook
+  (lsp-completion-mode . 2c/corfu-setup-lsp) ; Use corfu for lsp completion
+  (corfu-mode . corfu-popupinfo-mode)
+
   ;; Recommended: Enable Corfu globally.
   ;; This is recommended since dabbrev can be used globally (M-/).
   :init
-  (corfu-global-mode))
+  (global-corfu-mode))
+
+(use-package kind-icon
+  :ensure t
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default) ; to compute blended backgrounds correctly
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 ;; (defun 2c-enter-dir-or-exit ()
 ;;   (interactive)
@@ -540,7 +579,7 @@ Reduce modeline clutter
 (use-package emacs
   :init
   ;; TAB cycle if there are only few candidates
-  (setq completion-cycle-threshold 3)
+  (setq completion-cycle-threshold nil)
 
   ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
   ;; Corfu commands are hidden, since they are not supposed to be used via M-x.
@@ -614,9 +653,6 @@ Reduce modeline clutter
   ;; This adds thin lines, sorting and hides the mode line of the window.
   (advice-add #'register-preview :override #'consult-register-window)
 
-  ;; Optionally replace `completing-read-multiple' with an enhanced version.
-  (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
-
   ;; Use Consult to select xref locations with preview
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
@@ -638,8 +674,7 @@ Reduce modeline clutter
    consult-buffer
    consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
-   consult--source-file consult--source-project-file consult--source-bookmark
-   :preview-key (kbd "M-."))
+   :preview-key "M-.")
 
   ;; Optionally configure the narrowing key.
   ;; Both < and C-+ work reasonably well.
@@ -964,8 +999,9 @@ might be bad."
 ;; guess tab/offset mode
 (use-package dtrt-indent
   :diminish
+  :init
+  (setq dtrt-indent-global-mode t)
   :config
-  (dtrt-indent-global-mode 1)
   (defun disable-dtrt-indent-mode ()
     (interactive)
     (dtrt-indent-mode 0))
@@ -1170,17 +1206,18 @@ string).  It returns t if a new completion is found, nil otherwise."
 
 ** Completions: company-mode & yasnippet
 #+begin_src emacs-lisp
-(use-package company
-  :ensure
-  :custom
-  (company-idle-delay 0.5) ;; how long to wait until popup
-  ;; (company-begin-commands nil) ;; uncomment to disable popup
-  :bind
-  (:map company-active-map
-	      ("C-n". company-select-next)
-	      ("C-p". company-select-previous)
-	      ("M-<". company-select-first)
-	      ("M->". company-select-last)))
+;; (use-package company
+;;   :ensure
+;;   :custom
+;;   (company-idle-delay 0.5) ;; how long to wait until popup
+;;   ;; (company-begin-commands nil) ;; uncomment to disable popup
+;;   :bind
+;;   (:map company-active-map
+;; 	      ("C-n". company-select-next)
+;; 	      ("C-p". company-select-previous)
+;; 	      ("M-<". company-select-first)
+;; 	      ("M->". company-select-last)
+;; 	      ("C-s". company-search-candidates)))
 
 (use-package yasnippet
   :ensure
@@ -1188,8 +1225,83 @@ string).  It returns t if a new completion is found, nil otherwise."
   (yas-reload-all)
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'text-mode-hook 'yas-minor-mode))
+
+(use-package yasnippet-snippets
+  :ensure t)
 #+end_src
 
+* Codeium AI completion
+#+begin_src emacs-lisp
+(use-package codeium
+  :quelpa (codeium :fetcher github :repo "Exafunction/codeium.el")
+  ;; if you use straight
+  ;; :straight '(:type git :host github :repo "Exafunction/codeium.el")
+  ;; otherwise, make sure that the codeium.el file is on load-path
+
+  :preface
+  (defun 2c-codeium-complete ()
+    (interactive)
+    (let ((completion-at-point-functions '(codeium-completion-at-point)))
+      (completion-at-point)))
+
+  :init
+    ;; use globally
+    ;;(add-to-list 'completion-at-point-functions #'codeium-completion-at-point)
+    ;; or on a hook
+    ;; (add-hook 'python-mode-hook
+    ;;     (lambda ()
+    ;;         (setq-local completion-at-point-functions '(codeium-completion-at-point))))
+
+    ;; if you want multiple completion backends, use cape (https://github.com/minad/cape):
+    ;; (add-hook 'python-mode-hook
+    ;;     (lambda ()
+    ;;         (setq-local completion-at-point-functions
+    ;;             (list (cape-super-capf #'codeium-completion-at-point #'lsp-completion-at-point)))))
+    ;; an async company-backend is coming soon!
+
+    ;; codeium-completion-at-point is autoloaded, but you can
+    ;; optionally set a timer, which might speed up things as the
+    ;; codeium local language server takes ~0.2s to start up
+    ;; (add-hook 'emacs-startup-hook
+    ;;  (lambda () (run-with-timer 0.1 nil #'codeium-init)))
+
+  :bind (("M-J" . 2c-codeium-complete))
+
+  ;; :defer t ;; lazy loading, if you want
+  :config
+    (setq use-dialog-box nil) ;; do not use popup boxes
+
+    ;; if you don't want to use customize to save the api-key
+    ;; (setq codeium/metadata/api_key "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+
+    ;; get codeium status in the modeline
+    (setq codeium-mode-line-enable
+        (lambda (api) (not (memq api '(CancelRequest Heartbeat AcceptCompletion)))))
+    (add-to-list 'mode-line-format '(:eval (car-safe codeium-mode-line)) t)
+    ;; alternatively for a more extensive mode-line
+    ;; (add-to-list 'mode-line-format '(-50 "" codeium-mode-line) t)
+
+    ;; use M-x codeium-diagnose to see apis/fields that would be sent to the local language server
+    (setq codeium-api-enabled
+        (lambda (api)
+            (memq api '(GetCompletions Heartbeat CancelRequest GetAuthToken RegisterUser auth-redirect AcceptCompletion))))
+    ;; you can also set a config for a single buffer like this:
+    ;; (add-hook 'python-mode-hook
+    ;;     (lambda ()
+    ;;         (setq-local codeium/editor_options/tab_size 4)))
+
+    ;; You can overwrite all the codeium configs!
+    ;; for example, we recommend limiting the string sent to codeium for better performance
+    (defun my-codeium/document/text ()
+        (buffer-substring-no-properties (max (- (point) 3000) (point-min)) (min (+ (point) 1000) (point-max))))
+    ;; if you change the text, you should also change the cursor_offset
+    ;; warning: this is measured by UTF-8 encoded bytes
+    (defun my-codeium/document/cursor_offset ()
+        (codeium-utf8-byte-length
+            (buffer-substring-no-properties (max (- (point) 3000) (point-min)) (point))))
+    (setq codeium/document/text 'my-codeium/document/text)
+    (setq codeium/document/cursor_offset 'my-codeium/document/cursor_offset))
+#+end_src
 * Modes
 ** try packages
 #+begin_src emacs-lisp
@@ -1353,8 +1465,9 @@ string).  It returns t if a new completion is found, nil otherwise."
   :bind (("C-t" . vterm-new)
          :map vterm-mode-map
          ("<C-backspace>" . (lambda () (interactive) (vterm-send-key (kbd "C-w"))))
-         ("C-t" . vterm-send-C-t)
-         ("C-x C-t" . vterm-new)))
+         ("C-t" . #'vterm--self-insert)
+	 ("S-<prior>" . #'scroll-down-command)
+         ("C-x C-t" . #'vterm-new)))
 
 ;; remove SHLVL.  For any shell, we're the top level
 (setenv "SHLVL" nil)
@@ -1447,7 +1560,33 @@ string).  It returns t if a new completion is found, nil otherwise."
 ** erc/znc
 #+begin_src emacs-lisp
 (use-package znc)
-(use-package erc)
+(use-package erc
+  :config
+  (setq erc-modules '(completion
+		      move-to-prompt
+		      stamp
+		      spelling
+		      truncate
+		      hl-nicks
+		      netsplit
+		      fill
+		      button
+		      match
+		      track
+		      readonly
+		      networks
+		      ring
+		      autojoin
+		      noncommands
+		      irccontrols
+		      move-to-prompt
+		      menu
+		      list
+		      scrolltobottom))
+  :hook ((erc-mode-hook . (lambda () (subword-mode 0)))
+	 (erc-mode-hook . erc-add-scroll-to-bottom)
+	 (erc-mode-hook . 2c-erc-set-scroll-conservatively)))
+
 (use-package erc-hl-nicks)
 
 (setq erc-hide-list '("JOIN" "PART" "QUIT"))
@@ -1466,17 +1605,17 @@ string).  It returns t if a new completion is found, nil otherwise."
 
 (defun 2c-erc-set-scroll-conservatively ()
   (make-local-variable 'scroll-conservatively)
-  (setq scroll-conservatively 5))
+  (setq scroll-conservatively 1000))
 
 (setq erc-ignore-list
       '())
 
-(define-advice erc-server-connect (:around (oldfn server port buffer) "2c-strip-server-slug")
+(define-advice erc-server-connect (:around (oldfn server port buffer &optional client-certificate) "2c-strip-server-slug")
   (let ((unslugged-server (progn
                           (string-match "[^@]*$" server)
                           (match-string 0 server))))
     (message "unslug: %s -> %s" server unslugged-server)
-    (funcall oldfn unslugged-server port buffer)))
+    (funcall oldfn unslugged-server port buffer client-certificate)))
 
 (defun 2c-erc-generate-new-buffer-name (server port target)
   "Create a new buffer name based on the arguments.  (fix from 28)"
@@ -1530,33 +1669,40 @@ string).  It returns t if a new completion is found, nil otherwise."
 (use-package pkgbuild-mode)
 #+end_src
 
+** tree-sitter syntax parsing
+#+begin_src emacs-lisp
+(use-package tree-sitter
+  :init
+  (global-tree-sitter-mode)
+  (diminish 'tree-sitter-mode)
+  :hook (tree-sitter-after-on . tree-sitter-hl-mode))
+(use-package tree-sitter-langs)
+(use-package tree-sitter-ispell)
+#+end_src
 * Languages
 ** Debugging
 #+begin_src emacs-lisp
-(use-package gud
-  :config
-  (setq gud-chdir-before-run nil))
+;; (use-package realgud
+;;   :config
+;;   (setq realgud-chdir-before-run nil))
 #+end_src
 
 ** LSP
 #+begin_src emacs-lisp
 (use-package lsp-mode
   :ensure
-  :commands lsp
+  :commands (lsp lsp-deferred)
   :init
   ;;(setq lsp-keymap-prefix "C-c l")
   :custom
   ;; what to use when checking on-save. "check" is default, I prefer clippy
-  (lsp-rust-analyzer-cargo-watch-command "clippy")
   (lsp-eldoc-render-all nil)
   (lsp-idle-delay 0.6)
-  (lsp-rust-analyzer-server-display-inlay-hints t)
   :config
   (defun 2c-lsp-format-on-save ()
     (if (bound-and-true-p lsp-mode)
 	(lsp-format-buffer)))
-  :hook ((python-mode . lsp-deferred)
-         (rustic-mode . lsp-deferred)
+  :hook (
          ;; if you want which-key integration
          (lsp-mode . lsp-enable-which-key-integration)
          (lsp-mode . lsp-ui-mode)
@@ -1565,24 +1711,29 @@ string).  It returns t if a new completion is found, nil otherwise."
 (use-package lsp-ui
   :ensure
   :commands lsp-ui-mode
-  :config
-  (setq lsp-ui-sideline-show-code-actions nil)
   :custom
   (lsp-ui-peek-always-show t)
-  (lsp-ui-sideline-show-hover nil))
+  (lsp-ui-sideline-show-hover nil)
+  (lsp-ui-sideline-show-code-actions nil))
 
-(use-package dap-mode)
+(use-package dap-mode
+  :ensure
+  :config
+  (dap-ui-mode)
+  (dap-ui-controls-mode -1)
+
+  (require 'dap-lldb)
+  (require 'dap-gdb-lldb)
+  ;; installs .extension/vscode
+  (dap-gdb-lldb-setup))
 ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
-
-(use-package lsp-pyright
-  :ensure t)
 
 #+end_src
 ** cov
 #+begin_src emacs-lisp
-(use-package cov
-  :ensure nil
-  :load-path "~/devel/3rdparty/cov")
+;; (use-package cov
+;;   :ensure nil
+;;   :load-path "~/devel/3rdparty/cov")
 #+end_src
 ** flycheck
 #+begin_src emacs-lisp
@@ -1705,7 +1856,8 @@ string).  It returns t if a new completion is found, nil otherwise."
                                        (class-open after))
                (c-offsets-alist (label . [0])
                                 (topmost-intro-cont . 2c-lineup-topmost-intro-cont)
-                                (func-decl-cont . (add + + +)))
+                                (func-decl-cont . (add + + +))
+				(inextern-lang . 0))
                (c-doc-comment-style gtkdoc)))
 
 (c-add-style "2c-c++"
@@ -1773,25 +1925,40 @@ string).  It returns t if a new completion is found, nil otherwise."
 #+end_src
 ** Dart/Flutter
 #+begin_src emacs-lisp
-(use-package dart-mode)
-(use-package lsp-dart
-  :ensure nil
-  :load-path "~/devel/3rdparty/lsp-dart"
-  :hook (dart-mode . lsp-deferred)
-  :bind (:map dart-mode-map
-	      ("C-c c" . lsp-dart-run-all-tests))
-  :config
-  (setq lsp-dart-test-tree-on-run nil)
-  (advice-add 'lsp-dart-test-output--handle-run-started :after
-	      (lambda (&rest r)
-		(setq lsp-dart-test-output--first-log nil)))
-  (advice-add 'lsp-dart-test-output--get-buffer-create :filter-return
+  (use-package dart-mode)
+  (use-package lsp-dart
+    :ensure nil
+    :load-path "~/devel/3rdparty/lsp-dart"
+    :bind (:map dart-mode-map
+	      ("C-c c" . 2c-lsp-dart-run-test-dwim))
+    :config
+    (setq lsp-dart-project-root-discovery-strategies '(closest-pubspec lsp-root))
+    ;; (setq lsp-dart-test-tree-on-run nil)
+    (advice-add 'lsp-dart-test--run :after
+	      (lambda (&optional test)
+		(lsp-workspace-set-metadata "last-ran-test" test)))
+    ;; (advice-add 'lsp-dart-test-output--handle-run-started :after
+    ;; 	      (lambda (&rest r)
+    ;; 		(setq lsp-dart-test-output--first-log nil)))
+    (advice-add 'lsp-dart-test-output--get-buffer-create :filter-return
 	      (lambda (test-buffer)
 		(with-current-buffer test-buffer
 		  (compilation-minor-mode t))
 		test-buffer))
-  (defun 2c-set-dart-lcov-file ()
-    (if (and (derived-mode-p 'dart-mode)
+
+    (defun 2c-lsp-dart-run-test-dwim (&optional arg)
+      (interactive "P")
+      (cond
+       ((and (not arg)
+	   (lsp-workspace-get-metadata "last-ran-test"))
+        (lsp-dart-run-last-test))
+       ((lsp-dart-test-file-p (buffer-file-name))
+        (lsp-dart-run-test-file))
+       (t
+        (lsp-dart-run-all-tests))))
+
+    (defun 2c-set-dart-lcov-file ()
+      (if (and (derived-mode-p 'dart-mode)
 	     (lsp-workspace-root))
 	(let* ((root (lsp-workspace-root))
 	       (relative-path "coverage/lcov.info")
@@ -1801,8 +1968,8 @@ string).  It returns t if a new completion is found, nil otherwise."
 	      (set (make-local-variable 'cov-lcov-file-name)
 		   lcov-file)
 	      (message "lcov set to %s" cov-lcov-file-name)))))
-  (defun 2c-cov-lcov-fix-paths (cov-data)
-    (cl-loop for (srcfile . src-cov-data) in cov-data
+    (defun 2c-cov-lcov-fix-paths (cov-data)
+      (cl-loop for (srcfile . src-cov-data) in cov-data
 	     collect
 	     (progn
 	       (when (not (file-exists-p srcfile))
@@ -1813,8 +1980,8 @@ string).  It returns t if a new completion is found, nil otherwise."
 		   (when (file-exists-p projfile)
 		     (setq srcfile projfile))))
 	       (cons srcfile src-cov-data))))
-  (advice-add 'cov--lcov-parse :filter-return #'2c-cov-lcov-fix-paths)
-  (add-hook 'lsp-mode-hook #'2c-set-dart-lcov-file))
+    (advice-add 'cov--lcov-parse :filter-return #'2c-cov-lcov-fix-paths)
+    (add-hook 'lsp-mode-hook #'2c-set-dart-lcov-file))
 #+end_src
 
 ** Rust
@@ -1837,10 +2004,22 @@ string).  It returns t if a new completion is found, nil otherwise."
   ;; (setq lsp-eldoc-hook nil)
   ;; (setq lsp-enable-symbol-highlighting nil)
   ;; (setq lsp-signature-auto-activate nil)
+  (setq lsp-rust-analyzer-import-merge-behaviour "crate")
+  (setq lsp-rust-analyzer-cargo-watch-command "clippy")
 
   ;; comment to disable rustfmt on save
   (setq rustic-format-on-save t)
-  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook)
+
+  (dap-register-debug-template
+   "Rust::LLDB Run Configuration"
+   (list :type "lldb-mi"
+         :request "launch"
+         :name "LLDB::Run"
+	 :gdbpath "rust-lldb"
+         ;; uncomment if lldb-mi is not in PATH
+         ;; :lldbmipath "path/to/lldb-mi"
+         )))
 
 (defun rk/rustic-mode-hook ()
   ;; so that run C-c C-c C-r works without having to confirm, but don't try to
@@ -1849,9 +2028,7 @@ string).  It returns t if a new completion is found, nil otherwise."
   ;; no longer be necessary.
   (when buffer-file-name
     (setq-local buffer-save-without-query t))
-  (setq indent-tabs-mode nil)
-  (setq lsp-ui-sideline-show-code-actions t)
-  (setq lsp-rust-analyzer-server-display-inlay-hints t))
+  (setq indent-tabs-mode nil))
 #+end_src
 * Desktop & Server
 ** Save desktop

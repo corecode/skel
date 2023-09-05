@@ -27,6 +27,7 @@
 	hippie-expand-no-case-fold
 	iedit-mode
 	iedit-next-occurrence
+	ignore
 	indent-for-tab-command
 	indent-pp-sexp
 	isearch-forward-use-region
@@ -49,6 +50,7 @@
 	paredit-backslash
 	paredit-backward-kill-word
 	paredit-comment-dwim
+	paredit-delete-char
 	paredit-forward
 	paredit-forward-delete
 	paredit-forward-kill-word
@@ -70,6 +72,7 @@
 (setq mc/cmds-to-run-once
       '(
 	ace-jump-mode
+	consult-buffer
 	counsel-find-file
 	handle-switch-frame
 	iedit-switch-to-mc-mode

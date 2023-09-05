@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Mocktail mock class declaration
+# key: mock
+# --
+class Mock$1 extends Mock implements $1 {}

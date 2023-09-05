@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: arrange act assert test template
+# key: aaa
+# --
+
+test('should $1', () async {
+  // arrange
+  $2
+  // act
+  $3
+  // assert
+  $4
+});
