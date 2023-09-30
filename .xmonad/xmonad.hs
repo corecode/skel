@@ -62,7 +62,7 @@
 import XMonad
 import XMonad.Util.EZConfig
 import qualified XMonad.StackSet as S
-import XMonad.Actions.CycleWS
+import XMonad.Actions.CycleWS hiding (Not)
 import XMonad.Actions.FloatKeys
 import XMonad.Actions.UpdatePointer
 import XMonad.Actions.GridSelect
@@ -93,7 +93,7 @@ import qualified Data.Map as M
 
 -- defaults on which we build
 -- use e.g. defaultConfig or gnomeConfig
-myBaseConfig = ewmh defaultConfig
+myBaseConfig = ewmhFullscreen . ewmh $ def
 
 myTerminal = "urxvt -ls"
 
@@ -143,10 +143,12 @@ imManageHooks = composeAll [isIM --> moveToIM] where
 
 floatManageHooks = composeAll
                    [ stringProperty "WM_NAME" =? "Crack Attack!" --> doFloat
+		   , isInProperty "_NET_WM_WINDOW_TYPE" "_NET_WM_WINDOW_TYPE_DIALOG" --> doFloat
                    , className =? "Gimp"           --> doFloat
                    , className =? "emulator-arm"   --> doFloat
                    , className =? "emulator64-arm" --> doFloat
                    , className =? "Gnuradio-companion" --> doFloat
+		   , className $? ".exe"           --> doFloat
                    ]
 
 -- Mod4 is the Super / Windows key
@@ -182,7 +184,7 @@ myKeys conf = M.union (mkKeymap conf myBindings) $
     , ((myModMask              , xK_F11   ), sendMessage $ Toggle NBFULL)
     , ((myModMask              , xK_b     ), sendMessage (IncMasterN 1))
     , ((myModMask              , xK_v     ), sendMessage (IncMasterN (-1)))
-    , ((myModMask              , xK_g     ), goToSelected defaultGSConfig)
+    -- , ((myModMask              , xK_g     ), goToSelected def)
     , ((myModMask .|. controlMask, xK_q   ), broadcastMessage ReleaseResources >> restart "xmonad" True)
     , ((myModMask .|. controlMask, xK_backslash   ), broadcastMessage ReleaseResources >> restart "stumpwm" True)
     , ((myModMask .|. shiftMask .|. controlMask, xK_q     ), io (exitWith ExitSuccess)) -- %! Quit xmonad
@@ -236,7 +238,6 @@ main = xmonad =<< statusBar "xmobar" myPP toggleMobarKey myBaseConfig
     , workspaces = myWorkspaces
     , layoutHook = myLayoutHook
     , manageHook = myManageHook
-    , handleEventHook = fullscreenEventHook
     , logHook = myLogHook
     , borderWidth = myBorderWidth
     , normalBorderColor = myNormalBorderColor
