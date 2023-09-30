@@ -1230,6 +1230,11 @@ string).  It returns t if a new completion is found, nil otherwise."
   :ensure t)
 #+end_src
 
+** String Inflection
+#+begin_src emacs-lisp
+(use-package string-inflection)
+#+end_src
+
 * Codeium AI completion
 #+begin_src emacs-lisp
 (use-package codeium
@@ -1401,6 +1406,7 @@ string).  It returns t if a new completion is found, nil otherwise."
 #+begin_src emacs-lisp
 (use-package magit
   :config
+  (require 'seq-25) ; workaround for magit/emacs interaction bug
   (defun magit-kill-file-on-line ()
     "Show file on current magit line and prompt for deletion."
     (interactive)
@@ -1698,6 +1704,7 @@ string).  It returns t if a new completion is found, nil otherwise."
   ;; what to use when checking on-save. "check" is default, I prefer clippy
   (lsp-eldoc-render-all nil)
   (lsp-idle-delay 0.6)
+  (lsp-inlay-hint-enable t)
   :config
   (defun 2c-lsp-format-on-save ()
     (if (bound-and-true-p lsp-mode)
@@ -1706,6 +1713,7 @@ string).  It returns t if a new completion is found, nil otherwise."
          ;; if you want which-key integration
          (lsp-mode . lsp-enable-which-key-integration)
          (lsp-mode . lsp-ui-mode)
+	 (lsp-mode . lsp-inlay-hints-mode)
 	 (before-save . 2c-lsp-format-on-save)))
 
 (use-package lsp-ui
@@ -2010,6 +2018,15 @@ string).  It returns t if a new completion is found, nil otherwise."
   ;; comment to disable rustfmt on save
   (setq rustic-format-on-save t)
   (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook)
+
+  (defun 2c-lsp-rust-init (init)
+    (let* ((ignored '(
+		      ;:mockall ("automock")
+			       ))
+	   (pm (plist-get init :procMacro))
+	   (pm (plist-put pm :ignored ignored)))
+      (plist-put init :procMacro pm)))
+  (advice-add 'lsp-rust-analyzer--make-init-options :filter-return #'2c-lsp-rust-init)
 
   (dap-register-debug-template
    "Rust::LLDB Run Configuration"

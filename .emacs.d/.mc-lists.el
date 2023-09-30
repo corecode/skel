@@ -65,6 +65,7 @@
 	quack-insert-opening-paren
 	ruby-end-space
 	save-region-or-current-line
+	string-inflection-camelcase
 	transpose-sexps
 	typescript-insert-and-indent
 	))
@@ -82,4 +83,5 @@
 	smex
 	term-send-up
 	universal-argument-minus
+	vertico-exit
 	))
