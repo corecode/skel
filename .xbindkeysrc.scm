@@ -208,6 +208,10 @@
  "XF86AudioPlay"
  "playerctl play-pause")
 
+(xbindkey
+ "XF86Explorer"
+ "playerctl play-pause")
+
 ;; Lenovo Laptop Fn+F12 "Favorites"
 (xbindkey
  '("m:0x0" "c:164")
