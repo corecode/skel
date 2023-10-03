@@ -50,6 +50,14 @@
     (add-to-list 'custom-theme-load-path dir)))
 #+END_SRC
 
+* OS Setup
+** Path
+#+begin_src emacs-lisp
+(use-package exec-path-from-shell
+  :config
+  (exec-path-from-shell-initialize))
+#+end_src
+
 * Packaging
 ** Prevent package.el from writing to custom
 #+begin_src emacs-lisp
