@@ -1917,7 +1917,19 @@ string).  It returns t if a new completion is found, nil otherwise."
 
 ** Python
 #+begin_src emacs-lisp
-(use-package pydoc)
+(use-package python
+  :config
+  (setq python-shell-interpreter "ipython"))
+
+(use-package elpy
+  :ensure t
+  :init
+  (elpy-enable)
+  :bind (("RET" . 'newline-and-indent)))
+
+(use-package pydoc
+  :config
+  (setq pydoc-command "python3 -m pydoc"))
 #+end_src
 
 ** Ruby
