@@ -243,8 +243,8 @@ fi
 whence -w rvm | grep 'function' || [[ -s ~/.rvm/scripts/rvm ]] && source ~/.rvm/scripts/rvm
 
 bindkey -e
-bindkey "$(echoti khome)" beginning-of-line
-bindkey "$(echoti kend)" end-of-line
+bindkey "$(echoti khome)" beginning-of-line 2> /dev/null
+bindkey "$(echoti kend)" end-of-line 2> /dev/null
 bindkey '\e[H' beginning-of-line
 bindkey '\e[F' end-of-line
 bindkey '\eOH' beginning-of-line
