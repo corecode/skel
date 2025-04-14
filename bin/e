@@ -94,4 +94,8 @@ else
 	emacsopt=-nw
 fi
 
+case $(launchctl managername 2>/dev/null) in
+Aqua) emacsopt=-c
+esac
+
 exec $invoke emacsclient $emacsopt -a "" "$@"

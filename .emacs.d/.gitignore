@@ -43,3 +43,7 @@ quelpa
 elpy
 eln-cache
 codeium
+forge-database.sqlite
+org-persist
+projectile-bookmarks.eld
+*.cache

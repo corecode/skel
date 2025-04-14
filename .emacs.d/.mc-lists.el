@@ -16,6 +16,7 @@
 	consult-yank-pop
 	counsel-M-x
 	delete-horizontal-space
+	describe-key-briefly
 	downcase-region
 	electric-newline-and-maybe-indent
 	electric-verilog-colon
@@ -78,6 +79,7 @@
 	handle-switch-frame
 	iedit-switch-to-mc-mode
 	info
+	magit-status
 	org-cycle
 	paredit-doublequote
 	smex

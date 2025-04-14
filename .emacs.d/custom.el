@@ -6,8 +6,9 @@
  ;; If there is more than one, they won't work right.
  '(auto-indent-next-pair-timer-geo-mean '((default 0.0005 0)))
  '(auto-indent-next-pair-timer-interval '((default 0.0005)))
+ '(custom-enabled-themes '(sanityinc-tomorrow-bright))
  '(custom-safe-themes
-   '("f641bdb1b534a06baa5e05ffdb5039fb265fde2764fbfd9a90b0d23b75f3936b" default))
+   '("04aa1c3ccaee1cc2b93b246c6fbcd597f7e6832a97aaeac7e5891e6863236f9f" "76ddb2e196c6ba8f380c23d169cf2c8f561fd2013ad54b987c516d3cabc00216" "6fc9e40b4375d9d8d0d9521505849ab4d04220ed470db0b78b700230da0a86c1" "b11edd2e0f97a0a7d5e66a9b82091b44431401ac394478beb44389cf54e6db28" "6bdc4e5f585bb4a500ea38f563ecf126570b9ab3be0598bdf607034bb07a8875" "f641bdb1b534a06baa5e05ffdb5039fb265fde2764fbfd9a90b0d23b75f3936b" default))
  '(doc-view-resolution 200)
  '(godoc-command "godoc")
  '(gofmt-command "goimports")
@@ -32,7 +33,10 @@
  '(org-time-clocksum-format
    '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
  '(safe-local-variable-values
-   '((eval add-to-list 'lsp-file-watch-ignored-directories "gecko_sdk")
+   '((eval setq-local lsp-file-watch-ignored-directories
+	   (cons "efr32bg22-sys/src/gecko_sdk" lsp-file-watch-ignored-directories))
+     (eval add-to-list 'lsp-file-watch-ignored-directories "efr32bg22-sys/src/gecko_sdk")
+     (eval add-to-list 'lsp-file-watch-ignored-directories "gecko_sdk")
      (eval add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]flowos-vision3[/\\\\]src[/\\\\]gecko_sdk")
      (cov-lcov-file-name . "converage/lcov.info")
      (eval c-set-offset 'innamespace 0)

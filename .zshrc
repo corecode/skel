@@ -218,6 +218,8 @@ fi
 
 umask 22
 
+eval "$(direnv hook zsh)"
+
 if [[ -x ~/bin/e ]]; then
 	export EDITOR=~/bin/e
 	export VISUAL=$EDITOR

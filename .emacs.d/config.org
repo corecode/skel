@@ -84,21 +84,47 @@
 #+begin_src emacs-lisp
 (setq visible-bell t
       font-lock-maximum-decoration t
-      color-theme-is-global nil
+      ;color-theme-is-global nil
       truncate-partial-width-windows nil)
 #+end_src
 
 ** theme
 #+begin_src emacs-lisp
-(use-package blackboard-theme
-  :config
-  (load-theme 'blackboard t)
+(defun 2c-follow-system-theme ()
+  (let ((system-theme
+	 (cond ((eq system-type 'darwin)
+		(if (string= (shell-command-to-string "defaults read -g AppleInterfaceStyle") "Dark\n")
+		    'dark 'light))
+	       (t 'dark))))
+    (cond ((and (eq system-theme 'dark)
+		(not (eq frame-background-mode 'dark)))
+	   (disable-theme 'sanityinc-tomorrow-day)
+	   (load-theme 'sanityinc-tomorrow-bright t))
+	  ((and (eq system-theme 'light)
+		(not (eq frame-background-mode 'light)))
+	   (disable-theme 'sanityinc-tomorrow-bright)
+	   (load-theme 'sanityinc-tomorrow-day t)))))
 
-  (set-face-background 'region "#464740")
-  (set-face-foreground 'font-lock-warning-face "#ff6666")
+(use-package color-theme-sanityinc-tomorrow
+  :init
+  ;; if we load-theme directly, the frame only gets half the theme
+  ;; loaded.  Delayed loading fixes this issue.
+  (run-at-time "0.2" 60 #'2c-follow-system-theme))
 
-  ;; modify modeline
-  (face-spec-set 'mode-line '((t (:background "darkred" :foreground "white" :box (:line-width -1 :style released-button))))))
+
+;; (use-package blackboard-theme
+;;   :config
+;;   (load-theme 'blackboard t)
+
+;;   (set-face-background 'region "#464740")
+;;   (set-face-foreground 'font-lock-warning-face "#ff6666")
+
+;;   ;; modify modeline
+;;   (face-spec-set 'mode-line '((t (:background "darkred" :foreground "white" :box (:line-width -1 :style released-button))))))
+
+(use-package solaire-mode
+  :init
+  (solaire-global-mode +1))
 #+end_src
 
 ** default font
@@ -106,11 +132,10 @@
 (setq default-frame-alist (assq-delete-all 'font default-frame-alist))
 (setq default-frame-alist (delq (assoc 'font default-frame-alist) default-frame-alist))
 (cond ((eq system-type 'darwin)
-       (add-to-list 'default-frame-alist '(font . "Menlo"))
-       (add-to-list 'default-frame-alist '(fontsize . 13))
-       (add-to-list 'default-frame-alist '(ns-appearance . 'dark)))
-      (t
-       (add-to-list 'default-frame-alist '(font . "JetBrains Mono-9:weight=normal"))))
+      (add-to-list 'default-frame-alist '(font . "Menlo-18"))
+      (add-to-list 'default-frame-alist '(ns-appearance . 'dark)))
+     (t
+      (add-to-list 'default-frame-alist '(font . "JetBrains Mono-9:weight=normal"))))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -162,7 +187,7 @@
 
 ** disable tooltips
 #+begin_src emacs-lisp
-(tooltip-mode -1)
+;(tooltip-mode -1)
 #+end_src
 
 ** do not blink cursor
@@ -173,19 +198,25 @@
 ** Highlight current line
 #+begin_src emacs-lisp
 (global-hl-line-mode 1)
-(set-face-background 'hl-line "#222222")
+;(set-face-background 'hl-line "#222222")
 #+end_src
 
 ** use fancy mode-line
 #+begin_src emacs-lisp
-(use-package powerline
+;; (use-package powerline
+;;   :config
+;;   ;; advise this function so that it doesn't produce a NaN
+;;   ;; when using color "darkred"
+;;   (advice-add 'pl/color-xyz-to-apple-rgb :filter-return
+;;               (lambda (rgb)
+;;                 (mapcar (lambda (e) (if (isnan e) 0.0 e)) rgb))))
+;; (powerline-default-theme)
+(use-package nerd-icons)
+
+(use-package doom-modeline
   :config
-  ;; advise this function so that it doesn't produce a NaN
-  ;; when using color "darkred"
-  (advice-add 'pl/color-xyz-to-apple-rgb :filter-return
-              (lambda (rgb)
-                (mapcar (lambda (e) (if (isnan e) 0.0 e)) rgb))))
-(powerline-default-theme)
+  (setq doom-modeline-window-width-limit 95)
+  :hook (after-init . doom-modeline-mode))
 #+end_src
 
 ** Diminish
@@ -324,6 +355,7 @@ Reduce modeline clutter
 ** Easily navigate sillycased words
 #+BEGIN_SRC emacs-lisp
 (global-subword-mode 1)
+(diminish 'subword-mode)
 #+END_SRC
 
 ** Keep cursor away from edges when scrolling up/down
@@ -403,7 +435,7 @@ Reduce modeline clutter
 
 ** Use system browser for URLs
 #+begin_src emacs-lisp
-(setq browse-url-browser-function 'browse-url-xdg-open)
+;(setq browse-url-browser-function 'browse-url-xdg-open)
 #+end_src
 
 ** Print setup
@@ -505,7 +537,6 @@ Reduce modeline clutter
 ** Vertico, Consult, Orderless, Marginalia, Embark, Corfu
 #+begin_src emacs-lisp
 (use-package orderless
-  :ensure t
   :custom (completion-styles '(orderless)))
 
 (use-package vertico
@@ -560,7 +591,6 @@ default lsp-passthrough."
   (global-corfu-mode))
 
 (use-package kind-icon
-  :ensure t
   :after corfu
   :custom
   (kind-icon-default-face 'corfu-default) ; to compute blended backgrounds correctly
@@ -725,8 +755,6 @@ default lsp-passthrough."
   (marginalia-mode))
 
 (use-package embark
-  :ensure t
-
   :bind
   (("C-." . embark-act)         ;; pick some comfortable binding
    ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
@@ -746,7 +774,6 @@ default lsp-passthrough."
 
 ;; Consult users will also want the embark-consult package.
 (use-package embark-consult
-  :ensure t
   :after (embark consult)
   :demand t ; only necessary if you have the hook below
   ;; if you want to have consult previews as you move around an
@@ -845,7 +872,9 @@ M-x compile.
 (use-package multiple-cursors
   :bind (("M-'" . mc/mark-all-like-this-dwim)
          ("C-\\" . mc/mark-next-like-this)
+         ("C-|" . mc/skip-to-next-like-this)
          ("C-]" . mc/mark-previous-like-this)
+         ("C-}" . mc/skip-to-previous-like-this)
          ("M-C-'" . mc/mark-more-like-this-extended)
          ("M-]" . mc/mark-all-in-region)))
 #+end_src
@@ -904,15 +933,6 @@ M-x compile.
       (deactivate-mark))
     (call-interactively 'isearch-backward))
 
-  (defun goto-line-with-feedback ()
-    "Show line numbers temporarily, while prompting for the line number input"
-    (interactive)
-    (unwind-protect
-        (progn
-          (linum-mode 1)
-          (call-interactively 'goto-line))
-      (linum-mode -1)))
-
   ;; Add spaces and proper formatting to linum-mode. It uses more room than
   ;; necessary, but that's not a problem since it's only in use when going to
   ;; lines.
@@ -938,7 +958,6 @@ M-x compile.
                  (point)))
 
   :bind (("M-i" . back-to-indentation)
-         ([remap goto-line] . goto-line-with-feedback)
          ("M-p" . backward-paragraph)
          ("M-n" . forward-paragraph)
          ("C-S-n" . (lambda () (interactive) (next-line 5)))
@@ -1229,13 +1248,13 @@ string).  It returns t if a new completion is found, nil otherwise."
 
 (use-package yasnippet
   :ensure
+  :diminish yas-minor-mode
   :config
   (yas-reload-all)
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'text-mode-hook 'yas-minor-mode))
 
-(use-package yasnippet-snippets
-  :ensure t)
+(use-package yasnippet-snippets)
 #+end_src
 
 ** String Inflection
@@ -1414,7 +1433,6 @@ string).  It returns t if a new completion is found, nil otherwise."
 #+begin_src emacs-lisp
 (use-package magit
   :config
-  (require 'seq-25) ; workaround for magit/emacs interaction bug
   (defun magit-kill-file-on-line ()
     "Show file on current magit line and prompt for deletion."
     (interactive)
@@ -1447,6 +1465,11 @@ string).  It returns t if a new completion is found, nil otherwise."
 (use-package gist)
 #+end_src
 
+*** gsnip
+#+begin_src emacs-lisp
+(use-package gsnip)
+#+end_src
+
 ** rgrep
 #+begin_src emacs-lisp
 (use-package grep)
@@ -1463,16 +1486,15 @@ string).  It returns t if a new completion is found, nil otherwise."
 
 ** term
 #+begin_src emacs-lisp
-(use-package eterm-256color
-  :ensure t)
+(use-package eterm-256color)
 
 (use-package vterm
-  :ensure t
   :config
   (setq vterm-term-environment-variable "eterm-color")
   (setq vterm-buffer-name-string "term %s")
   (setq vterm-max-scrollback 100000)
   (setq vterm-always-compile-module 't)
+  (setq vterm-min-window-width 0)
   (defun vterm-new ()
     (interactive)
     (vterm 't))
@@ -1481,7 +1503,8 @@ string).  It returns t if a new completion is found, nil otherwise."
          ("<C-backspace>" . (lambda () (interactive) (vterm-send-key (kbd "C-w"))))
          ("C-t" . #'vterm--self-insert)
 	 ("S-<prior>" . #'scroll-down-command)
-         ("C-x C-t" . #'vterm-new)))
+         ("C-x C-t" . #'vterm-new)
+	 ("M-w" . #'kill-ring-save)))
 
 ;; remove SHLVL.  For any shell, we're the top level
 (setenv "SHLVL" nil)
@@ -1597,9 +1620,9 @@ string).  It returns t if a new completion is found, nil otherwise."
 		      menu
 		      list
 		      scrolltobottom))
-  :hook ((erc-mode-hook . (lambda () (subword-mode 0)))
-	 (erc-mode-hook . erc-add-scroll-to-bottom)
-	 (erc-mode-hook . 2c-erc-set-scroll-conservatively)))
+  :hook ((erc-mode . (lambda () (subword-mode 0)))
+	 ;(erc-mode . erc-add-scroll-to-bottom)
+	 (erc-mode . 2c-erc-set-scroll-conservatively)))
 
 (use-package erc-hl-nicks)
 
@@ -1672,7 +1695,7 @@ string).  It returns t if a new completion is found, nil otherwise."
     ;; fallback to the old <N> uniquification method:
     (or buffer-name (generate-new-buffer-name full-buf-name))))
 
-(advice-add 'erc-generate-new-buffer-name :override #'2c-erc-generate-new-buffer-name)
+;(advice-add 'erc-generate-new-buffer-name :override #'2c-erc-generate-new-buffer-name)
 
 (add-hook 'erc-mode-hook
           (lambda () (subword-mode 0)))
@@ -1693,6 +1716,35 @@ string).  It returns t if a new completion is found, nil otherwise."
 (use-package tree-sitter-langs)
 (use-package tree-sitter-ispell)
 #+end_src
+** envrc
+#+begin_src emacs-lisp
+(use-package envrc
+  :diminish
+  :hook (after-init . envrc-global-mode))
+#+end_src
+** projectile + project
+#+begin_src emacs-lisp
+(use-package projectile
+  :diminish
+  :init
+  (projectile-mode +1)
+  :bind (:map projectile-mode-map
+              ("s-p" . projectile-command-map))
+  :config
+  (defun 2c-projectile-ignore-homedir (dir)
+    (if (equal dir (expand-file-name "~/"))
+	nil
+      dir))
+  (advice-add 'projectile-locate-dominating-file :filter-return #'2c-projectile-ignore-homedir))
+
+(defun 2c-project-ignore-homedir (project)
+  (if (and project
+	   (equal (expand-file-name (nth 2 project)) (expand-file-name "~/")))
+      nil
+    project))
+(advice-add 'project-try-vc :filter-return #'2c-project-ignore-homedir)
+#+end_src
+
 * Languages
 ** Debugging
 #+begin_src emacs-lisp
@@ -1705,6 +1757,8 @@ string).  It returns t if a new completion is found, nil otherwise."
 #+begin_src emacs-lisp
 (use-package lsp-mode
   :ensure
+  :diminish 'lsp-lens-mode
+  :diminish lsp-mode
   :commands (lsp lsp-deferred)
   :init
   ;;(setq lsp-keymap-prefix "C-c l")
@@ -1713,6 +1767,7 @@ string).  It returns t if a new completion is found, nil otherwise."
   (lsp-eldoc-render-all nil)
   (lsp-idle-delay 0.6)
   (lsp-inlay-hint-enable t)
+  (lsp-diagnostics-disabled-modes '(python-mode))
   :config
   (defun 2c-lsp-format-on-save ()
     (if (bound-and-true-p lsp-mode)
@@ -1721,7 +1776,6 @@ string).  It returns t if a new completion is found, nil otherwise."
          ;; if you want which-key integration
          (lsp-mode . lsp-enable-which-key-integration)
          (lsp-mode . lsp-ui-mode)
-	 (lsp-mode . lsp-inlay-hints-mode)
 	 (before-save . 2c-lsp-format-on-save)))
 
 (use-package lsp-ui
@@ -1754,12 +1808,20 @@ string).  It returns t if a new completion is found, nil otherwise."
 ** flycheck
 #+begin_src emacs-lisp
 (use-package flycheck
-  :init (global-flycheck-mode)
+  :init
+  (global-flycheck-mode)
   :config
   (setq flycheck-gnat-include-path '("."))
   :hook
   (c-mode . (lambda () (setq flycheck-clang-language-standard "gnu11")))
   (c++-mode . (lambda () (setq flycheck-clang-language-standard "c++17"))))
+
+;; set working directory for python-ruff.  However, for unknown
+;; reasons we can't do this in :config and have to do it delayed like
+;; so.
+(require 'flycheck)
+(setf (flycheck-checker-get 'python-ruff 'working-directory)
+      'flycheck-python-find-project-root)
 #+end_src
 
 ** paredit
@@ -1919,17 +1981,28 @@ string).  It returns t if a new completion is found, nil otherwise."
 #+begin_src emacs-lisp
 (use-package python
   :config
-  (setq python-shell-interpreter "ipython"))
+  (setq python-shell-interpreter "ipython")
+  (setq lsp-pylsp-plugins-rope-autoimport-enabled t))
 
-(use-package elpy
-  :ensure t
-  :init
-  (elpy-enable)
-  :bind (("RET" . 'newline-and-indent)))
+;; (use-package lsp-jedi
+;;   :hook (python-mode . lsp-deferred))
+
+;; (use-package elpy
+;;   :init
+;;   (elpy-enable)
+;;   :bind (("RET" . 'newline-and-indent)))
 
 (use-package pydoc
   :config
   (setq pydoc-command "python3 -m pydoc"))
+
+(use-package python-pytest
+  :bind ("C-c t" . 'python-pytest-dispatch))
+
+;; (use-package lsp-pyright
+;;   :hook (python-mode . (lambda ()
+;;                           (require 'lsp-pyright)
+;;                           (lsp-deferred))))
 #+end_src
 
 ** Ruby
@@ -2034,6 +2107,7 @@ string).  It returns t if a new completion is found, nil otherwise."
   ;; (setq lsp-signature-auto-activate nil)
   (setq lsp-rust-analyzer-import-merge-behaviour "crate")
   (setq lsp-rust-analyzer-cargo-watch-command "clippy")
+  (setq lsp-rust-analyzer-use-client-watching nil)
 
   ;; comment to disable rustfmt on save
   (setq rustic-format-on-save t)

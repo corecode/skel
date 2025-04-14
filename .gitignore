@@ -1,6 +1,9 @@
 /*
 !.zsh*
 .zshhistory*
+.zsh_history*
+.zsh_sessions
+.zshenv.local
 *~
 .*.sw[po]
 #*#
