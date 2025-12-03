@@ -3,6 +3,7 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+	2c-codeium-complete
 	backward-sexp
 	c-electric-brace
 	c-electric-colon
@@ -13,11 +14,14 @@
 	c-electric-slash
 	c-electric-star
 	c-indent-line-or-region
+	complete-symbol
 	consult-yank-pop
+	corfu-next
 	counsel-M-x
 	delete-horizontal-space
 	describe-key-briefly
 	downcase-region
+	edebug-pop-to-backtrace
 	electric-newline-and-maybe-indent
 	electric-verilog-colon
 	electric-verilog-semi
@@ -40,6 +44,7 @@
 	keyboard-escape-quit
 	kill-region-or-backward-word
 	lsp-ui-doc--handle-mouse-movement
+	markdown-cycle
 	markdown-outdent-or-delete
 	org-beginning-of-line
 	org-delete-char
@@ -69,19 +74,24 @@
 	string-inflection-camelcase
 	transpose-sexps
 	typescript-insert-and-indent
+	upcase-region
 	))
 
 (setq mc/cmds-to-run-once
       '(
 	ace-jump-mode
+	c-electric-pound
 	consult-buffer
 	counsel-find-file
 	handle-switch-frame
 	iedit-switch-to-mc-mode
 	info
 	magit-status
+	mc--insert-number-and-increase
 	org-cycle
 	paredit-doublequote
+	query-replace-regexp
+	rustic-cargo-test
 	smex
 	term-send-up
 	universal-argument-minus

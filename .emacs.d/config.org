@@ -109,7 +109,9 @@
   :init
   ;; if we load-theme directly, the frame only gets half the theme
   ;; loaded.  Delayed loading fixes this issue.
-  (run-at-time "0.2" 60 #'2c-follow-system-theme))
+  (run-at-time "0.2" 60 #'2c-follow-system-theme)
+
+  )
 
 
 ;; (use-package blackboard-theme
@@ -215,12 +217,26 @@
 
 (use-package doom-modeline
   :config
-  (setq doom-modeline-window-width-limit 95)
+  (setq doom-modeline-window-width-limit 65)
+  (setq doom-modeline-buffer-encoding nil)
+  (doom-modeline-def-modeline 'main
+    '(eldoc bar window-state workspace-name window-number modals matches follow buffer-info remote-host buffer-position word-count parrot selection-info)
+    '(compilation objed-state misc-info project-name persp-name battery grip github debug repl lsp minor-modes input-method indent-info buffer-encoding process vcs check time))
+
+  (setq doom-modeline-vcs-display-function
+	(lambda ()
+	  (let* ((name (doom-modeline-vcs-name))
+		 (displayed-name (if (or (string= name "master")
+					 (string= name "main"))
+				     ""
+				   name)))
+	    displayed-name)))
+  (setq doom-modeline-irc nil)
+
   :hook (after-init . doom-modeline-mode))
 #+end_src
 
-** Diminish
-Reduce modeline clutter
+** Reduce modeline clutter
 #+begin_src emacs-lisp
 (use-package diminish)
 #+end_src
@@ -478,6 +494,8 @@ Reduce modeline clutter
 #+begin_src emacs-lisp
 (define-key help-map (kbd "C-m") 'man)
 (define-key help-map (kbd "M") 'man)
+(when (eq (window-system) 'ns)
+  (setq Man-sed-command "gsed"))
 #+end_src
 
 ** Ivy, Swiper, Counsel, Amx
@@ -1334,6 +1352,20 @@ string).  It returns t if a new completion is found, nil otherwise."
     (setq codeium/document/text 'my-codeium/document/text)
     (setq codeium/document/cursor_offset 'my-codeium/document/cursor_offset))
 #+end_src
+* Aider
+#+begin_src emacs-lisp
+(use-package aidermacs
+  :bind (("C-c a" . aidermacs-transient-menu))
+  :custom
+  ; See the Configuration section below
+  (aidermacs-default-chat-mode 'code)
+  (aidermacs-default-model "openrouter/deepseek/deepseek-r1:free")
+  (aidermacs-architect-model "openrouter/deepseek/deepseek-r1:free")
+  (aidermacs-editor-model "openrouter/deepseek/deepseek-r1:free")
+  (aidermacs-weak-model "openrouter/deepseek/deepseek-chat:free")
+  )
+
+#+end_src
 * Modes
 ** try packages
 #+begin_src emacs-lisp
@@ -1426,7 +1458,14 @@ string).  It returns t if a new completion is found, nil otherwise."
 ** asciidoc
 #+begin_src emacs-lisp
 (use-package adoc-mode
-  :mode "\\.adoc\\'")
+  :mode "\\.adoc\\'"
+  :init
+  (add-to-list
+   'browse-url-handlers
+   `("\\.adoc\\>" .
+     ,(lambda (url &optional _new-window)
+	(setq url (browse-url-encode-url url))
+	(start-process (concat "brave " url) nil "open" "-a" "Brave Browser" url)))))
 #+end_src
 
 ** git / magit
@@ -1599,6 +1638,8 @@ string).  It returns t if a new completion is found, nil otherwise."
 (use-package znc)
 (use-package erc
   :config
+  (setq erc-enable-logging nil)
+  (setq erc-log-channels-directory nil)
   (setq erc-modules '(completion
 		      move-to-prompt
 		      stamp
@@ -1768,15 +1809,11 @@ string).  It returns t if a new completion is found, nil otherwise."
   (lsp-idle-delay 0.6)
   (lsp-inlay-hint-enable t)
   (lsp-diagnostics-disabled-modes '(python-mode))
-  :config
-  (defun 2c-lsp-format-on-save ()
-    (if (bound-and-true-p lsp-mode)
-	(lsp-format-buffer)))
   :hook (
          ;; if you want which-key integration
          (lsp-mode . lsp-enable-which-key-integration)
          (lsp-mode . lsp-ui-mode)
-	 (before-save . 2c-lsp-format-on-save)))
+	 ))
 
 (use-package lsp-ui
   :ensure
@@ -1952,6 +1989,8 @@ string).  It returns t if a new completion is found, nil otherwise."
 
 (define-key c-mode-base-map (kbd "RET") 'c-context-line-break)
 (define-key c-mode-base-map (kbd "M-j") nil)
+
+(add-hook 'c++-mode-hook 'lsp)
 #+end_src
 
 ** TODO Arduino
@@ -2007,7 +2046,15 @@ string).  It returns t if a new completion is found, nil otherwise."
 
 ** Ruby
 #+begin_src emacs-lisp
-(use-package yari)
+(use-package ruby-test-mode
+  :preface
+  (defun ruby-test-run-all ()
+    (interactive)
+    (ruby-test-with-ruby-directory
+     (or (ruby-test-find-file) default-directory)
+     (ruby-test-run-command (ruby-test-spec-command ""))))
+  :bind (:map ruby-test-mode-map
+	      ("C-c C-t C-t" . ruby-test-run-all)))
 #+end_src
 
 ** JSON
@@ -2087,6 +2134,10 @@ string).  It returns t if a new completion is found, nil otherwise."
 
 ** Rust
 #+begin_src emacs-lisp
+(use-package rust-mode
+  :config
+  (setq auto-mode-alist (rassq-delete-all 'rust-mode auto-mode-alist)))
+
 (use-package rustic
   :ensure
   :bind (:map rustic-mode-map
@@ -2099,7 +2150,8 @@ string).  It returns t if a new completion is found, nil otherwise."
               ("C-c C-c r" . lsp-rename)
               ("C-c C-c q" . lsp-workspace-restart)
               ("C-c C-c Q" . lsp-workspace-shutdown)
-              ("C-c C-c s" . lsp-rust-analyzer-status))
+              ("C-c C-c s" . consult-lsp-file-symbols)
+              ("C-c C-c S" . consult-lsp-symbols))
   :config
   ;; uncomment for less flashiness
   ;; (setq lsp-eldoc-hook nil)
@@ -2110,7 +2162,7 @@ string).  It returns t if a new completion is found, nil otherwise."
   (setq lsp-rust-analyzer-use-client-watching nil)
 
   ;; comment to disable rustfmt on save
-  (setq rustic-format-on-save t)
+  (setq rustic-format-on-save nil)
   (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook)
 
   (defun 2c-lsp-rust-init (init)
@@ -2139,6 +2191,7 @@ string).  It returns t if a new completion is found, nil otherwise."
   ;; no longer be necessary.
   (when buffer-file-name
     (setq-local buffer-save-without-query t))
+  (setq-local lsp-format-buffer-on-save t)
   (setq indent-tabs-mode nil))
 #+end_src
 * Desktop & Server
